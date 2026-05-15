@@ -18,7 +18,9 @@ export default function MainProvider({
 
       <div className="relative z-10 shrink-0">
         <TitleBar height={titleBarHeight} />
-        <ContentContainer>{children}</ContentContainer>
+        <ContentContainer className="flex flex-col overflow-hidden">
+          {children}
+        </ContentContainer>
       </div>
     </div>
   );
