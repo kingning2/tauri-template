@@ -1,0 +1,66 @@
+{
+  "launcher": {
+    "hero_title": "EaseUS MobiXpert - 系統修復",
+    "hero_subtitle": "簡單高效的 iOS 系統修復軟體",
+    "slide1_title": "EaseUS MobiXpert - 系統修復",
+    "slide1_subtitle": "簡單高效的 iOS 系統修復軟體",
+    "slide2_title": "一鍵修復常見 iOS 系統故障",
+    "slide2_subtitle": "黑屏、白蘋果、恢復模式等問題，在家即可嘗試修復。",
+    "slide3_title": "安全升級 / 降級 iOS",
+    "slide3_subtitle": "在保留資料的前提下，協助你完成系統版本切換。",
+    "carousel_goto": "第 {{index}} 則輪播"
+  },
+  "title_bar": {
+    "app_name": "EaseUS MobiXpert",
+    "buy_now": "立即購買",
+    "activate": "啟用",
+    "menu": "選單",
+    "minimize": "最小化",
+    "maximize": "最大化",
+    "close": "關閉",
+    "menu_language": "語言",
+    "menu_feedback": "反饋",
+    "menu_contact_support": "聯絡支援",
+    "menu_online_help": "在線幫助",
+    "menu_check_updates": "檢查更新",
+    "menu_about": "關於"
+  },
+  "tools": {
+    "system_repair": {
+      "title": "系統修復",
+      "description": "修復 iOS/iPad 問題和 iTunes 錯誤，升級/降級系統。"
+    },
+    "phone_unlock": {
+      "title": "手機解鎖",
+      "description": "無需密碼，即可移除鎖定和 Apple ID"
+    },
+    "virtual_location": {
+      "title": "虛擬定位",
+      "description": "在 iPhone、iPad 或 iPod touch 上設置虛擬位置"
+    },
+    "data_transfer": {
+      "title": "數據傳輸和備份",
+      "description": "管理、傳輸和備份你的 iPhone/iPad/iPod touch 數據。"
+    },
+    "data_recovery": {
+      "title": "資料復原",
+      "description": "直接從 iPhone/iPad/iPod Touch 以及 iTunes 和 iCloud 備份中還原資料"
+    },
+    "social_transfer": {
+      "title": "社群 App 資料傳輸",
+      "description": "傳輸、備份與還原 WhatsApp、LINE、Kik、Viber 的訊息和附件"
+    },
+    "ringtone": {
+      "title": "鈴聲編輯",
+      "description": "以喜歡的方式為你的 iPhone 製作鈴聲"
+    }
+  },
+  "common": {
+    "hot": "熱門",
+    "downloading": "下載中…",
+    "downloaded": "已下載",
+    "failed": "失敗",
+    "download": "下載",
+    "redownload": "重新下載"
+  }
+}

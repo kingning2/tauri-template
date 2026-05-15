@@ -10,7 +10,7 @@ const initialState: AppInitialState = {
   titleBarHeight: 40,
   mainWindowGlobalGg: '#f0f4f8',
   supportLanguages: [
-    { label: '简体中文', value: 'cn' },
+    { label: '繁體中文', value: 'cn' },
     { label: 'English', value: 'en' }
   ],
   currentLanguage: (localCache.getCache('language') as AppInitialState['currentLanguage']) ?? 'cn'

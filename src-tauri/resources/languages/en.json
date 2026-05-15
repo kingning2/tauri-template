@@ -1,0 +1,66 @@
+{
+  "launcher": {
+    "hero_title": "EaseUS MobiXpert - System Repair",
+    "hero_subtitle": "Easy & efficient iOS system repair software",
+    "slide1_title": "EaseUS MobiXpert - System Repair",
+    "slide1_subtitle": "Easy & efficient iOS system repair software",
+    "slide2_title": "Fix common iOS system issues",
+    "slide2_subtitle": "Black screen, Apple logo loop, recovery mode, and more—guided repair at home.",
+    "slide3_title": "Upgrade or downgrade iOS safely",
+    "slide3_subtitle": "Switch iOS versions while keeping your data in mind with clear steps.",
+    "carousel_goto": "Go to slide {{index}}"
+  },
+  "title_bar": {
+    "app_name": "EaseUS MobiXpert",
+    "buy_now": "Buy now",
+    "activate": "Activate",
+    "menu": "Menu",
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "close": "Close",
+    "menu_language": "Language",
+    "menu_feedback": "Feedback",
+    "menu_contact_support": "Contact support",
+    "menu_online_help": "Online help",
+    "menu_check_updates": "Check for updates",
+    "menu_about": "About"
+  },
+  "tools": {
+    "system_repair": {
+      "title": "System repair",
+      "description": "Fix iOS/iPad issues and iTunes errors; upgrade or downgrade the system."
+    },
+    "phone_unlock": {
+      "title": "Phone unlock",
+      "description": "Remove lock screen and Apple ID without a passcode."
+    },
+    "virtual_location": {
+      "title": "Virtual location",
+      "description": "Set a virtual location on iPhone, iPad, or iPod touch."
+    },
+    "data_transfer": {
+      "title": "Data transfer & backup",
+      "description": "Manage, transfer, and back up your iPhone/iPad/iPod touch data."
+    },
+    "data_recovery": {
+      "title": "Data recovery",
+      "description": "Recover data from devices, iTunes, and iCloud backups."
+    },
+    "social_transfer": {
+      "title": "Social app transfer",
+      "description": "Transfer, back up, and restore WhatsApp, LINE, Kik, and Viber chats."
+    },
+    "ringtone": {
+      "title": "Ringtone editor",
+      "description": "Create custom ringtones for your iPhone."
+    }
+  },
+  "common": {
+    "hot": "HOT",
+    "downloading": "Downloading…",
+    "downloaded": "Downloaded",
+    "failed": "Failed",
+    "download": "Download",
+    "redownload": "Re-download"
+  }
+}

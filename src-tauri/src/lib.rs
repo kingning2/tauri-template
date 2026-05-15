@@ -12,6 +12,9 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
+            cmd::lang::get_lang,
+            cmd::lang::set_lang,
+            cmd::lang::get_language_resource_bundle,
             cmd::tools::download_tool,
             cmd::tools::get_tools_download_dir,
             cmd::log::log_fe,

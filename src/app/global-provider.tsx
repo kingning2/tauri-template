@@ -5,6 +5,7 @@ import { useEffect } from 'react'
 import { initWindowConfig } from '@/config/popup-window'
 
 import InitGuard from '@/guards/global/init-guard'
+import LanguageGuard from '@/guards/global/language-guard'
 
 export default function GlobalProvider({
   children
@@ -27,13 +28,15 @@ export default function GlobalProvider({
 
   return (
     <InitGuard>
-      <div
-        id="App"
-        className="antialiased"
-        onContextMenu={(e) => e.preventDefault()}
-      >
-        {children}
-      </div>
+      <LanguageGuard>
+        <div
+          id="App"
+          className="antialiased"
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          {children}
+        </div>
+      </LanguageGuard>
     </InitGuard>
   )
 }
