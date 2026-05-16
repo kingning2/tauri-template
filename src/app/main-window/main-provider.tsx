@@ -16,11 +16,11 @@ export default function MainProvider({
     <div className="main-window flex min-h-0 flex-1 flex-col">
       <GlobalBgGuard />
 
-      <div className="relative z-10 shrink-0">
-        <TitleBar height={titleBarHeight} />
-        <ContentContainer className="flex flex-col overflow-hidden">
+      <div className="relative z-10 shrink-0 flex flex-col h-full">
+        <TitleBar height={titleBarHeight}  />
+        <div className="flex flex-col overflow-hidden flex-1 p-3 bg-white">
           {children}
-        </ContentContainer>
+        </div>
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ const ContentContainer = React.forwardRef<HTMLDivElement, ContentContainerProps>
     <div
       ref={ref}
       className={cn(
-        "min-h-0 min-w-0 flex-1 overflow-auto scrollbar-themed",
+        "min-h-0 min-w-0 flex-1 overflow-auto scrollbar-themed w-full",
         className
       )}
       {...props}

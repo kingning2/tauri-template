@@ -88,7 +88,8 @@ const TitleBar = memo((props: { height?: number }) => {
       role="banner"
       data-drag-region
       className={cn(
-        'flex w-full select-none items-center justify-between border-b bg-card/90 px-3 backdrop-blur'
+        'flex w-full select-none items-center justify-between bg-card/90 px-3 backdrop-blur',
+        // 'border-b'
       )}
       style={{ height: h }}
       onMouseDown={handleBarMouseDown}
