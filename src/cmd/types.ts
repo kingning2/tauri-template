@@ -4,5 +4,6 @@ export type Cmd =
   | 'get_language_resource_bundle'
   | 'download_tool'
   | 'get_tools_download_dir'
+  | 'get_tools_manifest'
   | 'log_fe'
   | 'log_fe_req'

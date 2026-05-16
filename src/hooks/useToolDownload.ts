@@ -6,17 +6,17 @@ import { downloadToolStream } from '@/cmd/tools'
 
 import type { ToolManifest } from '@/config/tools-manifest'
 
-export type DownloadPhase = 'idle' | 'downloading' | 'completed' | 'error'
+import { DownloadPhase } from '@/enums/download-phase'
 
 export function useToolDownload() {
-  const [phase, setPhase] = useState<DownloadPhase>('idle')
+  const [phase, setPhase] = useState<DownloadPhase>(DownloadPhase.Idle)
   const [receivedBytes, setReceivedBytes] = useState(0)
   const [savedPath, setSavedPath] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const inFlight = useRef(false)
 
   const reset = useCallback(() => {
-    setPhase('idle')
+    setPhase(DownloadPhase.Idle)
     setReceivedBytes(0)
     setSavedPath(null)
     setError(null)
@@ -26,26 +26,24 @@ export function useToolDownload() {
     if (inFlight.current) return
     inFlight.current = true
 
-    setPhase('downloading')
+    setPhase(DownloadPhase.Downloading)
     setReceivedBytes(0)
     setSavedPath(null)
     setError(null)
 
-    const relativePath = `${tool.id}/${tool.fileName}`
-
     try {
       const path = await downloadToolStream({
-        url: tool.downloadUrl,
-        relativePath,
+        downloadSpec: tool.downloadSpec,
+        relativeDir: tool.id,
         onChunkBytes: (n) => {
           setReceivedBytes((b) => b + n)
         }
       })
       setSavedPath(path)
-      setPhase('completed')
+      setPhase(DownloadPhase.Completed)
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
-      setPhase('error')
+      setPhase(DownloadPhase.Error)
     } finally {
       inFlight.current = false
     }
