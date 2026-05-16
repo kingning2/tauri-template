@@ -11,6 +11,18 @@ export async function getToolsManifest() {
   return await invokeWrapper<ToolManifest[]>('get_tools_manifest')
 }
 
+export async function getRuntimeHostPlatform() {
+  return await invokeWrapper<'windows' | 'macos'>('runtime_host_platform')
+}
+
+export async function getToolExecutablePath(toolId: string) {
+  return await invokeWrapper<string>('get_tool_executable_path', { toolId })
+}
+
+export async function openToolExecutable(toolId: string) {
+  return await invokeWrapper<void>('open_tool_executable', { toolId })
+}
+
 export async function downloadToolStream(args: {
   downloadSpec: PlatformDownloadSpec
   relativeDir: string
