@@ -4,3 +4,4 @@ pub mod macos;
 pub mod windows;
 
 pub mod download;
+pub mod tool_launch;

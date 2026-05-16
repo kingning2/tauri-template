@@ -2,14 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use std::fs::File;
 use std::io;
-use std::path::{Component, Path, PathBuf};
-use std::process::Stdio;
-
-#[cfg(target_os = "macos")]
-use crate::utils::download::tools_download_base_dir;
-
-#[cfg(target_os = "macos")]
-use tokio::fs;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -43,6 +36,40 @@ impl PlatformArtifacts {
     }
 }
 
+/// Windows：zip 解压后的收尾步骤（Uninstall/产品键、语言与 gclid、防火墙；不写快捷方式）。
+/// 需与 [`PlatformDownloadSpec::windows_product_registry`] 同时存在时才会在解压后执行。
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WindowsZipInstallSteps {
+    /// 相对安装目录的主程序路径，例如 `Gbyte Unlock.exe`（用于校验解压结果是否完整）。
+    pub main_executable_relative: String,
+    /// 相对安装目录的卸载程序路径，例如 `uninstaller.exe`。
+    pub uninstaller_relative: String,
+    /// 控制面板「程序和功能」显示名称。
+    pub display_name: String,
+    pub publisher: String,
+    pub display_version: String,
+    /// 同时执行的防火墙 PowerShell 任务上限（与安装器 `add_firewall_rules(..., 8)` 一致）。
+    /// 兼容旧字段名 `firewallScanMaxExes`。
+    #[serde(
+        default = "default_firewall_max_concurrent",
+        alias = "firewallScanMaxExes"
+    )]
+    pub firewall_max_concurrent: u32,
+    #[serde(default = "default_true")]
+    pub write_lang_registry: bool,
+    #[serde(default = "default_true")]
+    pub write_gclid_from_env: bool,
+}
+
+fn default_firewall_max_concurrent() -> u32 {
+    8
+}
+
+fn default_true() -> bool {
+    true
+}
+
 /// Windows：按「产品」区分的注册表位置（与安装器写入的 `Uninstall` 子键 + `HKLM\SOFTWARE\...` 数据根一致）。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -73,6 +100,15 @@ pub struct PlatformDownloadSpec {
     /// 不写则回退为工具下载目录下的落地/解压判断。
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub macos_installed_bundle_path: Option<String>,
+    /// Windows：当 `InstallPath` 为**安装目录**（常见于 MSI/安装器写入）且**没有**配置
+    /// [`Self::windows_zip_install_steps`] 时，在此填写主程序相对该目录的路径，例如 `Gbyte Unlock.exe`。
+    /// 与 zip 流程中的 `windowsZipInstallSteps.mainExecutableRelative` 二选一即可；若两者皆有，以 zip 步骤为准。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub windows_main_executable_relative: Option<String>,
+    /// Windows：当 payload 为 zip 且与 [`Self::windows_product_registry`] 同时存在时，解压后执行
+    /// 注册表、语言/gclid、防火墙等步骤（不创建快捷方式）。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub windows_zip_install_steps: Option<WindowsZipInstallSteps>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -136,53 +172,12 @@ pub fn is_tool_download_installed(
     #[cfg(target_os = "windows")]
     {
         let _ = relative_dir;
-        let Some(win) = spec.windows_product_registry.as_ref() else {
-            return Ok(false);
-        };
-        if !crate::utils::platform::windows::registry::registry_install_exist(&win.uninstall_subkey)
-        {
-            return Ok(false);
-        }
-        return Ok(
-            match crate::utils::platform::windows::registry::get_install_path(
-                &win.hklm_software_path,
-            ) {
-                Ok(p) => p.is_dir(),
-                Err(_) => true,
-            },
-        );
+        return super::windows::download::is_tool_download_installed(spec);
     }
 
     #[cfg(target_os = "macos")]
     {
-        if let Some(ref p) = spec.macos_installed_bundle_path {
-            return Ok(Path::new(p).exists());
-        }
-
-        let artifact = resolve_download_artifact(spec)?;
-        let rel = build_tool_relative_download_path(relative_dir, &artifact.file_name)?;
-        let base = tools_download_base_dir()?;
-        let artifact_path = base.join(rel);
-
-        let installed = match artifact.kind {
-            DownloadPayloadKind::Executable => artifact_path.is_file(),
-            DownloadPayloadKind::Zip => {
-                let install_dir = artifact_path.parent().ok_or_else(|| {
-                    "invalid artifact path: expected a file path with a parent directory"
-                        .to_string()
-                })?;
-
-                if artifact_path.is_file() {
-                    false
-                } else if !install_dir.is_dir() {
-                    false
-                } else {
-                    let mut entries = std::fs::read_dir(install_dir).map_err(|e| e.to_string())?;
-                    entries.next().is_some()
-                }
-            }
-        };
-        return Ok(installed);
+        return super::macos::download::is_tool_download_installed(spec, relative_dir);
     }
 
     #[cfg(not(any(target_os = "windows", target_os = "macos")))]
@@ -192,143 +187,30 @@ pub fn is_tool_download_installed(
     }
 }
 
-/// 将 `relative_dir` + `file_name` 拼成与下载逻辑一致的相对路径，并做安全校验。
-#[cfg(target_os = "macos")]
-fn build_tool_relative_download_path(
-    relative_dir: &str,
-    file_name: &str,
-) -> Result<String, String> {
-    let file_name = file_name.trim();
-    if file_name.is_empty() {
-        return Err("file_name is required".to_string());
-    }
-
-    let dir = relative_dir.trim().trim_matches('/').trim_matches('\\');
-    let rel = if dir.is_empty() {
-        file_name.to_string()
-    } else {
-        format!("{dir}/{file_name}")
-    };
-
-    ensure_tool_relative_path_safe(&rel)?;
-    Ok(rel)
-}
-
-#[cfg(target_os = "macos")]
-fn ensure_tool_relative_path_safe(rel: &str) -> Result<(), String> {
-    if rel.is_empty() || rel.contains("..") {
-        return Err("invalid relative path".to_string());
-    }
-    let p = PathBuf::from(rel);
-    if p.is_absolute() {
-        return Err("invalid relative path: absolute path is not allowed".to_string());
-    }
-    if p.components().any(|c| matches!(c, Component::ParentDir)) {
-        return Err("invalid relative path".to_string());
-    }
-    Ok(())
-}
-
 /// 如果是可执行安装包：按平台 chmod（macOS）后用 `tokio::process` 拉起安装程序（不阻塞等待安装结束）。
 pub async fn post_process_download_payload_if_needed(
     kind: DownloadPayloadKind,
     local_path: &str,
+    spec: &PlatformDownloadSpec,
 ) -> Result<(), String> {
     match kind {
-        // 解压zip
-        DownloadPayloadKind::Zip => install_zip_payload_from_local_path(local_path).await,
-        // 可执行安装包
+        DownloadPayloadKind::Zip => install_zip_payload_from_local_path(local_path, spec).await,
         DownloadPayloadKind::Executable => {
             #[cfg(target_os = "macos")]
+            super::macos::download::chmod_installer_executable(local_path).await?;
+
+            #[cfg(target_os = "macos")]
+            return super::macos::download::run_downloaded_installer(local_path).await;
+
+            #[cfg(target_os = "windows")]
+            return super::windows::download::run_downloaded_installer(local_path).await;
+
+            #[cfg(not(any(target_os = "windows", target_os = "macos")))]
             {
-                use std::os::unix::fs::PermissionsExt;
-
-                fs::set_permissions(local_path, std::fs::Permissions::from_mode(0o755))
-                    .await
-                    .map_err(|e| e.to_string())?;
+                let _ = (local_path, spec);
+                Err("executable installer launch is not supported on this platform".to_string())
             }
-
-            run_downloaded_installer(local_path).await
         }
-    }
-}
-
-/// 启动已下载的安装包（GUI 安装器在子任务里 `wait`，避免僵尸进程）。
-///
-/// - **Windows**：`.msi` → `msiexec /i <path>`；其余扩展名 →直接执行该路径。
-/// - **macOS**：`.dmg` / `.pkg` / `.app` → `open <path>`；其余（如 `.sh`、Mach-O）→ 直接执行路径（需已 chmod）。
-async fn run_downloaded_installer(local_path: &str) -> Result<(), String> {
-    let path = PathBuf::from(local_path);
-    if !path.is_file() {
-        return Err(format!("installer path is not a file: {local_path}"));
-    }
-
-    let file_lower = path
-        .file_name()
-        .and_then(|n| n.to_str())
-        .map(|s| s.to_ascii_lowercase())
-        .unwrap_or_default();
-
-    #[cfg(target_os = "windows")]
-    {
-        let mut cmd = if file_lower.ends_with(".msi") {
-            let msiexec = match std::env::var("SystemRoot") {
-                Ok(root) => PathBuf::from(root).join("System32").join("msiexec.exe"),
-                Err(_) => PathBuf::from("msiexec.exe"),
-            };
-            let mut c = tokio::process::Command::new(msiexec);
-            c.arg("/i").arg(&path);
-            c
-        } else {
-            tokio::process::Command::new(&path)
-        };
-
-        cmd.stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null());
-
-        let mut child = cmd
-            .spawn()
-            .map_err(|e| format!("failed to spawn Windows installer: {e}"))?;
-
-        tokio::spawn(async move {
-            let _ = child.wait().await;
-        });
-        return Ok(());
-    }
-
-    #[cfg(target_os = "macos")]
-    {
-        let lower = local_path.to_ascii_lowercase();
-        let mut cmd = if lower.ends_with(".dmg")
-            || lower.ends_with(".pkg")
-            || lower.ends_with(".app")
-        {
-            let mut c = tokio::process::Command::new("/usr/bin/open");
-            c.arg(local_path);
-            c
-        } else {
-            tokio::process::Command::new(&path)
-        };
-
-        cmd.stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null());
-
-        let mut child = cmd
-            .spawn()
-            .map_err(|e| format!("failed to spawn macOS installer: {e}"))?;
-
-        tokio::spawn(async move {
-            let _ = child.wait().await;
-        });
-        return Ok(());
-    }
-
-    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
-    {
-        let _ = (local_path, file_lower);
-        Err("executable installer launch is not supported on this platform".to_string())
     }
 }
 
@@ -336,18 +218,22 @@ async fn run_downloaded_installer(local_path: &str) -> Result<(), String> {
 /// 1) 以 `local_path` 的父目录作为安装目录；
 /// 2) 解压到安装目录；
 /// 3) 解压成功后默认删除原 zip 文件（避免重复占空间）。
-async fn install_zip_payload_from_local_path(local_path: &str) -> Result<(), String> {
-    // local_path 指向 zip 文件本体。
+async fn install_zip_payload_from_local_path(
+    local_path: &str,
+    spec: &PlatformDownloadSpec,
+) -> Result<(), String> {
     let zip_path = PathBuf::from(local_path);
     let install_dir = zip_path
         .parent()
         .ok_or_else(|| "zip local_path has no parent directory".to_string())?
         .to_path_buf();
 
-    // 约定：解压到 zip 所在目录（通常会是 `{app_data}/tool-downloads/{tool-id}/`）
     let remove_zip_after_install = true;
 
     unzip_zip_payload(&zip_path, &install_dir).await?;
+
+    #[cfg(target_os = "windows")]
+    super::windows::download::run_zip_post_install_if_configured(&install_dir, spec).await?;
 
     if remove_zip_after_install {
         tokio::fs::remove_file(&zip_path)
@@ -381,8 +267,6 @@ fn unzip_zip_payload_sync(zip_path: &Path, install_dir: &Path) -> Result<(), Str
     for i in 0..archive.len() {
         let mut file = archive.by_index(i).map_err(|e| e.to_string())?;
 
-        // `enclosed_name` 会返回解压时相对目标目录的安全路径（不包含前导 `/` 等）。
-        // 这里再额外做一次穿越防护，避免把文件写出 install_dir。
         let name = file
             .enclosed_name()
             .ok_or_else(|| format!("zip entry has invalid name (index={i})"))?;
@@ -405,12 +289,9 @@ fn unzip_zip_payload_sync(zip_path: &Path, install_dir: &Path) -> Result<(), Str
     Ok(())
 }
 
-/// 将 zip entry 的相对路径解析成安全的输出路径：
-/// - 拒绝绝对路径；
-/// - 拒绝包含 `..`/Root/Prefix 等非法组件；
-/// - 最终输出路径保证落在 `install_dir` 下。
 fn safe_out_path(install_dir: &Path, enclosed_name: &Path) -> Result<PathBuf, String> {
-    // 拒绝绝对路径 / 根路径 / 以及任何 `..` 路径穿越。
+    use std::path::Component;
+
     if enclosed_name.is_absolute() {
         return Err("zip entry path must be relative".to_string());
     }
@@ -427,42 +308,11 @@ fn safe_out_path(install_dir: &Path, enclosed_name: &Path) -> Result<PathBuf, St
     Ok(install_dir.join(enclosed_name))
 }
 
-#[cfg(target_os = "windows")]
-fn detect_current_platform() -> Result<SystemPlatform, String> {
-    crate::utils::platform::windows::download::current_platform()
-}
-
-#[cfg(target_os = "macos")]
-fn detect_current_platform() -> Result<SystemPlatform, String> {
-    crate::utils::platform::macos::download::current_platform()
-}
-
-#[cfg(not(any(target_os = "windows", target_os = "macos")))]
-fn detect_current_platform() -> Result<SystemPlatform, String> {
-    Err("unsupported platform".to_string())
-}
-
-#[cfg(target_os = "windows")]
-fn detect_current_arch() -> Result<SystemArch, String> {
-    crate::utils::platform::windows::download::current_arch()
-}
-
-#[cfg(target_os = "macos")]
-fn detect_current_arch() -> Result<SystemArch, String> {
-    crate::utils::platform::macos::download::current_arch()
-}
-
-#[cfg(not(any(target_os = "windows", target_os = "macos")))]
-fn detect_current_arch() -> Result<SystemArch, String> {
-    Err("unsupported architecture".to_string())
-}
-
-pub fn resolve_download_artifact(
+fn resolve_download_artifact_inner(
     spec: &PlatformDownloadSpec,
+    platform: SystemPlatform,
+    arch: SystemArch,
 ) -> Result<ResolvedDownloadArtifact, String> {
-    let platform = detect_current_platform()?;
-    let arch = detect_current_arch()?;
-
     let platform_artifacts = match platform {
         SystemPlatform::Windows => spec.windows.as_ref(),
         SystemPlatform::MacOS => spec.macos.as_ref(),
@@ -489,4 +339,31 @@ pub fn resolve_download_artifact(
         file_name: artifact.file_name,
         kind: artifact.kind,
     })
+}
+
+pub fn resolve_download_artifact(
+    spec: &PlatformDownloadSpec,
+) -> Result<ResolvedDownloadArtifact, String> {
+    #[cfg(target_os = "windows")]
+    {
+        return resolve_download_artifact_inner(
+            spec,
+            crate::utils::platform::windows::download::current_platform()?,
+            crate::utils::platform::windows::download::current_arch()?,
+        );
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        return resolve_download_artifact_inner(
+            spec,
+            crate::utils::platform::macos::download::current_platform()?,
+            crate::utils::platform::macos::download::current_arch()?,
+        );
+    }
+
+    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+    {
+        Err("unsupported platform".to_string())
+    }
 }

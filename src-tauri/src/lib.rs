@@ -4,11 +4,9 @@ mod utils;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::async_runtime::block_on(async {
-        if let Err(e) = utils::log::init_log().await {
-            eprintln!("failed to init log: {}", e);
-        }
-    });
+    if let Err(e) = utils::log::init_log() {
+        eprintln!("failed to init log: {}", e);
+    }
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
@@ -43,6 +41,9 @@ pub fn run() {
             cmd::tools::download_tool,
             cmd::tools::get_tools_download_dir,
             cmd::tools::get_tools_manifest,
+            cmd::tools::runtime_host_platform,
+            cmd::tools::get_tool_executable_path,
+            cmd::tools::open_tool_executable,
             cmd::log::log_fe,
             cmd::log::log_fe_req,
         ])
