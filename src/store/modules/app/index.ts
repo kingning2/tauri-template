@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
+import { appConfig } from '@/config/app-config'
 import { localCache } from '@/utils/cache'
 
 import type { AppInitialState } from './types'
@@ -7,13 +8,12 @@ import type { IAction } from '@/store/types'
 
 const initialState: AppInitialState = {
   initialized: false,
-  titleBarHeight: 40,
-  mainWindowGlobalGg: '#f0f4f8',
-  supportLanguages: [
-    { label: '繁體中文', value: 'cn' },
-    { label: 'English', value: 'en' }
-  ],
-  currentLanguage: (localCache.getCache('language') as AppInitialState['currentLanguage']) ?? 'cn'
+  titleBarHeight: appConfig.titleBarHeight,
+  mainWindowGlobalGg: appConfig.mainWindowGlobalGg,
+  supportLanguages: appConfig.supportLanguages,
+  currentLanguage:
+    (localCache.getCache(appConfig.languageCacheKey) as AppInitialState['currentLanguage']) ??
+    appConfig.defaultLanguage
 }
 
 const appSlice = createSlice({
@@ -37,7 +37,7 @@ const appSlice = createSlice({
       { payload }: IAction<AppInitialState['currentLanguage']>
     ) {
       state.currentLanguage = payload
-      localCache.setCache('language', payload)
+      localCache.setCache(appConfig.languageCacheKey, payload)
     }
   }
 })
