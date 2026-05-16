@@ -28,7 +28,7 @@ fn load_tools_manifest() -> Vec<ToolManifestEntry> {
     serde_json::from_str(TOOLS_MANIFEST_JSON).unwrap_or_else(|e| {
         panic!(
             "failed to parse resources/tools_manifest.json: {e}\n\
-             Fix the JSON schema (camelCase keys, kind: \"executable\"|\"zip\", variant: \"hero-left\"|\"medium\"|\"small\")."
+             Fix the JSON schema (camelCase keys, kind: \"executable\"|\"zip\", variant: \"hero-left\"|\"medium\"|\"small\", optional windowsZipInstallSteps)."
         )
     })
 }

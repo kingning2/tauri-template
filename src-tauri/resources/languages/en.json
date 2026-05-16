@@ -61,6 +61,7 @@
     "downloaded": "Downloaded",
     "failed": "Failed",
     "download": "Download",
-    "redownload": "Re-download"
+    "redownload": "Re-download",
+    "not_yet_online": "Not available yet"
   }
 }

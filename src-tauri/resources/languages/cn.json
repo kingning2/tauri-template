@@ -61,6 +61,7 @@
     "downloaded": "已下載",
     "failed": "失敗",
     "download": "下載",
-    "redownload": "重新下載"
+    "redownload": "重新下載",
+    "not_yet_online": "暫未上線"
   }
 }
