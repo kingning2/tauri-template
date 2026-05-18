@@ -58,10 +58,12 @@
   "common": {
     "hot": "熱門",
     "downloading": "下載中…",
+    "downloading_percent_prefix": "下載中：",
     "downloaded": "已下載",
     "failed": "失敗",
     "download": "下載",
     "redownload": "重新下載",
-    "not_yet_online": "暫未上線"
+    "not_yet_online": "暫未上線",
+    "installed_on_device": "本機已安裝"
   }
 }

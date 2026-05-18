@@ -5,6 +5,7 @@ use std::process::Stdio;
 use crate::utils::platform::download::{PlatformDownloadSpec, SystemArch, SystemPlatform};
 use crate::utils::platform::windows::registry;
 
+/// 当前平台
 pub fn current_platform() -> Result<SystemPlatform, String> {
     match OS {
         "windows" => Ok(SystemPlatform::Windows),
@@ -12,6 +13,7 @@ pub fn current_platform() -> Result<SystemPlatform, String> {
     }
 }
 
+/// 当前架构
 pub fn current_arch() -> Result<SystemArch, String> {
     match ARCH {
         "x86_64" => Ok(SystemArch::X64),
@@ -20,6 +22,7 @@ pub fn current_arch() -> Result<SystemArch, String> {
     }
 }
 
+/// 判断工具是否已安装
 pub fn is_tool_download_installed(spec: &PlatformDownloadSpec) -> Result<bool, String> {
     let Some(win) = spec.windows_product_registry.as_ref() else {
         return Ok(false);
@@ -33,6 +36,7 @@ pub fn is_tool_download_installed(spec: &PlatformDownloadSpec) -> Result<bool, S
     })
 }
 
+/// 运行下载的安装器
 pub async fn run_downloaded_installer(local_path: &str) -> Result<(), String> {
     let path = PathBuf::from(local_path);
     if !path.is_file() {
@@ -71,6 +75,7 @@ pub async fn run_downloaded_installer(local_path: &str) -> Result<(), String> {
     Ok(())
 }
 
+/// 运行下载的安装器后，运行 zip 安装步骤
 pub async fn run_zip_post_install_if_configured(
     install_dir: &Path,
     spec: &PlatformDownloadSpec,

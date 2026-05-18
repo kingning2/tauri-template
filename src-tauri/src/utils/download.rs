@@ -1,9 +1,9 @@
 use std::path::PathBuf;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use futures_util::StreamExt;
-use reqwest::header::{CONTENT_LENGTH, RANGE};
-use reqwest::{Client, StatusCode};
+use reqwest::header::{CONTENT_RANGE, RANGE};
+use reqwest::{Client, Response, StatusCode};
 use tauri::ipc::Channel;
 use tauri::AppHandle;
 use tokio::fs::{self, OpenOptions};
@@ -14,6 +14,42 @@ use tokio::time::sleep;
 use crate::utils::platform::download::{
     resolve_download_artifact, PlatformDownloadResult, PlatformDownloadSpec,
 };
+
+/// 工具下载进度（Rust → 前端 Channel）。
+#[derive(Clone, Debug, serde::Serialize)]
+pub struct ToolDownloadProgress {
+    /// 已写入磁盘的累计字节数（含断点续传前已有部分）。
+    pub downloaded: u64,
+    /// 完整文件总字节数；若响应未提供 `Content-Length` / `Content-Range` 则为 `null`。
+    pub total: Option<u64>,
+}
+
+fn parse_content_range_total(s: &str) -> Option<u64> {
+    let rest = s.strip_prefix("bytes ")?.trim();
+    let (_, total_part) = rest.rsplit_once('/')?;
+    let total_part = total_part.trim();
+    if total_part == "*" {
+        return None;
+    }
+    total_part.parse().ok()
+}
+
+/// 从响应头推断完整文件大小（用于真实进度条）。
+fn infer_total_file_bytes(existing_on_disk: u64, resume: bool, response: &Response) -> Option<u64> {
+    if let Some(cr) = response.headers().get(CONTENT_RANGE) {
+        if let Ok(s) = cr.to_str() {
+            if let Some(t) = parse_content_range_total(s) {
+                return Some(t);
+            }
+        }
+    }
+    let body_len = response.content_length()?;
+    if resume && response.status() == StatusCode::PARTIAL_CONTENT {
+        existing_on_disk.checked_add(body_len)
+    } else {
+        Some(body_len)
+    }
+}
 
 /// 将下载落地路径拼成安全的相对路径：`{relative_dir}/{file_name}`。
 ///
@@ -47,7 +83,7 @@ fn build_relative_download_path(relative_dir: &str, file_name: &str) -> Result<S
 /// - `app`: Tauri 的 `AppHandle`（当前只是为了与其它下载函数保持一致）
 /// - `spec`: 平台下载描述，包含 `windows` / `macos`，以及 `x64` / `arm64` / `universal` 的兜底规则
 /// - `relative_dir`: 资源保存时的相对目录名（最终会落到 `{app_data}/tool-downloads/{relative_dir}/...`）
-/// - `on_progress`: 下载过程中用于上报进度的通道，发送的是**每个分块写入的字节数**
+/// - `on_progress`: 下载过程中上报进度（已下载字节 + 总大小，总大小来自 `Content-Length` / `Content-Range`）
 ///
 /// # 返回
 /// [`PlatformDownloadResult`]
@@ -86,7 +122,7 @@ fn build_relative_download_path(relative_dir: &str, file_name: &str) -> Result<S
 ///   }),
 /// };
 ///
-/// // on_progress 需要你在 Tauri command/业务层创建好 Channel<u64>
+/// // on_progress：Tauri command 侧创建 `Channel<ToolDownloadProgress>`
 /// let result = download_tool_file_by_platform(
 ///   &app,
 ///   &spec,
@@ -100,7 +136,7 @@ pub async fn download_tool_file_by_platform(
     app: &AppHandle,
     spec: &PlatformDownloadSpec,
     relative_dir: &str,
-    on_progress: Channel<u64>,
+    on_progress: Channel<ToolDownloadProgress>,
 ) -> Result<PlatformDownloadResult, String> {
     let artifact = resolve_download_artifact(spec)?;
     let relative_path = build_relative_download_path(relative_dir, &artifact.file_name)?;
@@ -147,17 +183,22 @@ pub fn tools_download_base_dir() -> Result<PathBuf, String> {
     Ok(dirs.data_local_dir().join("tool-downloads"))
 }
 
-/// 带“重试 + HTTP Range 断点续传”的下载实现。
+/// 带「重试 + HTTP Range 断点续传」的下载实现。
 ///
-/// 关键行为：
-/// - 如果服务端支持续传（响应 `206 PARTIAL_CONTENT`），则在已有文件后追加
-/// - 否则会截断已有文件并从头开始下载
-/// - `on_progress` 上报的是每个分块写入的字节数
+/// **传输方式**：单连接 `GET` + `bytes_stream()` **流式写入**（按 TCP 分片到达顺序落盘），不是多连接并行分片。
+///
+/// **Range / 续传**：仅用于**同一次 `download_tool` 调用内**的重试（例如中途断流后 `attempt` 递增再次请求）；
+/// **每次用户新发起下载的首次尝试**（`attempt == 1`）会先 **删除** 目标路径已有文件，避免上次程序中途退出留下的半截包导致一直从半截续传、进度条不清零。
+///
+/// 其他行为：
+/// - 若服务端支持续传（响应 `206 PARTIAL_CONTENT`），则在已有文件后追加
+/// - 否则截断已有文件并从头开始下载
+/// - `on_progress` 上报累计已下载字节与（若可知）完整文件总大小
 ///
 /// # 参数
 /// - `url`: 远端文件 URL
 /// - `relative_path`: `{app_data}/tool-downloads/` 下的相对落地路径
-/// - `on_progress`: 上报分块写入进度
+/// - `on_progress`: 上报下载进度事件
 ///
 /// # 返回
 /// 保存完成后的落地路径字符串（期望为 UTF-8）
@@ -165,7 +206,7 @@ pub async fn download_tool_file_retries_range(
     _app: &AppHandle,
     url: &str,
     relative_path: &str,
-    on_progress: Channel<u64>,
+    on_progress: Channel<ToolDownloadProgress>,
 ) -> Result<String, String> {
     crate::log_info!(
         "download.start(retries_range) url={} relative_path={}",
@@ -190,6 +231,9 @@ pub async fn download_tool_file_retries_range(
 
     const MAX_RETRIES: u8 = 3;
     const RETRY_DELAY_MS: u64 = 3000;
+    /// 流式写入过程中定期打 INFO，避免只有头尾两条日志
+    const PROGRESS_LOG_MIN_INTERVAL: Duration = Duration::from_millis(1500);
+    const PROGRESS_LOG_MIN_BYTES: u64 = 256 * 1024;
 
     let mut attempt: u8 = 0;
     loop {
@@ -203,6 +247,24 @@ pub async fn download_tool_file_retries_range(
             MAX_RETRIES + 1,
             url
         );
+
+        // 新一轮用户下载：去掉上次未完成的半截文件，进度从 0 开始；同一次调用内的重试不删（attempt > 1）。
+        if attempt == 1 {
+            if let Ok(meta) = fs::metadata(&dest).await {
+                crate::log_info!(
+                    "download.discard_previous_artifact path={} previous_bytes={}",
+                    dest.display(),
+                    meta.len()
+                );
+                if let Err(e) = fs::remove_file(&dest).await {
+                    crate::log_warn!(
+                        "download.remove_previous_artifact_failed path={} err={}",
+                        dest.display(),
+                        e
+                    );
+                }
+            }
+        }
 
         let existing_size = fs::metadata(&dest).await.map(|m| m.len()).unwrap_or(0);
 
@@ -223,6 +285,15 @@ pub async fn download_tool_file_retries_range(
         };
 
         let resume_supported = response.status() == StatusCode::PARTIAL_CONTENT;
+
+        crate::log_info!(
+            "download.http_ready status={} resume_supported={} existing_on_disk={} content_length_header={:?} url={}",
+            response.status(),
+            resume_supported,
+            existing_size,
+            response.content_length(),
+            url
+        );
 
         if !response.status().is_success() && !resume_supported {
             crate::log_error!(
@@ -262,21 +333,29 @@ pub async fn download_tool_file_retries_range(
 
         let mut downloaded: u64 = if resume_supported { existing_size } else { 0 };
 
+        let total_hint = infer_total_file_bytes(existing_size, resume_supported, &response);
+
+        crate::log_info!(
+            "download.body_stream_start path={} total_hint={:?} resume_supported={}",
+            dest.display(),
+            total_hint,
+            resume_supported
+        );
+
         // If we resumed successfully, make UI reflect already-written bytes.
         if resume_supported && existing_size > 0 {
-            on_progress.send(existing_size).map_err(|e| e.to_string())?;
+            on_progress
+                .send(ToolDownloadProgress {
+                    downloaded: existing_size,
+                    total: total_hint,
+                })
+                .map_err(|e| e.to_string())?;
         }
-
-        // Best-effort logging: for resume responses, CONTENT_LENGTH is body length not total length.
-        let _body_len: u64 = response
-            .headers()
-            .get(CONTENT_LENGTH)
-            .and_then(|v| v.to_str().ok())
-            .and_then(|s| s.parse().ok())
-            .unwrap_or(0);
 
         let mut stream = response.bytes_stream();
         let mut is_success = true;
+        let mut last_progress_log = Instant::now();
+        let mut bytes_since_progress_log: u64 = 0;
 
         while let Some(item) = stream.next().await {
             let chunk = match item {
@@ -288,12 +367,39 @@ pub async fn download_tool_file_retries_range(
                 }
             };
 
+            let chunk_len = chunk.len() as u64;
             file.write_all(&chunk).await.map_err(|e| e.to_string())?;
-            downloaded += chunk.len() as u64;
+            downloaded += chunk_len;
+            bytes_since_progress_log += chunk_len;
 
             on_progress
-                .send(chunk.len() as u64)
+                .send(ToolDownloadProgress {
+                    downloaded,
+                    total: total_hint,
+                })
                 .map_err(|e| e.to_string())?;
+
+            let elapsed = last_progress_log.elapsed();
+            if bytes_since_progress_log >= PROGRESS_LOG_MIN_BYTES
+                || elapsed >= PROGRESS_LOG_MIN_INTERVAL
+            {
+                let pct = total_hint
+                    .filter(|&t| t > 0)
+                    .map(|t| (downloaded as f64 / t as f64) * 100.0)
+                    .map(|p| format!("{p:.2}%"))
+                    .unwrap_or_else(|| "n/a".to_string());
+                crate::log_info!(
+                    "download.progress path={} downloaded={} total={:?} approx_percent={} chunk_last={} elapsed_since_log_ms={}",
+                    dest.display(),
+                    downloaded,
+                    total_hint,
+                    pct,
+                    chunk_len,
+                    elapsed.as_millis()
+                );
+                last_progress_log = Instant::now();
+                bytes_since_progress_log = 0;
+            }
         }
 
         if !is_success {

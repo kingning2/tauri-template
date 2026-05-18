@@ -58,10 +58,12 @@
   "common": {
     "hot": "HOT",
     "downloading": "Downloading…",
+    "downloading_percent_prefix": "Downloading:",
     "downloaded": "Downloaded",
     "failed": "Failed",
     "download": "Download",
     "redownload": "Re-download",
-    "not_yet_online": "Not available yet"
+    "not_yet_online": "Not available yet",
+    "installed_on_device": "Installed on this device"
   }
 }

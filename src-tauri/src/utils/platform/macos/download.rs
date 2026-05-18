@@ -25,6 +25,7 @@ pub fn current_arch() -> Result<SystemArch, String> {
     }
 }
 
+/// 判断工具是否已安装
 pub fn is_tool_download_installed(
     spec: &PlatformDownloadSpec,
     relative_dir: &str,
@@ -58,6 +59,7 @@ pub fn is_tool_download_installed(
     Ok(installed)
 }
 
+/// 构建工具相对下载路径
 fn build_tool_relative_download_path(
     relative_dir: &str,
     file_name: &str,
@@ -78,6 +80,7 @@ fn build_tool_relative_download_path(
     Ok(rel)
 }
 
+/// 确保工具相对路径安全
 fn ensure_tool_relative_path_safe(rel: &str) -> Result<(), String> {
     if rel.is_empty() || rel.contains("..") {
         return Err("invalid relative path".to_string());
@@ -92,6 +95,7 @@ fn ensure_tool_relative_path_safe(rel: &str) -> Result<(), String> {
     Ok(())
 }
 
+/// 修改安装器可执行权限
 pub async fn chmod_installer_executable(local_path: &str) -> Result<(), String> {
     use std::os::unix::fs::PermissionsExt;
 
@@ -100,6 +104,7 @@ pub async fn chmod_installer_executable(local_path: &str) -> Result<(), String> 
         .map_err(|e| e.to_string())
 }
 
+/// 运行下载的安装器
 pub async fn run_downloaded_installer(local_path: &str) -> Result<(), String> {
     let path = PathBuf::from(local_path);
     if !path.is_file() {
