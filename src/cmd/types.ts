@@ -5,6 +5,7 @@ export type Cmd =
   | 'download_tool'
   | 'get_tools_download_dir'
   | 'get_tools_manifest'
+  | 'get_tools_install_state'
   | 'runtime_host_platform'
   | 'get_tool_executable_path'
   | 'open_tool_executable'

@@ -74,6 +74,35 @@ export type ToolManifest = {
   variant: ToolVariant
 }
 
+/** 与 Rust `ToolInstallState` 对齐（`get_tools_install_state`）。 */
+export type ToolInstallState = {
+  toolId: string
+  installed: boolean
+  executablePath?: string
+  installCheckError?: string
+}
+
+/** 与 Rust `OpenToolExecutableArgs` 对齐（`open_tool_executable`）；由注册表 / bundle 解析路径，不经由 `toolId` 查嵌入清单。 */
+export type OpenToolExecutableArgs = {
+  windowsHklmSoftwarePath?: string
+  windowsZipMainExecutableRelative?: string
+  windowsMainExecutableRelative?: string
+  macosInstalledBundlePath?: string
+}
+
+/** 从 `downloadSpec` 构造打开工具所需参数（Windows：`InstallPath` + 相对主程序名）。 */
+export function openToolArgsFromDownloadSpec(
+  spec: PlatformDownloadSpec
+): OpenToolExecutableArgs {
+  return {
+    windowsHklmSoftwarePath: spec.windowsProductRegistry?.hklmSoftwarePath,
+    windowsZipMainExecutableRelative:
+      spec.windowsZipInstallSteps?.mainExecutableRelative,
+    windowsMainExecutableRelative: spec.windowsMainExecutableRelative,
+    macosInstalledBundlePath: spec.macosInstalledBundlePath,
+  }
+}
+
 /** i18n key suffix under namespace `tools`, e.g. system_repair -> tools:system_repair.title */
 export function toolIdToI18nKey(id: string): string {
   return id.replace(/-/g, '_')
