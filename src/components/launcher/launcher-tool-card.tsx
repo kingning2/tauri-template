@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Download,
   FolderOpen,
   History,
   MapPin,
@@ -13,19 +12,15 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { ShadowCard } from "@/components/ui/shadow-card";
+import DowloadCard, {
+  type DowloadCardRenderArgs,
+} from "@/components/dowload/dowload-card";
 import {
-  toolHasUniversalDownloadForPlatform,
   toolIdToI18nKey,
   type HostDesktopPlatform,
+  type ToolInstallState,
   type ToolManifest,
 } from "@/config/tools-manifest";
-import { ToolVariant } from "@/enums/tool-variant";
-import { DownloadPhase } from "@/enums/download-phase";
-import { useToolDownload } from "@/hooks/useToolDownload";
-import { cn } from "@/lib/utils";
 
 const TOOL_ICON: Partial<Record<string, LucideIcon>> = {
   "system-repair": Wrench,
@@ -47,135 +42,85 @@ const TOOL_ICON_BOX: Partial<Record<string, string>> = {
   ringtone: "from-violet-500 to-purple-600",
 };
 
-interface LauncherToolCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  tool: ToolManifest;
-  /** 来自 `runtime_host_platform`；未就绪前为 `null`，不显示为可下载。 */
-  hostPlatform: HostDesktopPlatform | null;
+function toolLauncherIconGradient(toolId: string): string {
+  return TOOL_ICON_BOX[toolId] ?? "from-sky-400 to-blue-600";
 }
 
-function ToolGlyph({ toolId }: { toolId: string }) {
+export function ToolGlyph({ toolId }: { toolId: string }) {
   const Icon = TOOL_ICON[toolId] ?? Wrench;
   return <Icon className="size-6 text-white sm:size-7" aria-hidden />;
 }
 
-export default function LauncherToolCard({
+export type LauncherToolCardBodyRenderProps = DowloadCardRenderArgs & {
+  title: string;
+  description: string;
+  iconGrad: string;
+  tool: ToolManifest;
+  toolInstallState?: ToolInstallState;
+  tc: (key: string) => string;
+};
+
+export interface LauncherToolCardProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+  tool: ToolManifest;
+  isFeatured: boolean;
+  isCompact: boolean;
+  /** 来自 `runtime_host_platform`；未就绪前为 `null`，不显示为可下载。 */
+  hostPlatform: HostDesktopPlatform | null;
+  /** 来自 `get_tools_install_state`；首屏加载后由父组件注入。 */
+  toolInstallState?: ToolInstallState;
+  /** 下载完成后刷新安装态（与 `get_tools_install_state` 一致）。 */
+  onInstallStateRefresh?: () => void;
+  renderBody: (props: LauncherToolCardBodyRenderProps) => React.ReactNode;
+  /** 与原先 `ShadowCard` 内层之后的插槽一致（如卡片扩展区） */
+  trailing?: React.ReactNode;
+}
+
+/** 连接 `DowloadCard`、i18n 文案与下载态；具体排版由大/中/小卡片各自 `renderBody` 实现。 */
+export function LauncherToolCard({
   tool,
+  isFeatured,
+  isCompact,
   hostPlatform,
+  toolInstallState,
+  onInstallStateRefresh,
   className = "",
-  children,
+  renderBody,
+  trailing,
+  ...rest
 }: LauncherToolCardProps) {
   const { t } = useTranslation("tools");
   const { t: tc } = useTranslation("common");
   const key = toolIdToI18nKey(tool.id);
   const title = t(`${key}.title`);
   const description = t(`${key}.description`);
-  const variant = tool.variant;
-
-  const { phase, receivedBytes, error, start } = useToolDownload();
-
-  const canDownload =
-    hostPlatform != null &&
-    toolHasUniversalDownloadForPlatform(tool.downloadSpec, hostPlatform);
-
-  const busy = phase === DownloadPhase.Downloading;
-  const done = phase === DownloadPhase.Completed;
-  const failed = phase === DownloadPhase.Error;
-
-  const progressValue = busy
-    ? Math.min(92, 8 + Math.log10(receivedBytes + 10) * 18)
-    : done
-      ? 100
-      : 0;
-
-  const iconGrad = TOOL_ICON_BOX[tool.id] ?? "from-sky-400 to-blue-600";
-  const isFeatured = variant === ToolVariant.HeroLeft;
-  const isCompact = variant === ToolVariant.Small;
-
-  const interactive = canDownload && !busy;
+  const iconGrad = toolLauncherIconGradient(tool.id);
 
   return (
-    <ShadowCard
-      role={interactive ? "button" : undefined}
-      tabIndex={interactive ? 0 : undefined}
-      onClick={() => {
-        if (!interactive || !hostPlatform) return;
-        void start(tool, hostPlatform);
-      }}
-      onKeyDown={(e) => {
-        if (!interactive || !hostPlatform) return;
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          void start(tool, hostPlatform);
-        }
-      }}
-      className={cn(
-        "flex min-h-0 flex-col overflow-hidden",
-        interactive && "cursor-pointer",
-        !interactive && "cursor-default opacity-95",
-        isFeatured &&
-          "h-full border-sky-100/80 bg-linear-to-b from-card to-sky-50/50",
-        busy && "pointer-events-none opacity-90",
-        className,
-      )}
+    <DowloadCard
+      {...rest}
+      tool={tool}
+      hostPlatform={hostPlatform}
+      onInstallStateRefresh={onInstallStateRefresh}
+      title={title}
+      isFeatured={isFeatured}
+      isCompact={isCompact}
+      iconGradient={iconGrad}
+      className={className}
+      trailing={trailing}
+      toolInstallState={toolInstallState}
     >
-      <div
-        className={cn(
-          "flex min-h-0 flex-1 flex-col gap-2 p-3 sm:p-4",
-          isCompact && "gap-1.5 p-2.5 sm:p-3",
-        )}
-      >
-        <div className="flex min-h-0 gap-2.5 sm:gap-3">
-          <div
-            className={cn(
-              "flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br shadow-sm sm:size-12",
-              iconGrad,
-              isCompact && "size-9 rounded-lg sm:size-10",
-            )}
-          >
-            <ToolGlyph toolId={tool.id} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3
-              className={cn(
-                "font-semibold leading-tight tracking-tight",
-                isFeatured ? "text-base sm:text-lg" : "text-sm sm:text-base",
-                isCompact && "text-xs sm:text-sm",
-              )}
-            >
-              {title}
-            </h3>
-            <p
-              className={cn(
-                "text-muted-foreground mt-0.5 line-clamp-2 text-xs leading-snug sm:line-clamp-3 sm:text-[0.8125rem]",
-                isCompact && "line-clamp-2 text-[0.6875rem]",
-              )}
-            >
-              {description}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-auto flex min-h-0 flex-col gap-1.5 pt-0.5">
-          {!canDownload && (
-            <Badge variant="secondary" className="w-fit text-xs font-normal">
-              {tc("not_yet_online")}
-            </Badge>
-          )}
-          {canDownload && busy && (
-            <Progress value={progressValue} className="h-1.5" aria-label={tc("downloading")} />
-          )}
-          {canDownload && done && (
-            <span className="text-muted-foreground flex items-center gap-1 text-xs">
-              <Download className="size-3.5 shrink-0" aria-hidden />
-              {tc("downloaded")}
-            </span>
-          )}
-          {canDownload && failed && error && (
-            <span className="text-destructive text-xs leading-snug">{error}</span>
-          )}
-        </div>
-      </div>
-      {children}
-    </ShadowCard>
+      {(args) =>
+        renderBody({
+          ...args,
+          title,
+          description,
+          iconGrad,
+          tool,
+          toolInstallState,
+          tc,
+        })
+      }
+    </DowloadCard>
   );
 }

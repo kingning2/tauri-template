@@ -110,6 +110,35 @@
   }
 }
 
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(450%);
+  }
+}
+
+@keyframes ios-radial-bar {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/** 下载卡片：箭头自上而下循环位移 */
+@keyframes download-arrow-slide-down {
+  0% {
+    transform: translateY(-42%);
+  }
+  100% {
+    transform: translateY(42%);
+  }
+}
+
 #App {
   position: relative;
   display: flex;

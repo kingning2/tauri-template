@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import LauncherHeroCarousel from '@/components/launcher/launcher-hero-carousel'
-import LauncherToolCard from '@/components/launcher/launcher-tool-card'
-import { getRuntimeHostPlatform, getToolsManifest } from '@/cmd/tools'
-import type { HostDesktopPlatform, ToolManifest } from '@/config/tools-manifest'
+import LauncherLargeToolCard from '@/components/launcher/launcher-large-tool-card'
+import LauncherMediumToolCard from '@/components/launcher/launcher-medium-tool-card'
+import LauncherSmallToolCard from '@/components/launcher/launcher-small-tool-card'
+import { getRuntimeHostPlatform, getToolsInstallState, getToolsManifest } from '@/cmd/tools'
+import type { HostDesktopPlatform, ToolInstallState, ToolManifest } from '@/config/tools-manifest'
 import { mainWindowBg } from '@/config/main-window-bg'
 import { ToolVariant } from '@/enums/tool-variant'
 import { useAppDispatch } from '@/store/hooks'
@@ -15,6 +17,15 @@ export default function MainWindowHome() {
   const dispatch = useAppDispatch()
   const [tools, setTools] = useState<ToolManifest[] | null>(null)
   const [hostPlatform, setHostPlatform] = useState<HostDesktopPlatform | null>(null)
+  const [installByToolId, setInstallByToolId] = useState<
+    Record<string, ToolInstallState>
+  >({})
+
+  const refreshInstallState = useCallback(() => {
+    void getToolsInstallState().then((list) => {
+      setInstallByToolId(Object.fromEntries(list.map((s) => [s.toolId, s])))
+    })
+  }, [])
 
   useEffect(() => {
     dispatch(
@@ -29,9 +40,15 @@ export default function MainWindowHome() {
 
   useEffect(() => {
     let cancelled = false
-    void getToolsManifest().then((list) => {
-      if (!cancelled) setTools(list)
-    })
+    void Promise.all([getToolsManifest(), getToolsInstallState()]).then(
+      ([list, installList]) => {
+        if (cancelled) return
+        setTools(list)
+        setInstallByToolId(
+          Object.fromEntries(installList.map((s) => [s.toolId, s]))
+        )
+      }
+    )
     return () => {
       cancelled = true
     }
@@ -65,27 +82,34 @@ export default function MainWindowHome() {
         <LauncherHeroCarousel />
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)_minmax(0,1fr)] gap-3 overflow-visible lg:grid-cols-[minmax(0,1fr)_minmax(0,1.55fr)] lg:grid-rows-1">
-        <LauncherToolCard tool={hero} hostPlatform={hostPlatform} className="min-h-0" />
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)_minmax(0,1fr)] gap-3 overflow-visible lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)] lg:grid-rows-1">
+        <LauncherLargeToolCard
+          tool={hero}
+          hostPlatform={hostPlatform}
+          toolInstallState={installByToolId[hero.id]}
+          onInstallStateRefresh={refreshInstallState}
+        />
 
         <div className="grid min-h-0 grid-rows-2 gap-3 overflow-visible">
           <div className="grid min-h-0 grid-cols-2 gap-3 overflow-visible">
             {mediums.map((tool) => (
-              <LauncherToolCard
+              <LauncherMediumToolCard
                 key={tool.id}
                 tool={tool}
                 hostPlatform={hostPlatform}
-                className="min-h-0"
+                toolInstallState={installByToolId[tool.id]}
+                onInstallStateRefresh={refreshInstallState}
               />
             ))}
           </div>
           <div className="grid min-h-0 grid-cols-2 gap-3 overflow-visible sm:grid-cols-4">
             {smalls.map((tool) => (
-              <LauncherToolCard
+              <LauncherSmallToolCard
                 key={tool.id}
                 tool={tool}
                 hostPlatform={hostPlatform}
-                className="min-h-0"
+                toolInstallState={installByToolId[tool.id]}
+                onInstallStateRefresh={refreshInstallState}
               />
             ))}
           </div>
