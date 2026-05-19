@@ -13,7 +13,7 @@ export const ShadowCard = React.forwardRef<HTMLDivElement, ShadowCardProps>(
     <div
       ref={ref}
       className={cn(
-        'shadow-card relative z-0 overflow-visible rounded-xl border bg-card text-card-foreground',
+        'shadow-card relative z-0 overflow-visible rounded-3xl border bg-card text-card-foreground',
         'transform-gpu focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         className
       )}

@@ -18,19 +18,16 @@ export default function LauncherLargeToolCard({
   className,
   ...props
 }: LauncherLargeToolCardProps) {
+  console.log(props.tool);
+
   return (
     <LauncherToolCard
       isFeatured
       isCompact={false}
       {...props}
       className={cn("min-h-0", className)}
-      renderBody={({
-        title,
-        description,
-        iconGrad,
-        tool,
-      }) => (
-        <>
+      renderBody={({ title, description, iconGrad, tool }) => (
+        <div className={cn("flex min-h-0 flex-col gap-2 h-full p-3")}>
           <div className="flex min-h-0 sm:gap-3 flex-col items-center text-center gap-4 justify-center h-full">
             <div
               className={cn(
@@ -47,7 +44,7 @@ export default function LauncherLargeToolCard({
               {description}
             </p>
           </div>
-        </>
+        </div>
       )}
     />
   );
