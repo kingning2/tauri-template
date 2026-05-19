@@ -4,7 +4,7 @@ import { DOWNLOAD_PROGRESS_SVG } from "@/animation/download/constants";
 import {
   buildDownloadRepeatingWaveLine,
   buildDownloadWaveCapPath,
-  downloadWaterSurfaceY,
+  downloadWaterSurfaceY
 } from "@/animation/download/progress-geometry";
 import type { DownloadProgressDomRefs, DownloadProgressLevelRefs } from "./types";
 
@@ -13,7 +13,7 @@ const WAVE_BOB_DURATION = 1.35;
 export function applyDownloadWaterLevel(
   refs: DownloadProgressDomRefs,
   levels: DownloadProgressLevelRefs,
-  pct: number,
+  pct: number
 ) {
   const { cy, radius } = DOWNLOAD_PROGRESS_SVG;
   const surface = downloadWaterSurfaceY(pct);
@@ -34,21 +34,15 @@ export function applyDownloadWaterLevel(
     levels.lastSurfaceY.current = surface;
     const ampFront = 5;
     const ampBack = 3.5;
-    refs.waveLine?.setAttribute(
-      "d",
-      buildDownloadRepeatingWaveLine(surface, ampFront),
-    );
-    refs.waveLineBack?.setAttribute(
-      "d",
-      buildDownloadRepeatingWaveLine(surface + 2, ampBack),
-    );
+    refs.waveLine?.setAttribute("d", buildDownloadRepeatingWaveLine(surface, ampFront));
+    refs.waveLineBack?.setAttribute("d", buildDownloadRepeatingWaveLine(surface + 2, ampBack));
     refs.waveCap?.setAttribute("d", buildDownloadWaveCapPath(surface, ampFront));
   }
 }
 
 export function startDownloadWaveMotion(
   refs: DownloadProgressDomRefs,
-  handles: { front: TweenHandle; back: TweenHandle; bob?: TweenHandle },
+  handles: { front: TweenHandle; back: TweenHandle; bob?: TweenHandle }
 ) {
   const front = refs.waveFrontGroup;
   const back = refs.waveBackGroup;
@@ -65,7 +59,7 @@ export function startDownloadWaveMotion(
     x: 0,
     y: 0,
     force3D: true,
-    svgOrigin: `${DOWNLOAD_PROGRESS_SVG.cx} ${DOWNLOAD_PROGRESS_SVG.cy}`,
+    svgOrigin: `${DOWNLOAD_PROGRESS_SVG.cx} ${DOWNLOAD_PROGRESS_SVG.cy}`
   });
 
   handles.back.set(
@@ -73,8 +67,8 @@ export function startDownloadWaveMotion(
       x: -period,
       duration: 2.6,
       ease: "none",
-      repeat: -1,
-    }),
+      repeat: -1
+    })
   );
 
   handles.front.set(
@@ -82,8 +76,8 @@ export function startDownloadWaveMotion(
       x: -period,
       duration: 1.75,
       ease: "none",
-      repeat: -1,
-    }),
+      repeat: -1
+    })
   );
 
   if (handles.bob) {
@@ -93,15 +87,15 @@ export function startDownloadWaveMotion(
         duration: WAVE_BOB_DURATION,
         ease: "sine.inOut",
         yoyo: true,
-        repeat: -1,
-      }),
+        repeat: -1
+      })
     );
   }
 }
 
 export function killDownloadWaveMotion(
   refs: DownloadProgressDomRefs,
-  handles: { front: TweenHandle; back: TweenHandle; bob?: TweenHandle },
+  handles: { front: TweenHandle; back: TweenHandle; bob?: TweenHandle }
 ) {
   handles.front.kill();
   handles.back.kill();

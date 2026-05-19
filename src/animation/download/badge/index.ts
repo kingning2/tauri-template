@@ -6,6 +6,6 @@ export {
   pinBadgeMotion,
   resetBadgeMotionDom,
   type BadgeMotionRect,
-  type DownloadBadgeElements,
+  type DownloadBadgeElements
 } from "./expand-collapse";
 export { animateDownloadBadgeVisibility } from "./visibility";

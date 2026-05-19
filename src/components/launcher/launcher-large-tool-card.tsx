@@ -2,11 +2,7 @@
 
 import { cn } from "@/lib/utils";
 
-import {
-  LauncherToolCard,
-  type LauncherToolCardProps,
-  ToolGlyph,
-} from "./launcher-tool-card";
+import { LauncherToolCard, type LauncherToolCardProps, ToolGlyph } from "./launcher-tool-card";
 
 export type LauncherLargeToolCardProps = Omit<
   LauncherToolCardProps,
@@ -14,10 +10,7 @@ export type LauncherLargeToolCardProps = Omit<
 >;
 
 /** 大卡：下载逻辑在 `LauncherToolCard`，排版仅在本组件。 */
-export default function LauncherLargeToolCard({
-  className,
-  ...props
-}: LauncherLargeToolCardProps) {
+export default function LauncherLargeToolCard({ className, ...props }: LauncherLargeToolCardProps) {
   console.log(props.tool);
 
   return (
@@ -27,17 +20,17 @@ export default function LauncherLargeToolCard({
       {...props}
       className={cn("min-h-0", className)}
       renderBody={({ title, description, iconGrad, tool }) => (
-        <div className={cn("flex min-h-0 flex-col gap-2 h-full p-3")}>
-          <div className="flex min-h-0 sm:gap-3 flex-col items-center text-center gap-4 justify-center h-full">
+        <div className={cn("flex h-full min-h-0 flex-col gap-2 p-3")}>
+          <div className="flex h-full min-h-0 flex-col items-center justify-center gap-4 text-center sm:gap-3">
             <div
               className={cn(
                 "flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br shadow-sm sm:size-12",
-                iconGrad,
+                iconGrad
               )}
             >
               <ToolGlyph toolId={tool.id} />
             </div>
-            <h3 className="font-semibold text-base leading-tight tracking-tight sm:text-lg">
+            <h3 className="text-base leading-tight font-semibold tracking-tight sm:text-lg">
               {title}
             </h3>
             <p className="text-muted-foreground mt-0.5 line-clamp-2 text-xs leading-snug sm:line-clamp-3 sm:text-[0.8125rem]">

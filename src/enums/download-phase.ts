@@ -1,7 +1,6 @@
 export enum DownloadPhase {
-  Idle = 'idle',
-  Downloading = 'downloading',
-  Completed = 'completed',
-  Error = 'error'
+  Idle = "idle",
+  Downloading = "downloading",
+  Completed = "completed",
+  Error = "error"
 }
-

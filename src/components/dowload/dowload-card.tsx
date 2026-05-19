@@ -9,7 +9,7 @@ import {
   toolHasDownloadForPlatform,
   ToolInstallState,
   type HostDesktopPlatform,
-  type ToolManifest,
+  type ToolManifest
 } from "@/config/tools-manifest";
 import { DownloadPhase } from "@/enums/download-phase";
 import { useToolDownload } from "@/hooks/useToolDownload";
@@ -26,10 +26,7 @@ export interface DowloadCardRenderArgs {
   startDownload: () => void;
 }
 
-export interface DowloadCardProps extends Omit<
-  React.HTMLAttributes<HTMLDivElement>,
-  "children"
-> {
+export interface DowloadCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
   tool: ToolManifest;
   hostPlatform: HostDesktopPlatform | null;
   onInstallStateRefresh?: () => void;
@@ -62,15 +59,14 @@ export default function DowloadCard({
     downloadExpandActive,
     progressExpanded,
     playDownloadExpand,
-    handleDownloadFinishDismiss,
+    handleDownloadFinishDismiss
   } = useDownloadBadgeAnimation({
     phase,
-    onCollapseComplete: reset,
+    onCollapseComplete: reset
   });
 
   const canDownload =
-    hostPlatform != null &&
-    toolHasDownloadForPlatform(tool.downloadSpec, hostPlatform);
+    hostPlatform != null && toolHasDownloadForPlatform(tool.downloadSpec, hostPlatform);
 
   const busy = phase === DownloadPhase.Downloading;
   const done = phase === DownloadPhase.Completed;
@@ -80,7 +76,7 @@ export default function DowloadCard({
   const runDownload = () => {
     if (!hostPlatform) return;
     void start(tool, hostPlatform, {
-      onCompleted: onInstallStateRefresh,
+      onCompleted: onInstallStateRefresh
     });
   };
 
@@ -96,7 +92,7 @@ export default function DowloadCard({
     failed,
     error,
     interactive,
-    startDownload: requestDownload,
+    startDownload: requestDownload
   };
 
   const overlayExpanded = downloadExpandActive || progressExpanded;
@@ -117,13 +113,11 @@ export default function DowloadCard({
             requestDownload();
             return;
           }
-          void openToolExecutable(
-            openToolArgsFromDownloadSpec(tool.downloadSpec),
-          );
+          void openToolExecutable(openToolArgsFromDownloadSpec(tool.downloadSpec));
         }}
         className={cn(
           "relative flex h-full min-h-0 flex-col overflow-hidden",
-          canDownload && "cursor-pointer",
+          canDownload && "cursor-pointer"
         )}
       >
         {children(renderArgs)}
@@ -134,9 +128,7 @@ export default function DowloadCard({
             className={cn(
               "pointer-events-none absolute z-20 will-change-transform",
               overlayExpanded && "overflow-hidden rounded-3xl",
-              progressExpanded
-                ? "inset-0 h-full w-full"
-                : "right-[20px] top-[20px] h-10 w-10",
+              progressExpanded ? "inset-0 h-full w-full" : "top-[20px] right-[20px] h-10 w-10"
             )}
           >
             <div
@@ -144,8 +136,8 @@ export default function DowloadCard({
               className={cn(
                 "h-full w-full",
                 overlayExpanded
-                  ? "overflow-hidden rounded-3xl bg-[#0a84ff]/55 backdrop-blur-md ring-1 ring-inset ring-white/25"
-                  : "rounded-full bg-[#0a84ff] p-0.5",
+                  ? "overflow-hidden rounded-3xl bg-[#0a84ff]/55 ring-1 ring-white/25 backdrop-blur-md ring-inset"
+                  : "rounded-full bg-[#0a84ff] p-0.5"
               )}
             >
               <DowloadProgress

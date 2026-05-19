@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-import { useAppSelector } from '@/store/hooks'
+import { useAppSelector } from "@/store/hooks";
 
 export default function Root() {
-  const router = useRouter()
-  const initialized = useAppSelector((state) => state.app.initialized)
+  const router = useRouter();
+  const initialized = useAppSelector((state) => state.app.initialized);
 
   useEffect(() => {
-    if (!initialized) return
-    router.replace('/main-window')
-  }, [initialized, router])
+    if (!initialized) return;
+    router.replace("/main-window");
+  }, [initialized, router]);
 
-  return null
+  return null;
 }

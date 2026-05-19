@@ -1,22 +1,22 @@
-'use client'
+"use client";
 
-import { useCallback } from 'react'
+import { useCallback } from "react";
 
 import {
   closeModalWindowCommand,
   openModalWindowCommand,
   type OpenModalWindowOptions
-} from '@/config/modal-window'
+} from "@/config/modal-window";
 
 export function useModalWindow() {
   const openModal = useCallback(async (options: OpenModalWindowOptions) => {
-    const label = await openModalWindowCommand(options)
-    return label
-  }, [])
+    const label = await openModalWindowCommand(options);
+    return label;
+  }, []);
 
   const closeModal = useCallback(async (label: string) => {
-    await closeModalWindowCommand(label)
-  }, [])
+    await closeModalWindowCommand(label);
+  }, []);
 
-  return { openModal, closeModal }
+  return { openModal, closeModal };
 }

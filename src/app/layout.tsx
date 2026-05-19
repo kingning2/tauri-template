@@ -1,21 +1,21 @@
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 
-import SessionBridgeProvider from '@/providers/session-bridge-provider'
-import StoreProvider from '@/providers/store'
+import SessionBridgeProvider from "@/providers/session-bridge-provider";
+import StoreProvider from "@/providers/store";
 
-import GlobalProvider from './global-provider'
+import GlobalProvider from "./global-provider";
 
-import '@/assets/globals.css'
+import "@/assets/globals.css";
 
 export const metadata: Metadata = {
-  title: 'MobiXpert',
-  description: 'iOS utility toolkit'
-}
+  title: "MobiXpert",
+  description: "iOS utility toolkit"
+};
 
 export default function RootLayout({
   children
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="zh-Hant">
@@ -27,5 +27,5 @@ export default function RootLayout({
         </StoreProvider>
       </body>
     </html>
-  )
+  );
 }

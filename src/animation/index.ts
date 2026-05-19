@@ -25,17 +25,14 @@ export {
   downloadWaterSurfaceY,
   initialWaterFillY,
   resetBadgeMotionDom,
-  resetDownloadProgressVisual,
+  resetDownloadProgressVisual
 } from "./download";
 
-export {
-  useDownloadBadgeAnimation,
-  useDownloadProgressAnimation,
-} from "./hooks";
+export { useDownloadBadgeAnimation, useDownloadProgressAnimation } from "./hooks";
 
 export type {
   UseDownloadBadgeAnimationOptions,
-  UseDownloadProgressAnimationOptions,
+  UseDownloadProgressAnimationOptions
 } from "./hooks";
 
 export type { DownloadBadgeElements, DownloadProgressDomRefs } from "./download";

@@ -14,7 +14,7 @@ import {
   ShoppingCart,
   Square,
   X,
-  type LucideIcon,
+  type LucideIcon
 } from "lucide-react";
 import { memo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
@@ -30,7 +30,7 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { mainWindow } from "@/config/popup-window";
 import { cn } from "@/lib/utils";
@@ -54,7 +54,7 @@ const MORE_MENU_ITEMS: MoreMenuItem[] = [
   { id: "contact_support", i18nKey: "menu_contact_support", Icon: Headphones },
   { id: "online_help", i18nKey: "menu_online_help", Icon: CircleHelp },
   { id: "check_updates", i18nKey: "menu_check_updates", Icon: ArrowUpCircle },
-  { id: "about", i18nKey: "menu_about", Icon: Info },
+  { id: "about", i18nKey: "menu_about", Icon: Info }
 ];
 
 const TitleBar = memo((props: { height?: number }) => {
@@ -62,9 +62,7 @@ const TitleBar = memo((props: { height?: number }) => {
   const h = props.height ?? 40;
   const dispatch = useAppDispatch();
   const currentLanguage = useAppSelector((state) => state.app.currentLanguage);
-  const supportLanguages = useAppSelector(
-    (state) => state.app.supportLanguages,
-  );
+  const supportLanguages = useAppSelector((state) => state.app.supportLanguages);
   const { openModal } = useModalWindow();
 
   const openActivateWindow = useCallback(() => {
@@ -72,7 +70,7 @@ const TitleBar = memo((props: { height?: number }) => {
       path: "/modal-window?panel=activate",
       title: t("activate"),
       width: 480,
-      height: 360,
+      height: 360
     });
   }, [openModal, t]);
 
@@ -86,7 +84,7 @@ const TitleBar = memo((props: { height?: number }) => {
         dispatch(changeCurrentLanguageAction(next));
       }
     },
-    [currentLanguage, dispatch],
+    [currentLanguage, dispatch]
   );
 
   /** 与 unlock 一致：仅当事件目标带 `data-drag-region` 时才拖动（按钮内部无此属性） */
@@ -102,7 +100,7 @@ const TitleBar = memo((props: { height?: number }) => {
       role="banner"
       data-drag-region
       className={cn(
-        "flex w-full select-none items-center justify-between bg-card/90 px-3 backdrop-blur",
+        "bg-card/90 flex w-full items-center justify-between px-3 backdrop-blur select-none"
         // 'border-b'
       )}
       style={{ height: h }}
@@ -116,15 +114,12 @@ const TitleBar = memo((props: { height?: number }) => {
         >
           M
         </div>
-        <span className="truncate text-[15px] font-semibold tracking-tight text-foreground">
+        <span className="text-foreground truncate text-[15px] font-semibold tracking-tight">
           {t("app_name")}
         </span>
       </div>
 
-      <div
-        className="pointer-events-auto flex shrink-0 items-center gap-2"
-        data-drag-region
-      >
+      <div className="pointer-events-auto flex shrink-0 items-center gap-2" data-drag-region>
         <Button
           type="button"
           size="sm"
@@ -137,7 +132,7 @@ const TitleBar = memo((props: { height?: number }) => {
           type="button"
           variant="outline"
           size="sm"
-          className="rounded-full border-pink-400 bg-background px-8 text-xs font-medium text-pink-600 hover:bg-pink-50 hover:text-pink-600"
+          className="bg-background rounded-full border-pink-400 px-8 text-xs font-medium text-pink-600 hover:bg-pink-50 hover:text-pink-600"
           onClick={openActivateWindow}
           onPointerDown={(e) => e.stopPropagation()}
         >
@@ -181,7 +176,7 @@ const TitleBar = memo((props: { height?: number }) => {
                     >
                       <span className="flex size-4 shrink-0 items-center justify-center">
                         {currentLanguage === opt.value ? (
-                          <Check className="size-4 text-primary" aria-hidden />
+                          <Check className="text-primary size-4" aria-hidden />
                         ) : null}
                       </span>
                       {opt.label}

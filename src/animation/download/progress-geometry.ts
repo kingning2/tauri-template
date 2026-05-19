@@ -1,7 +1,4 @@
-import {
-  DOWNLOAD_PROGRESS_SVG,
-  DOWNLOAD_PROGRESS_WATER,
-} from "./constants";
+import { DOWNLOAD_PROGRESS_SVG, DOWNLOAD_PROGRESS_WATER } from "./constants";
 
 export function clampDownloadPct(p: number): number {
   if (Number.isNaN(p) || !Number.isFinite(p)) return 0;
@@ -19,7 +16,7 @@ export function downloadWaterSurfaceY(pct: number): number {
 export function buildDownloadRepeatingWaveLine(
   surfaceY: number,
   amplitude: number,
-  period = DOWNLOAD_PROGRESS_SVG.wavePeriod,
+  period = DOWNLOAD_PROGRESS_SVG.wavePeriod
 ): string {
   const startX = -period * 2;
   const cycles = 6;
@@ -38,7 +35,7 @@ export function buildDownloadRepeatingWaveLine(
 export function buildDownloadWaveCapPath(
   surfaceY: number,
   amplitude: number,
-  period = DOWNLOAD_PROGRESS_SVG.wavePeriod,
+  period = DOWNLOAD_PROGRESS_SVG.wavePeriod
 ): string {
   const startX = -period * 2;
   const endX = startX + period * 6;

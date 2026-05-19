@@ -8,18 +8,16 @@ import {
   Music2,
   Smartphone,
   Wrench,
-  type LucideIcon,
+  type LucideIcon
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import DowloadCard, {
-  type DowloadCardRenderArgs,
-} from "@/components/dowload/dowload-card";
+import DowloadCard, { type DowloadCardRenderArgs } from "@/components/dowload/dowload-card";
 import {
   toolIdToI18nKey,
   type HostDesktopPlatform,
   type ToolInstallState,
-  type ToolManifest,
+  type ToolManifest
 } from "@/config/tools-manifest";
 
 const TOOL_ICON: Partial<Record<string, LucideIcon>> = {
@@ -29,7 +27,7 @@ const TOOL_ICON: Partial<Record<string, LucideIcon>> = {
   "data-transfer": FolderOpen,
   "data-recovery": History,
   "social-transfer": MessagesSquare,
-  ringtone: Music2,
+  ringtone: Music2
 };
 
 const TOOL_ICON_BOX: Partial<Record<string, string>> = {
@@ -39,7 +37,7 @@ const TOOL_ICON_BOX: Partial<Record<string, string>> = {
   "data-transfer": "from-blue-400 to-indigo-600",
   "data-recovery": "from-pink-400 to-rose-500",
   "social-transfer": "from-emerald-400 to-teal-600",
-  ringtone: "from-violet-500 to-purple-600",
+  ringtone: "from-violet-500 to-purple-600"
 };
 
 function toolLauncherIconGradient(toolId: string): string {
@@ -60,8 +58,10 @@ export type LauncherToolCardBodyRenderProps = DowloadCardRenderArgs & {
   tc: (key: string) => string;
 };
 
-export interface LauncherToolCardProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+export interface LauncherToolCardProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  "children"
+> {
   tool: ToolManifest;
   isFeatured: boolean;
   isCompact: boolean;
@@ -118,7 +118,7 @@ export function LauncherToolCard({
           iconGrad,
           tool,
           toolInstallState,
-          tc,
+          tc
         })
       }
     </DowloadCard>

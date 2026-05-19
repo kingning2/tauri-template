@@ -1,8 +1,8 @@
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-export type ContentContainerProps = React.HTMLAttributes<HTMLDivElement>
+export type ContentContainerProps = React.HTMLAttributes<HTMLDivElement>;
 
 /**
  * 主内容区：在纵向 flex 布局中占满剩余空间（flex-1 + min-h-0），横向同理（min-w-0），
@@ -12,14 +12,11 @@ const ContentContainer = React.forwardRef<HTMLDivElement, ContentContainerProps>
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(
-        "min-h-0 min-w-0 flex-1 overflow-auto scrollbar-themed w-full",
-        className
-      )}
+      className={cn("scrollbar-themed min-h-0 w-full min-w-0 flex-1 overflow-auto", className)}
       {...props}
     />
   )
-)
-ContentContainer.displayName = "ContentContainer"
+);
+ContentContainer.displayName = "ContentContainer";
 
-export { ContentContainer }
+export { ContentContainer };

@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import { memo, useEffect } from 'react'
+import { memo, useEffect } from "react";
 
-import { useAppSelector } from '@/store/hooks'
+import { useAppSelector } from "@/store/hooks";
 
 /** 将 Redux 中的主窗背景同步到 `:root` 的 `--main-window-bg`（与 unlock 的 GlobalBgGuard 一致） */
 const GlobalBgGuard = memo(() => {
-  const globalGg = useAppSelector((state) => state.app.mainWindowGlobalGg)
+  const globalGg = useAppSelector((state) => state.app.mainWindowGlobalGg);
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--main-window-bg', globalGg)
-  }, [globalGg])
+    document.documentElement.style.setProperty("--main-window-bg", globalGg);
+  }, [globalGg]);
 
-  return null
-})
+  return null;
+});
 
-export default GlobalBgGuard
+export default GlobalBgGuard;

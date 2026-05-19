@@ -5,11 +5,7 @@ import TitleBar from "@/components/title-bar";
 import GlobalBgGuard from "@/guards/main-window/global-bg-guard";
 import { useAppSelector } from "@/store/hooks";
 
-export default function MainProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function MainProvider({ children }: { children: React.ReactNode }) {
   const titleBarHeight = useAppSelector((state) => state.app.titleBarHeight);
 
   return (

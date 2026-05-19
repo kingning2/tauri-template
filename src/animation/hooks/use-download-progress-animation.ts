@@ -19,7 +19,7 @@ import {
   startDownloadWaveMotion,
   syncDownloadProgressDeterminate,
   syncDownloadProgressIndeterminate,
-  type DownloadProgressDomRefs,
+  type DownloadProgressDomRefs
 } from "@/animation/download";
 import { DownloadPhase } from "@/enums/download-phase";
 
@@ -36,7 +36,7 @@ export function useDownloadProgressAnimation({
   progress,
   layoutExpanded,
   onExpandedChange,
-  onFinishDismiss,
+  onFinishDismiss
 }: UseDownloadProgressAnimationOptions) {
   const lucideArrowRef = useRef<HTMLDivElement>(null);
   const progressSvgRef = useRef<SVGSVGElement>(null);
@@ -58,19 +58,14 @@ export function useDownloadProgressAnimation({
   const introPlayedRef = useRef(false);
   const completeAnimPlayedRef = useRef(false);
 
-  const waveHandles = useRef(
-    createTweenHandles(["front", "back", "bob"] as const),
-  ).current;
-  const syncHandles = useRef(
-    createTweenHandles(["waterIndeterminate", "ring"] as const),
-  ).current;
+  const waveHandles = useRef(createTweenHandles(["front", "back", "bob"] as const)).current;
+  const syncHandles = useRef(createTweenHandles(["waterIndeterminate", "ring"] as const)).current;
 
   const [showAfterComplete, setShowAfterComplete] = useState(false);
   const [introDone, setIntroDone] = useState(false);
 
   const showProgressSvg =
-    phase === DownloadPhase.Downloading ||
-    (phase === DownloadPhase.Completed && showAfterComplete);
+    phase === DownloadPhase.Downloading || (phase === DownloadPhase.Completed && showAfterComplete);
 
   const isExpanded =
     layoutExpanded ||
@@ -78,8 +73,7 @@ export function useDownloadProgressAnimation({
     (phase === DownloadPhase.Completed && showAfterComplete);
 
   const showWater =
-    phase === DownloadPhase.Downloading ||
-    (phase === DownloadPhase.Completed && showAfterComplete);
+    phase === DownloadPhase.Downloading || (phase === DownloadPhase.Completed && showAfterComplete);
 
   useEffect(() => {
     onExpandedChange?.(isExpanded);
@@ -96,18 +90,18 @@ export function useDownloadProgressAnimation({
       waveBackGroup: waveBackGroupRef.current,
       waveLine: waveLineRef.current,
       waveLineBack: waveLineBackRef.current,
-      waveCap: waveCapRef.current,
+      waveCap: waveCapRef.current
     }),
-    [],
+    []
   );
 
   const getLevelRefs = useCallback(
     () => ({
       waterLevel: waterLevelRef,
       ringLevel: ringLevelRef,
-      lastSurfaceY: lastSurfaceYRef,
+      lastSurfaceY: lastSurfaceYRef
     }),
-    [],
+    []
   );
 
   const stopLoops = useCallback(() => {
@@ -137,14 +131,10 @@ export function useDownloadProgressAnimation({
 
     const introPct = progress != null ? clampDownloadPct(progress) : 10;
 
-    introTimelineRef.current = createDownloadProgressIntroTimeline(
-      refs,
-      getLevelRefs(),
-      {
-        introPct,
-        onWaveStart: () => setIntroDone(true),
-      },
-    );
+    introTimelineRef.current = createDownloadProgressIntroTimeline(refs, getLevelRefs(), {
+      introPct,
+      onWaveStart: () => setIntroDone(true)
+    });
 
     return () => {
       introTimelineRef.current?.kill();
@@ -200,28 +190,17 @@ export function useDownloadProgressAnimation({
     completeAnimPlayedRef.current = true;
     stopLoops();
 
-    completeTimelineRef.current = createDownloadProgressCompleteTimeline(
-      refs,
-      getLevelRefs(),
-      {
-        onDismiss: () => {
-          setShowAfterComplete(false);
-          onFinishDismiss?.();
-        },
-      },
-    );
+    completeTimelineRef.current = createDownloadProgressCompleteTimeline(refs, getLevelRefs(), {
+      onDismiss: () => {
+        setShowAfterComplete(false);
+        onFinishDismiss?.();
+      }
+    });
 
     return () => {
       completeTimelineRef.current?.kill();
     };
-  }, [
-    getDomRefs,
-    getLevelRefs,
-    onFinishDismiss,
-    phase,
-    showAfterComplete,
-    stopLoops,
-  ]);
+  }, [getDomRefs, getLevelRefs, onFinishDismiss, phase, showAfterComplete, stopLoops]);
 
   useEffect(() => {
     if (phase === DownloadPhase.Idle || phase === DownloadPhase.Error) {
@@ -256,6 +235,6 @@ export function useDownloadProgressAnimation({
     waterGeometry: DOWNLOAD_PROGRESS_WATER,
     initialWaterFillY,
     buildRepeatingWaveLine: buildDownloadRepeatingWaveLine,
-    waterSurfaceY: downloadWaterSurfaceY,
+    waterSurfaceY: downloadWaterSurfaceY
   };
 }

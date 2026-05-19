@@ -1,22 +1,22 @@
-import { isString } from './general'
+import { isString } from "./general";
 
-import type { LocalCacheKey } from './cache-types'
+import type { LocalCacheKey } from "./cache-types";
 
 class LocalCache {
   setCache<T = unknown>(key: LocalCacheKey, value: T) {
-    if (typeof window === 'undefined') {
-      return undefined
+    if (typeof window === "undefined") {
+      return undefined;
     }
-    localStorage.setItem(key, JSON.stringify(value))
+    localStorage.setItem(key, JSON.stringify(value));
   }
 
   getCache<T = unknown>(key: LocalCacheKey): T | null {
-    if (typeof window === 'undefined') {
-      return null
+    if (typeof window === "undefined") {
+      return null;
     }
-    const value = localStorage.getItem(key)
-    return isString(value) ? JSON.parse(value) : value
+    const value = localStorage.getItem(key);
+    return isString(value) ? JSON.parse(value) : value;
   }
 }
 
-export const localCache = new LocalCache()
+export const localCache = new LocalCache();

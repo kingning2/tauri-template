@@ -1,8 +1,6 @@
 ---
-description: Git 提交规范（中文 Conventional Commits，仅 @ 本规则时启用）
 alwaysApply: false
 ---
-
 # Git 提交规范（中文）
 
 **仅在用户 @ 提及本规则（`git-commit-cn`）或明确要求按项目规范提交时执行。**

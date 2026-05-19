@@ -22,7 +22,7 @@ export default function DowloadProgress({
   installed = false,
   onExpandedChange,
   layoutExpanded = false,
-  onFinishDismiss,
+  onFinishDismiss
 }: DowloadProgressProps) {
   const clipId = useId().replace(/:/g, "");
 
@@ -44,13 +44,13 @@ export default function DowloadProgress({
     waterGeometry,
     initialWaterFillY,
     buildRepeatingWaveLine,
-    waterSurfaceY,
+    waterSurfaceY
   } = useDownloadProgressAnimation({
     phase,
     progress,
     layoutExpanded,
     onExpandedChange,
-    onFinishDismiss,
+    onFinishDismiss
   });
 
   const { cx, cy, radius, viewBox, checkPath } = svgGeometry;
@@ -60,14 +60,12 @@ export default function DowloadProgress({
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-valuenow={
-        progress == null ? undefined : Math.round(progress)
-      }
+      aria-valuenow={progress == null ? undefined : Math.round(progress)}
       aria-busy={phase === DownloadPhase.Downloading}
       aria-label="Download progress"
       className={cn(
         "pointer-events-auto absolute inset-0 z-30 flex items-center justify-center",
-        isExpanded && "overflow-hidden rounded-3xl",
+        isExpanded && "overflow-hidden rounded-3xl"
       )}
     >
       <div
@@ -75,7 +73,7 @@ export default function DowloadProgress({
           "relative flex items-center justify-center overflow-hidden",
           isExpanded
             ? "h-full w-full rounded-3xl bg-transparent shadow-none ring-0"
-            : "h-10 w-10 shrink-0 rounded-full bg-[#0a84ff] shadow-lg ring-1 ring-white/10",
+            : "h-10 w-10 shrink-0 rounded-full bg-[#0a84ff] shadow-lg ring-1 ring-white/10"
         )}
       >
         <div
@@ -98,8 +96,8 @@ export default function DowloadProgress({
             className={cn(
               "block",
               isExpanded
-                ? "aspect-square h-[min(72%,240px)] w-[min(72%,240px)] max-h-[88%] max-w-[88%]"
-                : "absolute inset-0 h-full w-full",
+                ? "aspect-square h-[min(72%,240px)] max-h-[88%] w-[min(72%,240px)] max-w-[88%]"
+                : "absolute inset-0 h-full w-full"
             )}
           >
             <defs>
@@ -131,7 +129,7 @@ export default function DowloadProgress({
                 className="will-change-transform"
                 style={{
                   transformBox: "fill-box",
-                  transformOrigin: "center center",
+                  transformOrigin: "center center"
                 }}
               >
                 <path
@@ -148,7 +146,7 @@ export default function DowloadProgress({
                 className="will-change-transform"
                 style={{
                   transformBox: "fill-box",
-                  transformOrigin: "center center",
+                  transformOrigin: "center center"
                 }}
               >
                 <path

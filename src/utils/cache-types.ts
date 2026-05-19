@@ -1,1 +1,1 @@
-export type LocalCacheKey = 'language'
+export type LocalCacheKey = "language";

@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -89,7 +89,7 @@
   }
 
   body {
-    @apply cursor-default text-foreground antialiased;
+    @apply text-foreground cursor-default antialiased;
     margin: 0;
     /* 透明窗体：底色由 #App / .main-window 提供，避免直角“底板”盖住圆角 */
     background-color: transparent;
@@ -99,7 +99,7 @@
 
   #App input,
   #App textarea,
-  #App [contenteditable='true'] {
+  #App [contenteditable="true"] {
     user-select: text;
     -webkit-user-select: text;
   }

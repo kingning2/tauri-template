@@ -6,16 +6,8 @@ import LauncherHeroCarousel from "@/components/launcher/launcher-hero-carousel";
 import LauncherLargeToolCard from "@/components/launcher/launcher-large-tool-card";
 import LauncherMediumToolCard from "@/components/launcher/launcher-medium-tool-card";
 import LauncherSmallToolCard from "@/components/launcher/launcher-small-tool-card";
-import {
-  getRuntimeHostPlatform,
-  getToolsInstallState,
-  getToolsManifest,
-} from "@/cmd/tools";
-import type {
-  HostDesktopPlatform,
-  ToolInstallState,
-  ToolManifest,
-} from "@/config/tools-manifest";
+import { getRuntimeHostPlatform, getToolsInstallState, getToolsManifest } from "@/cmd/tools";
+import type { HostDesktopPlatform, ToolInstallState, ToolManifest } from "@/config/tools-manifest";
 import { mainWindowBg } from "@/config/main-window-bg";
 import { ToolVariant } from "@/enums/tool-variant";
 import { useAppDispatch } from "@/store/hooks";
@@ -24,12 +16,8 @@ import { changeMainWindowGlobalGgAction } from "@/store/modules/app";
 export default function MainWindowHome() {
   const dispatch = useAppDispatch();
   const [tools, setTools] = useState<ToolManifest[] | null>(null);
-  const [hostPlatform, setHostPlatform] = useState<HostDesktopPlatform | null>(
-    null,
-  );
-  const [installByToolId, setInstallByToolId] = useState<
-    Record<string, ToolInstallState>
-  >({});
+  const [hostPlatform, setHostPlatform] = useState<HostDesktopPlatform | null>(null);
+  const [installByToolId, setInstallByToolId] = useState<Record<string, ToolInstallState>>({});
 
   const refreshInstallState = useCallback(() => {
     void getToolsInstallState().then((list) => {
@@ -46,15 +34,11 @@ export default function MainWindowHome() {
 
   useEffect(() => {
     let cancelled = false;
-    void Promise.all([getToolsManifest(), getToolsInstallState()]).then(
-      ([list, installList]) => {
-        if (cancelled) return;
-        setTools(list);
-        setInstallByToolId(
-          Object.fromEntries(installList.map((s) => [s.toolId, s])),
-        );
-      },
-    );
+    void Promise.all([getToolsManifest(), getToolsInstallState()]).then(([list, installList]) => {
+      if (cancelled) return;
+      setTools(list);
+      setInstallByToolId(Object.fromEntries(installList.map((s) => [s.toolId, s])));
+    });
     return () => {
       cancelled = true;
     };
@@ -72,7 +56,7 @@ export default function MainWindowHome() {
 
   if (!tools?.length) {
     return (
-      <div className="flex min-h-0 flex-1 items-center justify-center text-muted-foreground text-sm">
+      <div className="text-muted-foreground flex min-h-0 flex-1 items-center justify-center text-sm">
         Loading tools…
       </div>
     );
@@ -83,8 +67,8 @@ export default function MainWindowHome() {
   const smalls = tools.filter((tool) => tool.variant === ToolVariant.Small);
 
   return (
-    <div className="flex flex-col gap-3 min-h-0 overflow-hidden h-full">
-      <div className="min-h-0 h-[clamp(10.5rem,30vh,17.5rem)] max-h-70">
+    <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden">
+      <div className="h-[clamp(10.5rem,30vh,17.5rem)] max-h-70 min-h-0">
         <LauncherHeroCarousel />
       </div>
 

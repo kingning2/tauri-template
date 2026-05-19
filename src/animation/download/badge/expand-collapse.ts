@@ -1,8 +1,5 @@
 import { gsap } from "@/animation/core/gsap";
-import {
-  DOWNLOAD_ANIMATION_TIMING,
-  DOWNLOAD_BADGE_CORNER,
-} from "@/animation/download/constants";
+import { DOWNLOAD_ANIMATION_TIMING, DOWNLOAD_BADGE_CORNER } from "@/animation/download/constants";
 
 export interface DownloadBadgeElements {
   card: HTMLElement;
@@ -17,17 +14,14 @@ export interface BadgeMotionRect {
   height: number;
 }
 
-export function measureBadgeMotionInCard(
-  card: HTMLElement,
-  motion: HTMLElement,
-): BadgeMotionRect {
+export function measureBadgeMotionInCard(card: HTMLElement, motion: HTMLElement): BadgeMotionRect {
   const cardRect = card.getBoundingClientRect();
   const motionRect = motion.getBoundingClientRect();
   return {
     left: motionRect.left - cardRect.left,
     top: motionRect.top - cardRect.top,
     width: motionRect.width,
-    height: motionRect.height,
+    height: motionRect.height
   };
 }
 
@@ -37,7 +31,7 @@ export function getBadgeCornerTarget(cardWidth: number): BadgeMotionRect {
     left: cardWidth - right - size,
     top,
     width: size,
-    height: size,
+    height: size
   };
 }
 
@@ -52,14 +46,14 @@ export function pinBadgeMotion(motion: HTMLElement, rect: BadgeMotionRect) {
     width: rect.width,
     height: rect.height,
     x: 0,
-    y: 0,
+    y: 0
   });
 }
 
 /** 角标从右上角展开至铺满卡片 */
 export function createBadgeExpandTimeline(
   elements: DownloadBadgeElements,
-  options: { onComplete: () => void },
+  options: { onComplete: () => void }
 ): gsap.core.Timeline {
   const { card, motion, visual } = elements;
   const cardRect = card.getBoundingClientRect();
@@ -76,23 +70,27 @@ export function createBadgeExpandTimeline(
     .timeline({
       onComplete: () => {
         gsap.set(motion, {
-          clearProps: "left,top,right,bottom,width,height,x,y,scale",
+          clearProps: "left,top,right,bottom,width,height,x,y,scale"
         });
         options.onComplete();
-      },
+      }
     })
     .to(
       motion,
       { left: 0, top: 0, width: cardRect.width, height: cardRect.height, duration, ease },
-      0,
+      0
     )
-    .to(visual, { borderRadius: "1.5rem", duration: radiusEase.duration, ease: radiusEase.ease }, 0.06);
+    .to(
+      visual,
+      { borderRadius: "1.5rem", duration: radiusEase.duration, ease: radiusEase.ease },
+      0.06
+    );
 }
 
 /** 角标从铺满状态缩回右上角 */
 export function createBadgeCollapseTimeline(
   elements: DownloadBadgeElements,
-  options: { onComplete: () => void },
+  options: { onComplete: () => void }
 ): gsap.core.Timeline {
   const { card, motion, visual } = elements;
   const cardRect = card.getBoundingClientRect();
@@ -115,11 +113,15 @@ export function createBadgeCollapseTimeline(
         width: target.width,
         height: target.height,
         duration,
-        ease,
+        ease
       },
-      0,
+      0
     )
-    .to(visual, { borderRadius: "9999px", duration: radiusEase.duration, ease: radiusEase.ease }, 0.05);
+    .to(
+      visual,
+      { borderRadius: "9999px", duration: radiusEase.duration, ease: radiusEase.ease },
+      0.05
+    );
 }
 
 export function resetBadgeMotionDom(motion: HTMLElement | null, visual: HTMLElement | null) {

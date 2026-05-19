@@ -10,7 +10,7 @@ import {
   createBadgeExpandTimeline,
   DOWNLOAD_ANIMATION_TIMING,
   resetBadgeMotionDom,
-  type DownloadBadgeElements,
+  type DownloadBadgeElements
 } from "@/animation/download";
 import { DownloadPhase } from "@/enums/download-phase";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
@@ -22,7 +22,7 @@ export interface UseDownloadBadgeAnimationOptions {
 
 export function useDownloadBadgeAnimation({
   phase,
-  onCollapseComplete,
+  onCollapseComplete
 }: UseDownloadBadgeAnimationOptions) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const cardSurfaceRef = useRef<HTMLDivElement>(null);
@@ -63,10 +63,7 @@ export function useDownloadBadgeAnimation({
         return;
       }
 
-      if (
-        prefersReducedMotion ||
-        (!progressExpanded && !downloadExpandActive)
-      ) {
+      if (prefersReducedMotion || (!progressExpanded && !downloadExpandActive)) {
         resetBadgeLayout();
         onComplete?.();
         return;
@@ -78,7 +75,7 @@ export function useDownloadBadgeAnimation({
           expandAnimatingRef.current = false;
           resetBadgeLayout();
           onComplete?.();
-        },
+        }
       });
     },
     [
@@ -86,8 +83,8 @@ export function useDownloadBadgeAnimation({
       getBadgeElements,
       prefersReducedMotion,
       progressExpanded,
-      resetBadgeLayout,
-    ],
+      resetBadgeLayout
+    ]
   );
 
   const handleDownloadFinishDismiss = useCallback(() => {
@@ -124,10 +121,10 @@ export function useDownloadBadgeAnimation({
           expandAnimatingRef.current = false;
           flushSync(() => setProgressExpanded(true));
           onComplete();
-        },
+        }
       });
     },
-    [getBadgeElements, prefersReducedMotion],
+    [getBadgeElements, prefersReducedMotion]
   );
 
   useEffect(() => {
@@ -152,7 +149,7 @@ export function useDownloadBadgeAnimation({
     prefersReducedMotion,
     progressExpanded,
     downloadExpandActive,
-    handleDownloadFinishDismiss,
+    handleDownloadFinishDismiss
   ]);
 
   useIsomorphicLayoutEffect(() => {
@@ -170,13 +167,7 @@ export function useDownloadBadgeAnimation({
     return () => {
       gsap.killTweensOf(visual);
     };
-  }, [
-    cardHovered,
-    downloadExpandActive,
-    phase,
-    progressExpanded,
-    prefersReducedMotion,
-  ]);
+  }, [cardHovered, downloadExpandActive, phase, progressExpanded, prefersReducedMotion]);
 
   useIsomorphicLayoutEffect(() => {
     return () => {
@@ -194,6 +185,6 @@ export function useDownloadBadgeAnimation({
     progressExpanded,
     playDownloadExpand,
     handleDownloadFinishDismiss,
-    resetBadgeLayout,
+    resetBadgeLayout
   };
 }

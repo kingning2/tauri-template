@@ -3,21 +3,21 @@ export {
   DOWNLOAD_BADGE_CORNER,
   DOWNLOAD_PROGRESS_CIRCUMFERENCE,
   DOWNLOAD_PROGRESS_SVG,
-  DOWNLOAD_PROGRESS_WATER,
+  DOWNLOAD_PROGRESS_WATER
 } from "./constants";
 export {
   buildDownloadRepeatingWaveLine,
   buildDownloadWaveCapPath,
   clampDownloadPct,
   downloadWaterSurfaceY,
-  initialWaterFillY,
+  initialWaterFillY
 } from "./progress-geometry";
 export {
   animateDownloadBadgeVisibility,
   createBadgeCollapseTimeline,
   createBadgeExpandTimeline,
   resetBadgeMotionDom,
-  type DownloadBadgeElements,
+  type DownloadBadgeElements
 } from "./badge";
 export {
   applyDownloadWaterLevel,
@@ -28,5 +28,5 @@ export {
   startDownloadWaveMotion,
   syncDownloadProgressDeterminate,
   syncDownloadProgressIndeterminate,
-  type DownloadProgressDomRefs,
+  type DownloadProgressDomRefs
 } from "./progress";

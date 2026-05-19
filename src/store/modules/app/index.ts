@@ -1,10 +1,10 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from "@reduxjs/toolkit";
 
-import { appConfig } from '@/config/app-config'
-import { localCache } from '@/utils/cache'
+import { appConfig } from "@/config/app-config";
+import { localCache } from "@/utils/cache";
 
-import type { AppInitialState } from './types'
-import type { IAction } from '@/store/types'
+import type { AppInitialState } from "./types";
+import type { IAction } from "@/store/types";
 
 const initialState: AppInitialState = {
   initialized: false,
@@ -12,40 +12,34 @@ const initialState: AppInitialState = {
   mainWindowGlobalGg: appConfig.mainWindowGlobalGg,
   supportLanguages: appConfig.supportLanguages,
   currentLanguage:
-    (localCache.getCache(appConfig.languageCacheKey) as AppInitialState['currentLanguage']) ??
+    (localCache.getCache(appConfig.languageCacheKey) as AppInitialState["currentLanguage"]) ??
     appConfig.defaultLanguage
-}
+};
 
 const appSlice = createSlice({
-  name: 'app',
+  name: "app",
   initialState,
   reducers: {
-    changeInitializedAction(
-      state,
-      { payload }: IAction<AppInitialState['initialized']>
-    ) {
-      state.initialized = payload
+    changeInitializedAction(state, { payload }: IAction<AppInitialState["initialized"]>) {
+      state.initialized = payload;
     },
     changeMainWindowGlobalGgAction(
       state,
-      { payload }: IAction<AppInitialState['mainWindowGlobalGg']>
+      { payload }: IAction<AppInitialState["mainWindowGlobalGg"]>
     ) {
-      state.mainWindowGlobalGg = payload
+      state.mainWindowGlobalGg = payload;
     },
-    changeCurrentLanguageAction(
-      state,
-      { payload }: IAction<AppInitialState['currentLanguage']>
-    ) {
-      state.currentLanguage = payload
-      localCache.setCache(appConfig.languageCacheKey, payload)
+    changeCurrentLanguageAction(state, { payload }: IAction<AppInitialState["currentLanguage"]>) {
+      state.currentLanguage = payload;
+      localCache.setCache(appConfig.languageCacheKey, payload);
     }
   }
-})
+});
 
 export const {
   changeInitializedAction,
   changeMainWindowGlobalGgAction,
   changeCurrentLanguageAction
-} = appSlice.actions
+} = appSlice.actions;
 
-export default appSlice.reducer
+export default appSlice.reducer;

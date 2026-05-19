@@ -1,9 +1,9 @@
-import MainProvider from './main-provider'
+import MainProvider from "./main-provider";
 
 export default function MainLayout({
   children
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
-  return <MainProvider>{children}</MainProvider>
+  return <MainProvider>{children}</MainProvider>;
 }

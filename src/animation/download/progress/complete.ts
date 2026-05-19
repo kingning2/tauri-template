@@ -1,8 +1,5 @@
 import { gsap } from "@/animation/core/gsap";
-import {
-  DOWNLOAD_ANIMATION_TIMING,
-  DOWNLOAD_PROGRESS_SVG,
-} from "@/animation/download/constants";
+import { DOWNLOAD_ANIMATION_TIMING, DOWNLOAD_PROGRESS_SVG } from "@/animation/download/constants";
 import { applyDownloadRingProgress } from "./ring";
 import type { DownloadProgressDomRefs, DownloadProgressLevelRefs } from "./types";
 import { applyDownloadWaterLevel } from "./water";
@@ -15,7 +12,7 @@ export interface DownloadProgressCompleteOptions {
 export function createDownloadProgressCompleteTimeline(
   refs: DownloadProgressDomRefs,
   levels: DownloadProgressLevelRefs,
-  options: DownloadProgressCompleteOptions,
+  options: DownloadProgressCompleteOptions
 ): gsap.core.Timeline {
   const { cx, cy } = DOWNLOAD_PROGRESS_SVG;
   const { duration, ease } = DOWNLOAD_ANIMATION_TIMING.progressComplete;
@@ -27,14 +24,14 @@ export function createDownloadProgressCompleteTimeline(
     gsap.set(refs.check, {
       opacity: 0,
       scale: 0.4,
-      transformOrigin: `${cx}px ${cy}px`,
+      transformOrigin: `${cx}px ${cy}px`
     });
   }
 
   const tl = gsap.timeline({
     onComplete: () => {
       window.setTimeout(options.onDismiss, dismissDelay);
-    },
+    }
   });
 
   tl.to(
@@ -45,9 +42,9 @@ export function createDownloadProgressCompleteTimeline(
       ease,
       onUpdate() {
         applyDownloadWaterLevel(refs, levels, levels.waterLevel.current.pct);
-      },
+      }
     },
-    0,
+    0
   );
 
   tl.to(
@@ -58,9 +55,9 @@ export function createDownloadProgressCompleteTimeline(
       ease,
       onUpdate() {
         applyDownloadRingProgress(refs, levels, levels.ringLevel.current.pct);
-      },
+      }
     },
-    0,
+    0
   );
 
   if (refs.circle) {
@@ -74,9 +71,9 @@ export function createDownloadProgressCompleteTimeline(
         opacity: 1,
         scale: 1,
         duration: 0.38,
-        ease: "back.out(2.2)",
+        ease: "back.out(2.2)"
       },
-      "-=0.12",
+      "-=0.12"
     );
   }
 

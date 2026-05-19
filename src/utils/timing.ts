@@ -1,6 +1,6 @@
-export type Debounced<T extends (...args: never[]) => void> = ((
-  ...args: Parameters<T>
-) => void) & { cancel: () => void }
+export type Debounced<T extends (...args: never[]) => void> = ((...args: Parameters<T>) => void) & {
+  cancel: () => void;
+};
 
 /**
  * 连续触发时只在最后一次调用后 `waitMs` 毫秒执行。
@@ -8,24 +8,24 @@ export type Debounced<T extends (...args: never[]) => void> = ((
  */
 export function debounce<T extends (...args: never[]) => void>(
   fn: T,
-  waitMs: number,
+  waitMs: number
 ): Debounced<T> {
-  let id: ReturnType<typeof setTimeout> | undefined
+  let id: ReturnType<typeof setTimeout> | undefined;
 
   const wrapped = (...args: Parameters<T>) => {
-    clearTimeout(id)
+    clearTimeout(id);
     id = setTimeout(() => {
-      id = undefined
-      fn(...args)
-    }, waitMs)
-  }
+      id = undefined;
+      fn(...args);
+    }, waitMs);
+  };
 
   wrapped.cancel = () => {
-    clearTimeout(id)
-    id = undefined
-  }
+    clearTimeout(id);
+    id = undefined;
+  };
 
-  return wrapped as Debounced<T>
+  return wrapped as Debounced<T>;
 }
 
 /**
@@ -33,34 +33,34 @@ export function debounce<T extends (...args: never[]) => void>(
  */
 export function throttle<T extends (...args: never[]) => void>(
   fn: T,
-  waitMs: number,
+  waitMs: number
 ): (...args: Parameters<T>) => void {
-  let lastRun = 0
-  let trailingTimer: ReturnType<typeof setTimeout> | undefined
+  let lastRun = 0;
+  let trailingTimer: ReturnType<typeof setTimeout> | undefined;
 
   return (...args: Parameters<T>) => {
-    const now = Date.now()
-    const elapsed = now - lastRun
+    const now = Date.now();
+    const elapsed = now - lastRun;
 
     const run = () => {
-      lastRun = Date.now()
-      fn(...args)
-    }
+      lastRun = Date.now();
+      fn(...args);
+    };
 
     if (elapsed >= waitMs) {
       if (trailingTimer !== undefined) {
-        clearTimeout(trailingTimer)
-        trailingTimer = undefined
+        clearTimeout(trailingTimer);
+        trailingTimer = undefined;
       }
-      run()
-      return
+      run();
+      return;
     }
 
     if (trailingTimer === undefined) {
       trailingTimer = setTimeout(() => {
-        trailingTimer = undefined
-        run()
-      }, waitMs - elapsed)
+        trailingTimer = undefined;
+        run();
+      }, waitMs - elapsed);
     }
-  }
+  };
 }

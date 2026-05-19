@@ -1,6 +1,5 @@
-import type { LocalCacheKey } from '@/utils/cache-types'
+import type { LocalCacheKey } from "@/utils/cache-types";
 
-export const cacheKeys: Record<'language', LocalCacheKey> = {
-  language: 'language'
-}
-
+export const cacheKeys: Record<"language", LocalCacheKey> = {
+  language: "language"
+};

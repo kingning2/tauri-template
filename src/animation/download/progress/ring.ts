@@ -7,7 +7,7 @@ import type { DownloadProgressDomRefs, DownloadProgressLevelRefs } from "./types
 export function applyDownloadRingProgress(
   refs: DownloadProgressDomRefs,
   levels: DownloadProgressLevelRefs,
-  pct: number,
+  pct: number
 ) {
   const circle = refs.circle;
   if (!circle) return;
@@ -16,7 +16,7 @@ export function applyDownloadRingProgress(
   gsap.set(circle, {
     strokeDasharray: `${DOWNLOAD_PROGRESS_CIRCUMFERENCE} ${DOWNLOAD_PROGRESS_CIRCUMFERENCE}`,
     strokeDashoffset: DOWNLOAD_PROGRESS_CIRCUMFERENCE * (1 - p / 100),
-    opacity: 0.9,
+    opacity: 0.9
   });
 }
 
@@ -27,7 +27,7 @@ export function tweenDownloadRingProgress(
   target: number,
   duration: number,
   ease: string,
-  onUpdate: () => void,
+  onUpdate: () => void
 ) {
   handle.kill();
   handle.set(
@@ -39,7 +39,7 @@ export function tweenDownloadRingProgress(
       onUpdate: () => {
         applyDownloadRingProgress(refs, levels, levels.ringLevel.current.pct);
         onUpdate();
-      },
-    }),
+      }
+    })
   );
 }

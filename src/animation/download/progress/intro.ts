@@ -14,7 +14,7 @@ export interface DownloadProgressIntroOptions {
 export function createDownloadProgressIntroTimeline(
   refs: DownloadProgressDomRefs,
   levels: DownloadProgressLevelRefs,
-  options: DownloadProgressIntroOptions,
+  options: DownloadProgressIntroOptions
 ): gsap.core.Timeline {
   const { cx, cy } = DOWNLOAD_PROGRESS_SVG;
   const { introPct, onWaveStart } = options;
@@ -24,7 +24,7 @@ export function createDownloadProgressIntroTimeline(
     gsap.set(refs.svg, {
       autoAlpha: 0,
       scale: 0.82,
-      transformOrigin: `${cx}px ${cy}px`,
+      transformOrigin: `${cx}px ${cy}px`
     });
   }
   if (refs.circle) gsap.set(refs.circle, { opacity: 0 });
@@ -42,7 +42,7 @@ export function createDownloadProgressIntroTimeline(
       autoAlpha: 0,
       scale: 0.55,
       duration: 0.28,
-      ease: "power2.in",
+      ease: "power2.in"
     });
   }
 
@@ -53,9 +53,9 @@ export function createDownloadProgressIntroTimeline(
         autoAlpha: 1,
         scale: 1,
         duration: 0.42,
-        ease: "back.out(1.6)",
+        ease: "back.out(1.6)"
       },
-      refs.arrow ? "-=0.12" : 0,
+      refs.arrow ? "-=0.12" : 0
     );
   }
 
@@ -73,9 +73,9 @@ export function createDownloadProgressIntroTimeline(
       ease,
       onUpdate() {
         applyDownloadWaterLevel(refs, levels, levels.waterLevel.current.pct);
-      },
+      }
     },
-    "-=0.35",
+    "-=0.35"
   );
 
   tl.to(
@@ -86,9 +86,9 @@ export function createDownloadProgressIntroTimeline(
       ease,
       onUpdate() {
         applyDownloadRingProgress(refs, levels, levels.ringLevel.current.pct);
-      },
+      }
     },
-    "<",
+    "<"
   );
 
   return tl;

@@ -16,7 +16,7 @@ export function syncDownloadProgressDeterminate(
   refs: DownloadProgressDomRefs,
   levels: DownloadProgressLevelRefs,
   handles: DownloadProgressSyncHandles,
-  progress: number,
+  progress: number
 ) {
   handles.waterIndeterminate.kill();
   const target = clampDownloadPct(progress);
@@ -29,7 +29,7 @@ export function syncDownloadProgressDeterminate(
     overwrite: true,
     onUpdate() {
       applyDownloadWaterLevel(refs, levels, levels.waterLevel.current.pct);
-    },
+    }
   });
 
   tweenDownloadRingProgress(refs, levels, handles.ring, target, duration, ease, () => {});
@@ -39,7 +39,7 @@ export function syncDownloadProgressDeterminate(
 export function syncDownloadProgressIndeterminate(
   refs: DownloadProgressDomRefs,
   levels: DownloadProgressLevelRefs,
-  handles: DownloadProgressSyncHandles,
+  handles: DownloadProgressSyncHandles
 ) {
   handles.waterIndeterminate.kill();
   handles.ring.kill();
@@ -56,8 +56,8 @@ export function syncDownloadProgressIndeterminate(
       repeat: -1,
       onUpdate() {
         applyDownloadWaterLevel(refs, levels, levels.waterLevel.current.pct);
-      },
-    }),
+      }
+    })
   );
 
   handles.ring.set(
@@ -69,7 +69,7 @@ export function syncDownloadProgressIndeterminate(
       repeat: -1,
       onUpdate() {
         applyDownloadRingProgress(refs, levels, levels.ringLevel.current.pct);
-      },
-    }),
+      }
+    })
   );
 }

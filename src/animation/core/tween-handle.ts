@@ -21,7 +21,5 @@ export class TweenHandle {
 
 /** 多实例 Tween 槽位 */
 export function createTweenHandles<const K extends string>(keys: readonly K[]) {
-  return Object.fromEntries(
-    keys.map((key) => [key, new TweenHandle()]),
-  ) as Record<K, TweenHandle>;
+  return Object.fromEntries(keys.map((key) => [key, new TweenHandle()])) as Record<K, TweenHandle>;
 }

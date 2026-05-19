@@ -1,42 +1,34 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
+import { useEffect } from "react";
 
-import { initWindowConfig } from '@/config/popup-window'
+import { initWindowConfig } from "@/config/popup-window";
 
-import InitGuard from '@/guards/global/init-guard'
-import LanguageGuard from '@/guards/global/language-guard'
+import InitGuard from "@/guards/global/init-guard";
+import LanguageGuard from "@/guards/global/language-guard";
 
-export default function GlobalProvider({
-  children
-}: {
-  children: React.ReactNode
-}) {
+export default function GlobalProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    initWindowConfig()
+    initWindowConfig();
 
-    const app = document.getElementById('App')
-    if (!app) return
+    const app = document.getElementById("App");
+    if (!app) return;
 
-    const ua = navigator.userAgent
+    const ua = navigator.userAgent;
     if (/Windows/i.test(ua)) {
-      app.classList.add('windows')
+      app.classList.add("windows");
     } else if (/Mac/i.test(ua)) {
-      app.classList.add('macos')
+      app.classList.add("macos");
     }
-  }, [])
+  }, []);
 
   return (
     <InitGuard>
       <LanguageGuard>
-        <div
-          id="App"
-          className="antialiased"
-          onContextMenu={(e) => e.preventDefault()}
-        >
+        <div id="App" className="antialiased" onContextMenu={(e) => e.preventDefault()}>
           {children}
         </div>
       </LanguageGuard>
     </InitGuard>
-  )
+  );
 }

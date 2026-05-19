@@ -8,7 +8,7 @@ export function resetDownloadProgressVisual(
   refs: DownloadProgressDomRefs,
   levels: DownloadProgressLevelRefs,
   waveHandles: { front: TweenHandle; back: TweenHandle; bob?: TweenHandle },
-  syncHandles: { waterIndeterminate: TweenHandle; ring: TweenHandle },
+  syncHandles: { waterIndeterminate: TweenHandle; ring: TweenHandle }
 ) {
   killDownloadWaveMotion(refs, waveHandles);
   syncHandles.waterIndeterminate.kill();
@@ -27,8 +27,8 @@ export function resetDownloadProgressVisual(
       levels.waterLevel.current,
       levels.ringLevel.current,
       refs.waveFrontGroup,
-      refs.waveBackGroup,
-    ].filter(Boolean),
+      refs.waveBackGroup
+    ].filter(Boolean)
   );
 
   if (refs.svg) gsap.set(refs.svg, { autoAlpha: 0, scale: 0.9 });
