@@ -163,6 +163,14 @@
   background: var(--main-window-bg);
 }
 
+#App.modal-window-root {
+  background: #fff;
+}
+
+.modal-window {
+  background: #fff;
+}
+
 /* 主内容区滚动条：语义色 + WebKit / Firefox */
 @layer utilities {
   .shadow-card {

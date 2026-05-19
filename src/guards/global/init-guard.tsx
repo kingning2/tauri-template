@@ -1,13 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useStore } from 'react-redux'
 
-import { getLang } from '@/cmd/lang'
+import { getAppSession } from '@/cmd/session'
+import type { AppStore } from '@/store'
 import { useAppDispatch } from '@/store/hooks'
-import {
-  changeCurrentLanguageAction,
-  changeInitializedAction
-} from '@/store/modules/app'
+import { changeInitializedAction } from '@/store/modules/app'
+import { applySessionToStore } from '@/utils/session-bridge'
 
 export default function InitGuard({
   children
@@ -15,6 +15,7 @@ export default function InitGuard({
   children: React.ReactNode
 }) {
   const dispatch = useAppDispatch()
+  const store = useStore() as AppStore
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -22,17 +23,13 @@ export default function InitGuard({
   }, [dispatch])
 
   useEffect(() => {
-    getLang()
-      .then((lang) => {
-        if (lang) dispatch(changeCurrentLanguageAction(lang))
-      })
+    getAppSession()
+      .then((session) => applySessionToStore(store, session))
       .catch(() => {
-        /* 非 Tauri 环境或调用失败时沿用 Redux 默认语言 */
+        /* 非 Tauri：沿用 Redux 默认语言 */
       })
-      .finally(() => {
-        setReady(true)
-      })
-  }, [dispatch])
+      .finally(() => setReady(true))
+  }, [store])
 
   if (!ready) return null
 

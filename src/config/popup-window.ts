@@ -2,8 +2,10 @@ import { LogicalSize, Window } from '@tauri-apps/api/window'
 
 export type WindowLabel = 'main'
 
+export const MAIN_WINDOW_LABEL = 'main' as const
+
 /** 与 unlock-next-app 一致：固定 label，供标题栏拖动与窗口 API 使用 */
-export const mainWindow = new Window('main')
+export const mainWindow = new Window(MAIN_WINDOW_LABEL)
 
 /**
  * 在 WebView 内注册主窗体行为（与 unlock `global-provider` 里 `initWindowConfig()` 对齐）。

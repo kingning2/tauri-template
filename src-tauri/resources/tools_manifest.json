@@ -4,17 +4,17 @@
     "downloadSpec": {
       "windows": {
         "universal": {
-          "downloadKey": "system-repair-win-zip",
+          "downloadKey": "repair-win-zip",
           "kind": "zip"
         }
       },
       "macos": {
         "arm64": {
-          "downloadKey": "system-repair-mac-apple-dmg",
+          "downloadKey": "",
           "kind": "executable"
         },
         "x64": {
-          "downloadKey": "system-repair-mac-intel-dmg",
+          "downloadKey": "",
           "kind": "executable"
         }
       },
@@ -33,17 +33,17 @@
     "downloadSpec": {
       "windows": {
         "universal": {
-          "downloadKey": "phone-unlock-win-zip",
+          "downloadKey": "unlock-win-zip",
           "kind": "zip"
         }
       },
       "macos": {
         "arm64": {
-          "downloadKey": "phone-unlock-mac-apple-dmg",
+          "downloadKey": "",
           "kind": "executable"
         },
         "x64": {
-          "downloadKey": "phone-unlock-mac-intel-dmg",
+          "downloadKey": "",
           "kind": "executable"
         }
       },
@@ -62,17 +62,17 @@
     "downloadSpec": {
       "windows": {
         "universal": {
-          "downloadKey": "virtual-location-win-zip",
+          "downloadKey": "",
           "kind": "zip"
         }
       },
       "macos": {
         "arm64": {
-          "downloadKey": "virtual-location-mac-apple-dmg",
+          "downloadKey": "",
           "kind": "executable"
         },
         "x64": {
-          "downloadKey": "virtual-location-mac-intel-dmg",
+          "downloadKey": "",
           "kind": "executable"
         }
       },
@@ -91,17 +91,17 @@
     "downloadSpec": {
       "windows": {
         "universal": {
-          "downloadKey": "data-transfer-win-zip",
+          "downloadKey": "",
           "kind": "zip"
         }
       },
       "macos": {
         "arm64": {
-          "downloadKey": "data-transfer-mac-apple-dmg",
+          "downloadKey": "",
           "kind": "executable"
         },
         "x64": {
-          "downloadKey": "data-transfer-mac-intel-dmg",
+          "downloadKey": "",
           "kind": "executable"
         }
       },
@@ -120,17 +120,17 @@
     "downloadSpec": {
       "windows": {
         "universal": {
-          "downloadKey": "data-recovery-win-exe",
+          "downloadKey": "window",
           "kind": "executable"
         }
       },
       "macos": {
         "arm64": {
-          "downloadKey": "data-recovery-mac-apple-dmg",
+          "downloadKey": "mac-apple",
           "kind": "executable"
         },
         "x64": {
-          "downloadKey": "data-recovery-mac-intel-dmg",
+          "downloadKey": "mac-intel",
           "kind": "executable"
         }
       },
@@ -149,17 +149,17 @@
     "downloadSpec": {
       "windows": {
         "universal": {
-          "downloadKey": "social-transfer-win-zip",
+          "downloadKey": "",
           "kind": "zip"
         }
       },
       "macos": {
         "arm64": {
-          "downloadKey": "social-transfer-mac-apple-dmg",
+          "downloadKey": "",
           "kind": "executable"
         },
         "x64": {
-          "downloadKey": "social-transfer-mac-intel-dmg",
+          "downloadKey": "",
           "kind": "executable"
         }
       },
@@ -178,17 +178,17 @@
     "downloadSpec": {
       "windows": {
         "universal": {
-          "downloadKey": "ringtone-win-zip",
+          "downloadKey": "",
           "kind": "zip"
         }
       },
       "macos": {
         "arm64": {
-          "downloadKey": "ringtone-mac-apple-dmg",
+          "downloadKey": "",
           "kind": "executable"
         },
         "x64": {
-          "downloadKey": "ringtone-mac-intel-dmg",
+          "downloadKey": "",
           "kind": "executable"
         }
       },

@@ -132,7 +132,7 @@ pub struct PlatformDownloadSpec {
     /// Windows：zip 解压后收尾的显式配置；未配置时从 `windows_main_executable_relative` 等字段推导。
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub windows_zip_install_steps: Option<WindowsZipInstallSteps>,
-    /// 使用 `downloadKey` 时的解析 API 根路径，默认 `https://download.gbyte.com/downloads`。
+    /// 使用 `downloadKey` 时的解析 API 地址（`GET ?name={downloadKey}`），默认见 `.env`。
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub download_resolve_base_url: Option<String>,
 }

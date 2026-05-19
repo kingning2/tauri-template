@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "modal-windows",
+  "description": "Capability for dynamically created modal windows",
+  "windows": ["modal-*"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-close",
+    "core:window:allow-destroy",
+    "core:event:default",
+    "core:event:allow-emit-to"
+  ]
+}

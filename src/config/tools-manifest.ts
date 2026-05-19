@@ -10,7 +10,7 @@ export type DownloadPayloadKind = 'zip' | 'executable'
 export type DownloadArtifact = {
   /** 直接下载地址；与 `downloadKey` 二选一 */
   url?: string
-  /** 解析 API 的 key：`{downloadResolveBaseUrl}/{downloadKey}` */
+  /** 解析 API 的 name 参数：`GET {downloadResolveBaseUrl}?name={downloadKey}` */
   downloadKey?: string
   /** 本地保存文件名；未填时由后端从 url 路径推导 */
   fileName?: string
@@ -57,7 +57,7 @@ export type PlatformDownloadSpec = {
   windowsMainExecutableRelative?: string
   macosInstalledBundlePath?: string
   windowsZipInstallSteps?: WindowsZipInstallSteps
-  /** 使用 `downloadKey` 时的解析 API 根路径，默认 `https://download.gbyte.com/downloads` */
+  /** 使用 `downloadKey` 时的解析 API 地址（`GET ?name=`），默认见后端 `.env` */
   downloadResolveBaseUrl?: string
 }
 

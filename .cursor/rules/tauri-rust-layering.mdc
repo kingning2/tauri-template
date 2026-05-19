@@ -1,0 +1,41 @@
+---
+description: Rust 分层 — cmd 薄封装、utils 业务、platform 分平台实现
+globs:
+  - src-tauri/src/cmd/**/*.rs
+  - src-tauri/src/utils/**/*.rs
+alwaysApply: false
+---
+
+# Tauri Rust：`cmd` 与 `utils` 写入约定
+
+在修改或新增 **`src-tauri/src/cmd/`** 与 **`src-tauri/src/utils/`** 下的 Rust 代码时遵守以下分层。
+
+## `cmd/`
+
+- **只做** Tauri 入口：`#[tauri::command]`、参数/返回值类型、以及一行委托到 `utils`（或 `opener` 等插件）。
+- **不要**在 `cmd` 里写清单遍历、注册表解析、下载流程等平台或业务细节。
+
+## `utils/`
+
+- **业务与可复用逻辑**放在此处（例如 `utils/tools.rs`：安装态聚合、按 `tool_id` 解析路径）。
+- 与平台无关的通用代码放在 `utils` 根下模块（如 `download`、`log`）。
+
+## `utils/platform/`
+
+- **跨平台门面**：对外单一 API，内部用 `#[cfg(target_os = "...")]` 转发到具体实现（若仅二选一，保持分发层很薄）。
+- **平台专有实现**放在对应子目录，避免在共享文件里堆长 `cfg` 分支：
+  - Windows：`utils/platform/windows/*.rs`（如 `open_tool.rs` + `tool_launch.rs` + `registry.rs`）。
+  - macOS：`utils/platform/macos/*.rs`（同上模式）。
+- 共享 **IPC / 序列化 DTO**（如 `OpenToolExecutableArgs`）可留在 `platform/open_tool.rs`，解析逻辑在 `windows/open_tool.rs` / `macos/open_tool.rs`。
+
+## 反例
+
+```rust
+// ❌ 在 cmd/foo.rs 里实现注册表读写或遍历 tools_manifest
+// ✅ cmd 调用 utils::tools::gather_install_state()
+```
+
+```rust
+// ❌ 在 platform/open_tool.rs 里写一大段 #[cfg(target_os = "macos")] { ... }
+// ✅ 放到 platform/macos/open_tool.rs，由门面转发
+```

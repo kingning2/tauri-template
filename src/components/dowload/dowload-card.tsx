@@ -136,7 +136,7 @@ export default function DowloadCard({
               overlayExpanded && "overflow-hidden rounded-3xl",
               progressExpanded
                 ? "inset-0 h-full w-full"
-                : "right-[30px] top-[30px] h-10 w-10",
+                : "right-[20px] top-[20px] h-10 w-10",
             )}
           >
             <div

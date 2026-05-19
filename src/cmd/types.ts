@@ -11,3 +11,6 @@ export type Cmd =
   | 'open_tool_executable'
   | 'log_fe'
   | 'log_fe_req'
+  | 'open_modal_window'
+  | 'close_modal_window'
+  | 'get_app_session'

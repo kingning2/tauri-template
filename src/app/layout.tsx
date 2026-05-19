@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import SessionBridgeProvider from '@/providers/session-bridge-provider'
 import StoreProvider from '@/providers/store'
 
 import GlobalProvider from './global-provider'
@@ -20,7 +21,9 @@ export default function RootLayout({
     <html lang="zh-Hant">
       <body>
         <StoreProvider>
-          <GlobalProvider>{children}</GlobalProvider>
+          <SessionBridgeProvider>
+            <GlobalProvider>{children}</GlobalProvider>
+          </SessionBridgeProvider>
         </StoreProvider>
       </body>
     </html>

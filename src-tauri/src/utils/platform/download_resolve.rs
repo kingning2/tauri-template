@@ -1,7 +1,11 @@
 use serde::Deserialize;
 
-/// 默认下载解析 API 根路径（与 `{base}/{downloadKey}` 拼接），来自仓库根 `.env` 的 `DOWNLOAD_RESOLVE_BASE_URL`。
+use crate::utils::http;
+
+/// 下载解析 API 地址（`GET ?name={downloadKey}`），来自仓库根 `.env` 的 `DOWNLOAD_RESOLVE_BASE_URL`。
 pub const DEFAULT_DOWNLOAD_RESOLVE_BASE_URL: &str = env!("DOWNLOAD_RESOLVE_BASE_URL");
+
+const DOWNLOAD_RESOLVE_QUERY_NAME: &str = "name";
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -12,13 +16,13 @@ pub struct DownloadResolveResponse {
     pub last_updated: Option<String>,
 }
 
-/// `GET {base_url}/{download_key}` → JSON `{ version, url, lastUpdated }`
+/// `GET {base_url}?name={download_key}` → JSON `{ version, url, lastUpdated }`
 pub async fn fetch_download_resolve(
     base_url: &str,
     download_key: &str,
 ) -> Result<DownloadResolveResponse, String> {
-    let base = base_url.trim().trim_end_matches('/');
-    let key = download_key.trim().trim_start_matches('/');
+    let base = base_url.trim();
+    let key = download_key.trim();
     if base.is_empty() {
         return Err("download resolve base url is empty".to_string());
     }
@@ -26,39 +30,19 @@ pub async fn fetch_download_resolve(
         return Err("download key is empty".to_string());
     }
 
-    let endpoint = format!("{base}/{key}");
-    crate::log_info!("download.resolve_request endpoint={}", endpoint);
+    crate::log_info!(
+        "download.resolve_request url={} query {}={}",
+        base,
+        DOWNLOAD_RESOLVE_QUERY_NAME,
+        key
+    );
 
-    let client = reqwest::Client::builder()
-        .timeout(std::time::Duration::from_secs(30))
-        .build()
-        .map_err(|e| e.to_string())?;
-
-    let response = client
-        .get(&endpoint)
-        .send()
-        .await
-        .map_err(|e| format!("download resolve request failed: {e}"))?;
-
-    let status = response.status();
-    let body = response
-        .text()
-        .await
-        .map_err(|e| format!("download resolve read body failed: {e}"))?;
-
-    if !status.is_success() {
-        return Err(format!(
-            "download resolve http error status={} body={}",
-            status, body
-        ));
-    }
-
-    let parsed: DownloadResolveResponse = serde_json::from_str(&body).map_err(|e| {
-        format!(
-            "download resolve invalid json: {e}; body={}",
-            body.chars().take(200).collect::<String>()
-        )
-    })?;
+    let parsed: DownloadResolveResponse = http::get_json(
+        base,
+        &[(DOWNLOAD_RESOLVE_QUERY_NAME, key)],
+    )
+    .await
+    .map_err(|e| format!("download resolve: {e}"))?;
 
     let url = parsed.url.trim();
     if url.is_empty() {

@@ -3804,6 +3804,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-opener",
  "tokio",
+ "url",
  "winreg 0.52.0",
  "zip",
 ]

@@ -65,5 +65,12 @@
     "redownload": "Re-download",
     "not_yet_online": "Not available yet",
     "installed_on_device": "Installed on this device"
+  },
+  "modal_window": {
+    "title": "Window",
+    "activate_title": "Activate",
+    "panel_label": "Panel: {{panel}}",
+    "shared_session": "Shared session with main window. Language: {{lang}}",
+    "hint": "Closing this window removes the overlay on the main window."
   }
 }

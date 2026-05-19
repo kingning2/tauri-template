@@ -10,9 +10,11 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .manage(utils::session::SessionStore::load_from_disk())
         .invoke_handler(tauri::generate_handler![
             cmd::lang::get_lang,
             cmd::lang::set_lang,
+            cmd::session::get_app_session,
             cmd::lang::get_language_resource_bundle,
             cmd::tools::download_tool,
             cmd::tools::get_tools_download_dir,
@@ -23,6 +25,8 @@ pub fn run() {
             cmd::tools::open_tool_executable,
             cmd::log::log_fe,
             cmd::log::log_fe_req,
+            cmd::window::open_modal_window,
+            cmd::window::close_modal_window,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

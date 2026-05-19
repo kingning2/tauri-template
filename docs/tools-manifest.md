@@ -56,11 +56,11 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `url` | string | 直接下载地址（与 `downloadKey` 二选一）。 |
-| `downloadKey` | string | 解析 API 的 key；存在即表示可下载。请求 `GET {downloadResolveBaseUrl}/{downloadKey}`，响应 JSON：`{ "version", "url", "lastUpdated" }`，实际下载使用返回的 `url`。 |
+| `downloadKey` | string | 解析 API 的 `name` 参数；存在即表示可下载。请求 `GET {downloadResolveBaseUrl}?name={downloadKey}`，响应 JSON：`{ "version", "url", "lastUpdated" }`，实际下载使用返回的 `url`。 |
 | `fileName` | string | 可选。保存到应用数据目录时的文件名；未填时从最终 `url` 路径推导。 |
 | `kind` | string | **`zip`** 或 **`executable`**（小写 kebab-case）。`zip` 解压目录为 `{工具下载根}/{id}/`；可执行则落地为单文件。 |
 
-可选 **`downloadResolveBaseUrl`**（在 `downloadSpec` 根级）：默认 `https://download.gbyte.com/downloads`。
+可选 **`downloadResolveBaseUrl`**（在 `downloadSpec` 根级）：默认 `https://strapi.gbyte.com/api/v1/system-config/info`（见仓库根 `.env`）。
 
 **前端「是否可点下载」**：`toolHasDownloadForPlatform` 要求**当前平台**的 `windows` 或 `macos` 下，`universal` / `x64` / `arm64` 任一槽位配置了非空的 `url` 或 `downloadKey`。
 

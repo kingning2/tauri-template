@@ -20,6 +20,7 @@ import { memo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import { setLang } from "@/cmd/lang";
+import { useModalWindow } from "@/components/modal";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -64,16 +65,26 @@ const TitleBar = memo((props: { height?: number }) => {
   const supportLanguages = useAppSelector(
     (state) => state.app.supportLanguages,
   );
+  const { openModal } = useModalWindow();
+
+  const openActivateWindow = useCallback(() => {
+    void openModal({
+      path: "/modal-window?panel=activate",
+      title: t("activate"),
+      width: 480,
+      height: 360,
+    });
+  }, [openModal, t]);
 
   const switchLanguage = useCallback(
     async (next: Languages) => {
       if (next === currentLanguage) return;
       try {
         await setLang(next);
+        /* 语言写入 Rust 后会广播 session/changed，各 Webview Redux 由 session-bridge 更新 */
       } catch {
-        /* 非桌面环境等 */
+        dispatch(changeCurrentLanguageAction(next));
       }
-      dispatch(changeCurrentLanguageAction(next));
     },
     [currentLanguage, dispatch],
   );
@@ -127,6 +138,8 @@ const TitleBar = memo((props: { height?: number }) => {
           variant="outline"
           size="sm"
           className="rounded-full border-pink-400 bg-background px-8 text-xs font-medium text-pink-600 hover:bg-pink-50 hover:text-pink-600"
+          onClick={openActivateWindow}
+          onPointerDown={(e) => e.stopPropagation()}
         >
           <KeyRound className="size-3.5" aria-hidden />
           {t("activate")}
