@@ -7,11 +7,11 @@ fn main() {
     /* ===== env ===== */
     // 可选：从仓库根 .env 注入 cargo:rustc-env=KEY=VALUE 给 Rust 代码使用
     // 如果 .env 不存在，则跳过，避免影响构建。
-    let dotenv_path = ".env";
-    if Path::new(dotenv_path).exists() {
-        println!("cargo:rerun-if-changed={}", dotenv_path);
+    let dotenv_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../.env");
+    if dotenv_path.exists() {
+        println!("cargo:rerun-if-changed={}", dotenv_path.display());
 
-        if let Ok(contents) = fs::read_to_string(dotenv_path) {
+        if let Ok(contents) = fs::read_to_string(&dotenv_path) {
             for line in contents.lines() {
                 let line = line.trim();
                 if line.is_empty() || line.starts_with('#') {
