@@ -138,7 +138,7 @@ pub async fn download_tool_file_by_platform(
     relative_dir: &str,
     on_progress: Channel<ToolDownloadProgress>,
 ) -> Result<PlatformDownloadResult, String> {
-    let artifact = resolve_download_artifact(spec)?;
+    let artifact = resolve_download_artifact(spec).await?;
     let relative_path = build_relative_download_path(relative_dir, &artifact.file_name)?;
     let save_path =
         download_tool_file_retries_range(app, &artifact.url, &relative_path, on_progress).await?;

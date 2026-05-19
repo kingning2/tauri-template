@@ -33,8 +33,13 @@ pub async fn download_tool(
             download::download_tool_file_by_platform(&app, &download_spec, &relative_dir, on_progress)
                 .await?;
 
-        post_process_download_payload_if_needed(result.artifact.kind, &result.save_path, &download_spec)
-            .await?;
+        post_process_download_payload_if_needed(
+            result.artifact.kind,
+            &result.save_path,
+            &download_spec,
+            &relative_dir,
+        )
+        .await?;
         Ok(result.save_path)
     })
     .await

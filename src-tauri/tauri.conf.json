@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.polymerization.gybte",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:3000",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "bun run build",
     "frontendDist": "../out"
   },
   "app": {
@@ -18,7 +18,8 @@
         "height": 800,
         "decorations": false,
         "transparent": true,
-        "shadow": false
+        "shadow": false,
+        "resizable": false
       }
     ],
     "security": {

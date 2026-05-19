@@ -120,6 +120,22 @@ pub fn get_gclid(hklm_software_path: &str) -> Result<String, String> {
         .map_err(|e| format!("get {REGISTRY_DATA_GCLID_KEY} err: {e:?}"))
 }
 
+/// 注册表设置 Slint 渲染器名称（`SlintRendererName`）。
+pub fn registry_slint_renderer_name(
+    hklm_software_path: &str,
+    renderer_name: &str,
+) -> Result<(), String> {
+    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+    let (key, _disp) = hklm
+        .create_subkey_with_flags(
+            hklm_software_path.trim_start_matches('\\'),
+            KEY_WRITE | KEY_WOW64_64KEY,
+        )
+        .map_err(|e| e.to_string())?;
+    key.set_value(REGISTRY_DATA_SLINT_RENDERER_NAME, &renderer_name)
+        .map_err(|e| format!("set {REGISTRY_DATA_SLINT_RENDERER_NAME} err: {e:?}"))
+}
+
 /// 注册表设置 gclid
 pub fn registry_gclid_value(hklm_software_path: &str, gclid: &str) -> Result<(), String> {
     let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);

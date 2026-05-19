@@ -6,8 +6,7 @@ use tokio::fs;
 
 use crate::utils::download::tools_download_base_dir;
 use crate::utils::platform::download::{
-    resolve_download_artifact, DownloadPayloadKind, PlatformDownloadSpec, SystemArch,
-    SystemPlatform,
+    resolve_download_artifact_config, DownloadPayloadKind, PlatformDownloadSpec,
 };
 
 pub fn current_platform() -> Result<SystemPlatform, String> {
@@ -34,8 +33,16 @@ pub fn is_tool_download_installed(
         return Ok(Path::new(p).exists());
     }
 
-    let artifact = resolve_download_artifact(spec)?;
-    let rel = build_tool_relative_download_path(relative_dir, &artifact.file_name)?;
+    let (artifact, _) = resolve_download_artifact_config(spec)?;
+    let file_name = artifact
+        .file_name
+        .as_deref()
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .ok_or_else(|| {
+            "fileName is required for macOS install check when macosInstalledBundlePath is unset and url is configured directly".to_string()
+        })?;
+    let rel = build_tool_relative_download_path(relative_dir, file_name)?;
     let base = tools_download_base_dir()?;
     let artifact_path = base.join(rel);
 

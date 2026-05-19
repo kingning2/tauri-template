@@ -14,9 +14,28 @@ pub enum DownloadPayloadKind {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DownloadArtifact {
-    pub url: String,
-    pub file_name: String,
+    /// 直接下载地址；与 `downloadKey` 二选一。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub url: Option<String>,
+    /// 下载解析 API 的 key，请求 `{downloadResolveBaseUrl}/{key}` 获取真实 `url`。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub download_key: Option<String>,
+    /// 本地保存文件名；未填时从 `url`（含接口返回的 url）路径推导。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_name: Option<String>,
     pub kind: DownloadPayloadKind,
+}
+
+impl DownloadArtifact {
+    pub fn has_download_source(&self) -> bool {
+        self.url
+            .as_ref()
+            .is_some_and(|u| !u.trim().is_empty())
+            || self
+                .download_key
+                .as_ref()
+                .is_some_and(|k| !k.trim().is_empty())
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -36,8 +55,10 @@ impl PlatformArtifacts {
     }
 }
 
-/// Windows：zip 解压后的收尾步骤（Uninstall/产品键、语言与 gclid、防火墙；不写快捷方式）。
-/// 需与 [`PlatformDownloadSpec::windows_product_registry`] 同时存在时才会在解压后执行。
+/// Windows：zip 解压后的收尾步骤（Uninstall/产品键、语言/gclid/Slint、防火墙；不写快捷方式）。
+/// 与 `unlock-next-app/lifecycle/installer/src/ui_event.ts` 一致。
+/// 解压后只要存在 [`PlatformDownloadSpec::windows_product_registry`] 即会执行；
+/// 可显式配置本结构体，或由 `windowsMainExecutableRelative` + zip 文件名自动推导。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WindowsZipInstallSteps {
@@ -60,6 +81,9 @@ pub struct WindowsZipInstallSteps {
     pub write_lang_registry: bool,
     #[serde(default = "default_true")]
     pub write_gclid_from_env: bool,
+    /// 写入 HKLM 产品键 `SlintRendererName`（与安装器 `ui_event.ts` 一致）；未配置则跳过。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub slint_renderer_name: Option<String>,
 }
 
 fn default_firewall_max_concurrent() -> u32 {
@@ -105,10 +129,12 @@ pub struct PlatformDownloadSpec {
     /// 与 zip 流程中的 `windowsZipInstallSteps.mainExecutableRelative` 二选一即可；若两者皆有，以 zip 步骤为准。
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub windows_main_executable_relative: Option<String>,
-    /// Windows：当 payload 为 zip 且与 [`Self::windows_product_registry`] 同时存在时，解压后执行
-    /// 注册表、语言/gclid、防火墙等步骤（不创建快捷方式）。
+    /// Windows：zip 解压后收尾的显式配置；未配置时从 `windows_main_executable_relative` 等字段推导。
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub windows_zip_install_steps: Option<WindowsZipInstallSteps>,
+    /// 使用 `downloadKey` 时的解析 API 根路径，默认 `https://download.gbyte.com/downloads`。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub download_resolve_base_url: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -192,9 +218,12 @@ pub async fn post_process_download_payload_if_needed(
     kind: DownloadPayloadKind,
     local_path: &str,
     spec: &PlatformDownloadSpec,
+    relative_dir: &str,
 ) -> Result<(), String> {
     match kind {
-        DownloadPayloadKind::Zip => install_zip_payload_from_local_path(local_path, spec).await,
+        DownloadPayloadKind::Zip => {
+            install_zip_payload_from_local_path(local_path, spec, relative_dir).await
+        }
         DownloadPayloadKind::Executable => {
             #[cfg(target_os = "macos")]
             super::macos::download::chmod_installer_executable(local_path).await?;
@@ -215,23 +244,37 @@ pub async fn post_process_download_payload_if_needed(
 }
 
 /// 对下载到本地的 zip payload 做“安装前置处理”：
-/// 1) 以 `local_path` 的父目录作为安装目录；
-/// 2) 解压到安装目录；
-/// 3) 解压成功后默认删除原 zip 文件（避免重复占空间）。
+/// - **Windows**：解压到 `{ProgramFiles}\Gbyte\{产品目录}`（产品名来自注册表路径或 `relative_dir`）
+/// - **其它平台**：解压到 zip 所在目录（`local_path` 的父目录）
+/// - 解压成功后默认删除 AppData 中的原 zip 文件
 async fn install_zip_payload_from_local_path(
     local_path: &str,
     spec: &PlatformDownloadSpec,
+    relative_dir: &str,
 ) -> Result<(), String> {
     let zip_path = PathBuf::from(local_path);
+
+    #[cfg(target_os = "windows")]
+    let install_dir =
+        super::windows::install_paths::program_files_gbyte_product_dir(spec, relative_dir)?;
+
+    #[cfg(not(target_os = "windows"))]
     let install_dir = zip_path
         .parent()
         .ok_or_else(|| "zip local_path has no parent directory".to_string())?
         .to_path_buf();
 
+    crate::log_info!(
+        "zip.install_dir zip={} target={}",
+        zip_path.display(),
+        install_dir.display()
+    );
+
     let remove_zip_after_install = true;
 
     unzip_zip_payload(&zip_path, &install_dir).await?;
 
+    // Windows：写入 Uninstall / InstallPath / Lang / gclid / Slint / 防火墙（见 post_zip_install 模块文档）。
     #[cfg(target_os = "windows")]
     super::windows::download::run_zip_post_install_if_configured(&install_dir, spec).await?;
 
@@ -308,11 +351,11 @@ fn safe_out_path(install_dir: &Path, enclosed_name: &Path) -> Result<PathBuf, St
     Ok(install_dir.join(enclosed_name))
 }
 
-fn resolve_download_artifact_inner(
+fn resolve_download_artifact_config_inner(
     spec: &PlatformDownloadSpec,
     platform: SystemPlatform,
     arch: SystemArch,
-) -> Result<ResolvedDownloadArtifact, String> {
+) -> Result<(SystemPlatform, SystemArch, DownloadArtifact), String> {
     let platform_artifacts = match platform {
         SystemPlatform::Windows => spec.windows.as_ref(),
         SystemPlatform::MacOS => spec.macos.as_ref(),
@@ -332,16 +375,92 @@ fn resolve_download_artifact_inner(
         )
     })?;
 
+    if !artifact.has_download_source() {
+        return Err(format!(
+            "download source for platform `{}` arch `{}` has no url or downloadKey",
+            platform.as_key(),
+            arch.as_key()
+        ));
+    }
+
+    Ok((platform, arch, artifact))
+}
+
+fn download_resolve_base_url(spec: &PlatformDownloadSpec) -> &str {
+    spec.download_resolve_base_url
+        .as_deref()
+        .filter(|s| !s.trim().is_empty())
+        .unwrap_or(super::download_resolve::DEFAULT_DOWNLOAD_RESOLVE_BASE_URL)
+}
+
+async fn materialize_download_artifact(
+    spec: &PlatformDownloadSpec,
+    artifact: &DownloadArtifact,
+) -> Result<(String, String), String> {
+    if let Some(url) = artifact
+        .url
+        .as_ref()
+        .map(|u| u.trim())
+        .filter(|u| !u.is_empty())
+    {
+        let file_name = match artifact
+            .file_name
+            .as_ref()
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+        {
+            Some(name) => name.to_string(),
+            None => super::download_resolve::file_name_from_url(url)?,
+        };
+        return Ok((url.to_string(), file_name));
+    }
+
+    let key = artifact
+        .download_key
+        .as_deref()
+        .map(str::trim)
+        .filter(|k| !k.is_empty())
+        .ok_or_else(|| "downloadKey is required when url is absent".to_string())?;
+
+    let resolved = super::download_resolve::fetch_download_resolve(
+        download_resolve_base_url(spec),
+        key,
+    )
+    .await?;
+
+    let url = resolved.url.trim().to_string();
+    let file_name = match artifact
+        .file_name
+        .as_ref()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+    {
+        Some(name) => name.to_string(),
+        None => super::download_resolve::file_name_from_url(&url)?,
+    };
+
+    Ok((url, file_name))
+}
+
+async fn resolve_download_artifact_inner(
+    spec: &PlatformDownloadSpec,
+    platform: SystemPlatform,
+    arch: SystemArch,
+) -> Result<ResolvedDownloadArtifact, String> {
+    let (platform, arch, artifact) =
+        resolve_download_artifact_config_inner(spec, platform, arch)?;
+    let (url, file_name) = materialize_download_artifact(spec, &artifact).await?;
+
     Ok(ResolvedDownloadArtifact {
         platform: platform.as_key().to_string(),
         arch: arch.as_key().to_string(),
-        url: artifact.url,
-        file_name: artifact.file_name,
+        url,
+        file_name,
         kind: artifact.kind,
     })
 }
 
-pub fn resolve_download_artifact(
+pub async fn resolve_download_artifact(
     spec: &PlatformDownloadSpec,
 ) -> Result<ResolvedDownloadArtifact, String> {
     #[cfg(target_os = "windows")]
@@ -350,7 +469,8 @@ pub fn resolve_download_artifact(
             spec,
             crate::utils::platform::windows::download::current_platform()?,
             crate::utils::platform::windows::download::current_arch()?,
-        );
+        )
+        .await;
     }
 
     #[cfg(target_os = "macos")]
@@ -359,11 +479,37 @@ pub fn resolve_download_artifact(
             spec,
             crate::utils::platform::macos::download::current_platform()?,
             crate::utils::platform::macos::download::current_arch()?,
-        );
+        )
+        .await;
     }
 
     #[cfg(not(any(target_os = "windows", target_os = "macos")))]
     {
+        let _ = spec;
         Err("unsupported platform".to_string())
     }
+}
+
+/// 同步解析配置（不请求 downloadKey 接口）；用于仅需判断 artifact 是否存在的场景。
+pub fn resolve_download_artifact_config(
+    spec: &PlatformDownloadSpec,
+) -> Result<(DownloadArtifact, DownloadPayloadKind), String> {
+    #[cfg(target_os = "windows")]
+    let (platform, arch) = (
+        crate::utils::platform::windows::download::current_platform()?,
+        crate::utils::platform::windows::download::current_arch()?,
+    );
+
+    #[cfg(target_os = "macos")]
+    let (platform, arch) = (
+        crate::utils::platform::macos::download::current_platform()?,
+        crate::utils::platform::macos::download::current_arch()?,
+    );
+
+    #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+    return Err("unsupported platform".to_string());
+
+    let (_, _, artifact) = resolve_download_artifact_config_inner(spec, platform, arch)?;
+    let kind = artifact.kind;
+    Ok((artifact, kind))
 }

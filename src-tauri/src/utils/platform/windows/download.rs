@@ -4,6 +4,7 @@ use std::process::Stdio;
 
 use crate::utils::platform::download::{PlatformDownloadSpec, SystemArch, SystemPlatform};
 use crate::utils::platform::windows::registry;
+use crate::utils::platform::windows::zip_install_steps;
 
 /// 当前平台
 pub fn current_platform() -> Result<SystemPlatform, String> {
@@ -75,21 +76,20 @@ pub async fn run_downloaded_installer(local_path: &str) -> Result<(), String> {
     Ok(())
 }
 
-/// 运行下载的安装器后，运行 zip 安装步骤
+/// zip 解压完成后执行安装收尾（注册表、防火墙等）。
+///
+/// 只要配置了 [`PlatformDownloadSpec::windows_product_registry`] 就会执行；
+/// 步骤来自显式 `windowsZipInstallSteps` 或由 [`zip_install_steps::resolve_windows_zip_install_steps`] 推导。
+/// 与 `unlock-next-app/lifecycle/installer/src/ui_event.ts` 的 zip 完成处理对齐。
 pub async fn run_zip_post_install_if_configured(
     install_dir: &Path,
     spec: &PlatformDownloadSpec,
 ) -> Result<(), String> {
-    if let (Some(ref zip_steps), Some(ref win_reg)) = (
-        spec.windows_zip_install_steps.as_ref(),
-        spec.windows_product_registry.as_ref(),
-    ) {
-        super::post_zip_install::run_windows_zip_post_install_steps(
-            install_dir,
-            zip_steps,
-            win_reg,
-        )
-        .await?;
-    }
-    Ok(())
+    let Some(win_reg) = spec.windows_product_registry.as_ref() else {
+        crate::log_debug!("zip.post_install skipped: no windows_product_registry");
+        return Ok(());
+    };
+
+    let steps = zip_install_steps::resolve_windows_zip_install_steps(spec)?;
+    super::post_zip_install::run_windows_zip_post_install_steps(install_dir, &steps, win_reg).await
 }
