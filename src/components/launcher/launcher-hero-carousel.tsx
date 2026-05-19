@@ -23,16 +23,6 @@ export default function LauncherHeroCarousel() {
   const [showNav, setShowNav] = useState(false);
   const flipTimerRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (lock) return;
-
-    const id = window.setTimeout(() => {
-      flipTo((active + 1) % SLIDE_COUNT);
-    }, AUTO_MS);
-
-    return () => window.clearTimeout(id);
-  }, [active, lock]);
-
   const flipTo = useCallback(
     (target: number) => {
       if (lock) return;
@@ -69,6 +59,16 @@ export default function LauncherHeroCarousel() {
     },
     [active, lock]
   );
+
+  useEffect(() => {
+    if (lock) return;
+
+    const id = window.setTimeout(() => {
+      flipTo((active + 1) % SLIDE_COUNT);
+    }, AUTO_MS);
+
+    return () => window.clearTimeout(id);
+  }, [active, flipTo, lock]);
 
   useEffect(() => {
     return () => {

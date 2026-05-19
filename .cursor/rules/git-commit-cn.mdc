@@ -24,6 +24,13 @@ chore(deps): 增加动画相关依赖
 docs: 补充工具清单字段说明
 ```
 
+## 自动化校验（Husky）
+
+- **pre-commit**：执行 `bun run lint`（全量 ESLint），未通过则无法提交
+- **commit-msg**：由 `@commitlint/config-conventional` 校验，message 必须以 `feat` / `fix` / `chore` 等 type 开头，格式为 `<type>(<scope>): <简述>`
+
+跳过校验需显式使用 `git commit --no-verify`（默认禁止）。
+
 ## 执行提交时的流程
 
 1. 并行查看：`git status`、`git diff`、`git log -10 --oneline`（对齐既有风格）

@@ -9,23 +9,29 @@ import { useAppSelector } from "@/store/hooks";
 
 export default function LanguageGuard({ children }: { children: React.ReactNode }) {
   const currentLanguage = useAppSelector((state) => state.app.currentLanguage);
-  const [initComplete, setInitComplete] = useState(false);
+  const [readyLanguage, setReadyLanguage] = useState<string | null>(null);
 
   useEffect(() => {
-    setInitComplete(false);
+    let cancelled = false;
+
     getLanguageResourceBundle(currentLanguage)
       .catch((err) => {
         console.error("get_language_resource_bundle", err);
         return {};
       })
       .then((resource: Record<string, Record<string, unknown>>) => {
+        if (cancelled) return;
         Object.keys(resource).forEach((key) => {
           i18next.addResourceBundle(currentLanguage, key, resource[key], true, true);
         });
         void i18next.changeLanguage(currentLanguage);
-        setInitComplete(true);
+        setReadyLanguage(currentLanguage);
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [currentLanguage]);
 
-  return initComplete ? <>{children}</> : null;
+  return readyLanguage === currentLanguage ? <>{children}</> : null;
 }

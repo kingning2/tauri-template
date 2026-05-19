@@ -128,9 +128,8 @@ export function useDownloadBadgeAnimation({
   );
 
   useEffect(() => {
-    if (phase === DownloadPhase.Error) {
-      playDownloadCollapse(onCollapseComplete);
-    }
+    if (phase !== DownloadPhase.Error) return;
+    queueMicrotask(() => playDownloadCollapse(onCollapseComplete));
   }, [phase, onCollapseComplete, playDownloadCollapse]);
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import type gsap from "gsap";
 
@@ -58,8 +58,14 @@ export function useDownloadProgressAnimation({
   const introPlayedRef = useRef(false);
   const completeAnimPlayedRef = useRef(false);
 
-  const waveHandles = useRef(createTweenHandles(["front", "back", "bob"] as const)).current;
-  const syncHandles = useRef(createTweenHandles(["waterIndeterminate", "ring"] as const)).current;
+  const waveHandles = useMemo(
+    () => createTweenHandles(["front", "back", "bob"] as const),
+    []
+  );
+  const syncHandles = useMemo(
+    () => createTweenHandles(["waterIndeterminate", "ring"] as const),
+    []
+  );
 
   const [showAfterComplete, setShowAfterComplete] = useState(false);
   const [introDone, setIntroDone] = useState(false);
@@ -204,7 +210,7 @@ export function useDownloadProgressAnimation({
 
   useEffect(() => {
     if (phase === DownloadPhase.Idle || phase === DownloadPhase.Error) {
-      resetVisualState();
+      queueMicrotask(() => resetVisualState());
     }
   }, [phase, resetVisualState]);
 
