@@ -1,13 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 
 import appReducer from "./modules/app";
+import downloadReducer from "./modules/download";
 import modalReducer from "./modules/modal";
 
 const makeStore = () => {
   return configureStore({
     reducer: {
       app: appReducer,
-      modal: modalReducer
+      modal: modalReducer,
+      download: downloadReducer
     }
   });
 };

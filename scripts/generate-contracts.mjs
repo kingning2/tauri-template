@@ -1,0 +1,46 @@
+import { spawnSync } from "node:child_process";
+import { mkdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+const outFile = join(root, "src/generated/contracts.ts");
+const outDir = dirname(outFile);
+
+mkdirSync(outDir, { recursive: true });
+
+function run(cmd, args, opts = {}) {
+  const result = spawnSync(cmd, args, { stdio: "inherit", cwd: root, ...opts });
+  if (result.status !== 0) {
+    process.exit(result.status ?? 1);
+  }
+}
+
+run("cargo", [
+  "run",
+  "--quiet",
+  "--manifest-path",
+  "src-tauri/Cargo.toml",
+  "--bin",
+  "export-contract-schemas"
+]);
+
+const typeshare = spawnSync("typeshare", ["--help"], { cwd: root, encoding: "utf8" });
+if (typeshare.status !== 0) {
+  console.error(
+    "typeshare CLI not found. Install with: cargo install typeshare-cli --locked"
+  );
+  process.exit(1);
+}
+
+run("typeshare", [
+  "src-tauri/src",
+  "--config-file",
+  "typeshare.toml",
+  "--lang",
+  "typescript",
+  "--output-file",
+  outFile
+]);
+
+console.log(`wrote ${outFile}`);

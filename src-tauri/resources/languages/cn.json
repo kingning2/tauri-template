@@ -56,6 +56,11 @@
     }
   },
   "common": {
+    "error_title": "發生錯誤",
+    "error_retry": "重試",
+    "error_back_home": "返回首頁",
+    "error_close": "關閉視窗",
+    "error_digest": "錯誤 ID：{{digest}}",
     "hot": "熱門",
     "downloading": "下載中…",
     "downloading_percent_prefix": "下載中：",

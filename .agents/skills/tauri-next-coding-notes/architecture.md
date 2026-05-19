@@ -16,6 +16,17 @@
 3. Rust command 在 `src-tauri/src/cmd/*.rs`。
 4. `src-tauri/src/lib.rs` 注册 `generate_handler!`。
 
+## 前后端契约
+
+- Rust 类型标注 `#[typeshare]` / `JsonSchema` → `bun run generate:contracts` 生成 `src/generated/contracts.ts` 与 `schemas/tools_manifest.schema.json`。
+- `src-tauri/build.rs` 在构建时用 JSON Schema 校验 `resources/tools_manifest.json`。
+- 业务辅助函数仍在 `src/config/tools-manifest.ts`；IPC 类型优先从 `@/generated/contracts` 引用。
+
+## 下载状态
+
+- 按 `toolId` 存在 Redux `download.byToolId`，支持多卡片并行下载。
+- 组件通过 `useToolDownload(toolId)` 读写全局状态。
+
 ## i18n 流程
 
 1. `get_lang` 获取当前语言。

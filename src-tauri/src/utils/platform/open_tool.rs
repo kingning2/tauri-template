@@ -5,9 +5,12 @@
 
 use std::path::PathBuf;
 
-use serde::Deserialize;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+use typeshare::typeshare;
 
-#[derive(Debug, Clone, Deserialize)]
+#[typeshare]
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct OpenToolExecutableArgs {
     /// Windows：HKLM 下子路径，如 `SOFTWARE\Gbyte\Repair`（用于读取 `InstallPath`）。

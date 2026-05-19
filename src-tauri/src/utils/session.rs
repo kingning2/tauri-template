@@ -4,12 +4,15 @@ use std::fs;
 use std::sync::Mutex;
 
 use directories::ProjectDirs;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager};
+use typeshare::typeshare;
 
 pub const SESSION_CHANGED_EVENT: &str = "session/changed";
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[typeshare]
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct AppSession {
     pub current_language: String,

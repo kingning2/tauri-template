@@ -7,12 +7,9 @@ import type {
   ToolInstallState,
   ToolManifest
 } from "@/config/tools-manifest";
+import type { HostDesktopPlatform, ToolDownloadProgress } from "@/generated/contracts";
 
-/** 与 Rust `ToolDownloadProgress` 对齐（`total` 未知时为 `null`）。 */
-export type ToolDownloadProgress = {
-  downloaded: number;
-  total: number | null;
-};
+export type { ToolDownloadProgress };
 
 export async function getToolsDownloadDir() {
   return await invokeWrapper<string>("get_tools_download_dir");
@@ -27,7 +24,7 @@ export async function getToolsInstallState() {
 }
 
 export async function getRuntimeHostPlatform() {
-  return await invokeWrapper<"windows" | "macos">("runtime_host_platform");
+  return await invokeWrapper<HostDesktopPlatform>("runtime_host_platform");
 }
 
 export async function getToolExecutablePath(toolId: string) {

@@ -7,14 +7,17 @@
 
 use std::sync::OnceLock;
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use typeshare::typeshare;
 
 use crate::utils::platform::download::PlatformDownloadSpec;
 
 const TOOLS_MANIFEST_JSON: &str =
     include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/tools_manifest.json"));
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[typeshare]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ToolManifestEntry {
     pub id: String,

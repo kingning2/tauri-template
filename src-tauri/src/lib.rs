@@ -1,5 +1,6 @@
 mod cmd;
-mod config;
+pub mod config;
+pub mod contracts;
 mod utils;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

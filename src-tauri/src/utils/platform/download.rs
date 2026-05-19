@@ -1,17 +1,21 @@
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use typeshare::typeshare;
 
 use std::fs::File;
 use std::io;
 use std::path::{Path, PathBuf};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[typeshare]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "kebab-case")]
 pub enum DownloadPayloadKind {
     Zip,
     Executable,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[typeshare]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct DownloadArtifact {
     /// 直接下载地址；与 `downloadKey` 二选一。
@@ -38,7 +42,8 @@ impl DownloadArtifact {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[typeshare]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PlatformArtifacts {
     pub universal: Option<DownloadArtifact>,
@@ -59,7 +64,8 @@ impl PlatformArtifacts {
 /// 与 `unlock-next-app/lifecycle/installer/src/ui_event.ts` 一致。
 /// 解压后只要存在 [`PlatformDownloadSpec::windows_product_registry`] 即会执行；
 /// 可显式配置本结构体，或由 `windowsMainExecutableRelative` + zip 文件名自动推导。
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[typeshare]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct WindowsZipInstallSteps {
     /// 相对安装目录的主程序路径，例如 `Gbyte Unlock.exe`（用于校验解压结果是否完整）。
@@ -95,7 +101,8 @@ fn default_true() -> bool {
 }
 
 /// Windows：按「产品」区分的注册表位置（与安装器写入的 `Uninstall` 子键 + `HKLM\SOFTWARE\...` 数据根一致）。
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[typeshare]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct WindowsProductRegistry {
     /// 例如 `SOFTWARE\Gbyte\Unlock`（从 HKLM 起算的相对路径，与安装器 `REGISTRY_DATA_ROOT` 同形）。
@@ -104,7 +111,8 @@ pub struct WindowsProductRegistry {
     pub uninstall_subkey: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[typeshare]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "kebab-case")]
 pub enum ToolVariant {
     HeroLeft,
@@ -112,7 +120,17 @@ pub enum ToolVariant {
     Small,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+/// 前端 `runtime_host_platform` / 下载平台槽位。
+#[typeshare]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum HostDesktopPlatform {
+    Windows,
+    Macos,
+}
+
+#[typeshare]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PlatformDownloadSpec {
     pub windows: Option<PlatformArtifacts>,

@@ -1,33 +1,43 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useStore } from "react-redux";
 
 import { getAppSession } from "@/cmd/session";
 import type { AppStore } from "@/store";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { changeInitializedAction } from "@/store/modules/app";
 import { applySessionToStore } from "@/utils/session-bridge";
 
 export default function InitGuard({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
   const store = useStore() as AppStore;
-  const [ready, setReady] = useState(false);
+  const initialized = useAppSelector((state) => state.app.initialized);
 
   useEffect(() => {
-    dispatch(changeInitializedAction(true));
-  }, [dispatch]);
+    let cancelled = false;
 
-  useEffect(() => {
     getAppSession()
-      .then((session) => applySessionToStore(store, session))
+      .then((session) => {
+        if (!cancelled) {
+          applySessionToStore(store, session);
+        }
+      })
       .catch(() => {
         /* 非 Tauri：沿用 Redux 默认语言 */
       })
-      .finally(() => setReady(true));
-  }, [store]);
+      .finally(() => {
+        if (!cancelled) {
+          dispatch(changeInitializedAction(true));
+        }
+      });
 
-  if (!ready) return null;
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, store]);
+
+  if (!initialized) return null;
 
   return <>{children}</>;
-}
+};

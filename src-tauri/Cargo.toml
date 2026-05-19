@@ -12,12 +12,19 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 chrono = { version = "0.4", features = ["clock"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+typeshare = "1.0"
+schemars = { version = "0.8", features = ["preserve_order"] }
+jsonschema = "0.29"
 
 [dependencies]
 tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+typeshare = "1.0"
+schemars = { version = "0.8", features = ["preserve_order"] }
 url = "2"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "fs", "io-util", "process"] }
@@ -25,6 +32,10 @@ futures-util = "0.3"
 glob = "0.3"
 directories = "5"
 zip = "2"
+
+[[bin]]
+name = "export-contract-schemas"
+path = "src/bin/export_contract_schemas.rs"
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.52"

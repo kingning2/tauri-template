@@ -16,12 +16,13 @@ use crate::utils::platform::download::{
 };
 
 /// 工具下载进度（Rust → 前端 Channel）。
-#[derive(Clone, Debug, serde::Serialize)]
+#[typeshare::typeshare]
+#[derive(Clone, Debug, serde::Serialize, schemars::JsonSchema)]
 pub struct ToolDownloadProgress {
     /// 已写入磁盘的累计字节数（含断点续传前已有部分）。
-    pub downloaded: u64,
+    pub downloaded: i32,
     /// 完整文件总字节数；若响应未提供 `Content-Length` / `Content-Range` 则为 `null`。
-    pub total: Option<u64>,
+    pub total: Option<i32>,
 }
 
 fn parse_content_range_total(s: &str) -> Option<u64> {
@@ -346,8 +347,8 @@ pub async fn download_tool_file_retries_range(
         if resume_supported && existing_size > 0 {
             on_progress
                 .send(ToolDownloadProgress {
-                    downloaded: existing_size,
-                    total: total_hint,
+                    downloaded: u32::try_from(existing_size).unwrap_or(u32::MAX) as i32,
+                    total: total_hint.and_then(|t| u32::try_from(t).ok().map(|n| n as i32)),
                 })
                 .map_err(|e| e.to_string())?;
         }
@@ -374,8 +375,8 @@ pub async fn download_tool_file_retries_range(
 
             on_progress
                 .send(ToolDownloadProgress {
-                    downloaded,
-                    total: total_hint,
+                    downloaded: u32::try_from(downloaded).unwrap_or(u32::MAX) as i32,
+                    total: total_hint.and_then(|t| u32::try_from(t).ok().map(|n| n as i32)),
                 })
                 .map_err(|e| e.to_string())?;
 

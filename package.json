@@ -12,7 +12,11 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "bun run format:check && bun run lint",
+    "typecheck": "tsc --noEmit",
+    "check": "bun run format:check && bun run lint && bun run typecheck",
+    "check:rust": "cargo test --manifest-path src-tauri/Cargo.toml tools_manifest_json_parses --quiet && cargo check --manifest-path src-tauri/Cargo.toml",
+    "generate:contracts": "node scripts/generate-contracts.mjs",
+    "check:contracts": "bun run generate:contracts && git diff --quiet -- src/generated/contracts.ts schemas/tools_manifest.schema.json",
     "tauri": "tauri",
     "prepare": "husky"
   },

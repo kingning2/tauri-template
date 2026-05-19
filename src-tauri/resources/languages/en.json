@@ -56,6 +56,11 @@
     }
   },
   "common": {
+    "error_title": "Something went wrong",
+    "error_retry": "Try again",
+    "error_back_home": "Back to home",
+    "error_close": "Close window",
+    "error_digest": "Error ID: {{digest}}",
     "hot": "HOT",
     "downloading": "Downloading…",
     "downloading_percent_prefix": "Downloading:",

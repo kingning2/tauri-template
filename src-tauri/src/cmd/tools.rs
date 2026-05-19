@@ -5,7 +5,7 @@ use tauri_plugin_opener::OpenerExt;
 use crate::config::tools_manifest::{tools_manifest, ToolManifestEntry};
 use crate::utils::download::{self, ToolDownloadProgress};
 use crate::utils::platform::download::{
-    post_process_download_payload_if_needed, PlatformDownloadSpec,
+    post_process_download_payload_if_needed, HostDesktopPlatform, PlatformDownloadSpec,
 };
 use crate::utils::log::{trace_result_async, trace_result_fn};
 use crate::utils::platform::open_tool::{OpenToolExecutableArgs, resolve_executable_path as resolve_open_executable_path};
@@ -58,15 +58,15 @@ pub fn get_tools_install_state() -> Result<Vec<ToolInstallState>, String> {
 
 /// 当前进程所在桌面平台（供前端判断 `windows` / `macos` 下是否有 `universal` 下载项）。
 #[tauri::command]
-pub fn runtime_host_platform() -> Result<String, String> {
+pub fn runtime_host_platform() -> Result<HostDesktopPlatform, String> {
     trace_result_fn("cmd.tools", "runtime_host_platform", || {
         #[cfg(target_os = "windows")]
         {
-            return Ok("windows".to_string());
+            return Ok(HostDesktopPlatform::Windows);
         }
         #[cfg(target_os = "macos")]
         {
-            return Ok("macos".to_string());
+            return Ok(HostDesktopPlatform::Macos);
         }
         #[cfg(not(any(target_os = "windows", target_os = "macos")))]
         {

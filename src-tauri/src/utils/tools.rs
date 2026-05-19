@@ -1,13 +1,16 @@
 //! 启动器工具：安装态、可执行路径解析（清单 + 平台实现），供 `cmd::tools` 调用。
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use typeshare::typeshare;
 
 use crate::config::tools_manifest::tools_manifest;
 use crate::utils::platform::download::is_tool_download_installed;
 use crate::utils::platform::tool_launch;
 
 /// 各工具是否已安装 + 可启动主程序绝对路径。
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[typeshare]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ToolInstallState {
     pub tool_id: String,

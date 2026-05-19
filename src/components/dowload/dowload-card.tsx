@@ -49,7 +49,7 @@ export default function DowloadCard({
   className,
   ...shadowCardProps
 }: DowloadCardProps) {
-  const { phase, error, start, reset, progressBarValue } = useToolDownload();
+  const { phase, error, start, reset, progressBarValue } = useToolDownload(tool.id);
 
   const {
     cardSurfaceRef,
