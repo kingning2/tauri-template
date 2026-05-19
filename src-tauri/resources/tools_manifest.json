@@ -4,9 +4,18 @@
     "downloadSpec": {
       "windows": {
         "universal": {
-          "url": "https://resource.gbyte.com/app/win/Gbyte_Repair_1.0.2_Setup_Win.zip",
-          "fileName": "Gbyte_Repair_1.0.2_Setup_Win.zip",
+          "downloadKey": "system-repair-win-zip",
           "kind": "zip"
+        }
+      },
+      "macos": {
+        "arm64": {
+          "downloadKey": "system-repair-mac-apple-dmg",
+          "kind": "executable"
+        },
+        "x64": {
+          "downloadKey": "system-repair-mac-intel-dmg",
+          "kind": "executable"
         }
       },
       "windowsProductRegistry": {
@@ -24,9 +33,18 @@
     "downloadSpec": {
       "windows": {
         "universal": {
-          "url": "https://resource.gbyte.com/app/win/Gbyte_Repair_1.0.1_Setup_Win.zip",
-          "fileName": "Gbyte_Repair_1.0.1_Setup_Win.zip",
+          "downloadKey": "phone-unlock-win-zip",
           "kind": "zip"
+        }
+      },
+      "macos": {
+        "arm64": {
+          "downloadKey": "phone-unlock-mac-apple-dmg",
+          "kind": "executable"
+        },
+        "x64": {
+          "downloadKey": "phone-unlock-mac-intel-dmg",
+          "kind": "executable"
         }
       },
       "windowsProductRegistry": {
@@ -42,6 +60,22 @@
   {
     "id": "virtual-location",
     "downloadSpec": {
+      "windows": {
+        "universal": {
+          "downloadKey": "virtual-location-win-zip",
+          "kind": "zip"
+        }
+      },
+      "macos": {
+        "arm64": {
+          "downloadKey": "virtual-location-mac-apple-dmg",
+          "kind": "executable"
+        },
+        "x64": {
+          "downloadKey": "virtual-location-mac-intel-dmg",
+          "kind": "executable"
+        }
+      },
       "windowsProductRegistry": {
         "hklmSoftwarePath": "SOFTWARE\\Gbyte\\VirtualLocation",
         "uninstallSubkey": "gbyte_virtual_location"
@@ -55,6 +89,22 @@
   {
     "id": "data-transfer",
     "downloadSpec": {
+      "windows": {
+        "universal": {
+          "downloadKey": "data-transfer-win-zip",
+          "kind": "zip"
+        }
+      },
+      "macos": {
+        "arm64": {
+          "downloadKey": "data-transfer-mac-apple-dmg",
+          "kind": "executable"
+        },
+        "x64": {
+          "downloadKey": "data-transfer-mac-intel-dmg",
+          "kind": "executable"
+        }
+      },
       "windowsProductRegistry": {
         "hklmSoftwarePath": "SOFTWARE\\Gbyte\\DataTransfer",
         "uninstallSubkey": "gbyte_data_transfer"
@@ -68,6 +118,22 @@
   {
     "id": "data-recovery",
     "downloadSpec": {
+      "windows": {
+        "universal": {
+          "downloadKey": "data-recovery-win-exe",
+          "kind": "executable"
+        }
+      },
+      "macos": {
+        "arm64": {
+          "downloadKey": "data-recovery-mac-apple-dmg",
+          "kind": "executable"
+        },
+        "x64": {
+          "downloadKey": "data-recovery-mac-intel-dmg",
+          "kind": "executable"
+        }
+      },
       "windowsProductRegistry": {
         "hklmSoftwarePath": "SOFTWARE\\Gbyte\\DataRecovery",
         "uninstallSubkey": "gbyte_data_recovery"
@@ -81,6 +147,22 @@
   {
     "id": "social-transfer",
     "downloadSpec": {
+      "windows": {
+        "universal": {
+          "downloadKey": "social-transfer-win-zip",
+          "kind": "zip"
+        }
+      },
+      "macos": {
+        "arm64": {
+          "downloadKey": "social-transfer-mac-apple-dmg",
+          "kind": "executable"
+        },
+        "x64": {
+          "downloadKey": "social-transfer-mac-intel-dmg",
+          "kind": "executable"
+        }
+      },
       "windowsProductRegistry": {
         "hklmSoftwarePath": "SOFTWARE\\Gbyte\\SocialTransfer",
         "uninstallSubkey": "gbyte_social_transfer"
@@ -94,6 +176,22 @@
   {
     "id": "ringtone",
     "downloadSpec": {
+      "windows": {
+        "universal": {
+          "downloadKey": "ringtone-win-zip",
+          "kind": "zip"
+        }
+      },
+      "macos": {
+        "arm64": {
+          "downloadKey": "ringtone-mac-apple-dmg",
+          "kind": "executable"
+        },
+        "x64": {
+          "downloadKey": "ringtone-mac-intel-dmg",
+          "kind": "executable"
+        }
+      },
       "windowsProductRegistry": {
         "hklmSoftwarePath": "SOFTWARE\\Gbyte\\Ringtone",
         "uninstallSubkey": "gbyte_ringtone"

@@ -55,11 +55,14 @@
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `url` | string | 下载地址（HTTPS 等）。 |
-| `fileName` | string | 保存到应用数据目录时的文件名，如 `Setup.zip`；会与工具 `id` 组成相对路径，**勿含路径穿越**（`..`、绝对路径）。 |
+| `url` | string | 直接下载地址（与 `downloadKey` 二选一）。 |
+| `downloadKey` | string | 解析 API 的 key；存在即表示可下载。请求 `GET {downloadResolveBaseUrl}/{downloadKey}`，响应 JSON：`{ "version", "url", "lastUpdated" }`，实际下载使用返回的 `url`。 |
+| `fileName` | string | 可选。保存到应用数据目录时的文件名；未填时从最终 `url` 路径推导。 |
 | `kind` | string | **`zip`** 或 **`executable`**（小写 kebab-case）。`zip` 解压目录为 `{工具下载根}/{id}/`；可执行则落地为单文件。 |
 
-**前端「是否可点下载」**：`toolHasUniversalDownloadForPlatform` 要求**当前平台**的 `windows` 或 `macos` 下存在 `universal`，且 `url`、`fileName` 非空。若只配 `x64`/`arm64` 而无 `universal`，当前实现会认为**不可下载**（与启动器 UI 逻辑一致，需与产品约定对齐）。
+可选 **`downloadResolveBaseUrl`**（在 `downloadSpec` 根级）：默认 `https://download.gbyte.com/downloads`。
+
+**前端「是否可点下载」**：`toolHasDownloadForPlatform` 要求**当前平台**的 `windows` 或 `macos` 下，`universal` / `x64` / `arm64` 任一槽位配置了非空的 `url` 或 `downloadKey`。
 
 ### Windows：安装检测 `windowsProductRegistry`
 

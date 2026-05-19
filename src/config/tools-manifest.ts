@@ -8,8 +8,12 @@ import { ToolVariant } from '@/enums/tool-variant'
 export type DownloadPayloadKind = 'zip' | 'executable'
 
 export type DownloadArtifact = {
-  url: string
-  fileName: string
+  /** 直接下载地址；与 `downloadKey` 二选一 */
+  url?: string
+  /** 解析 API 的 key：`{downloadResolveBaseUrl}/{downloadKey}` */
+  downloadKey?: string
+  /** 本地保存文件名；未填时由后端从 url 路径推导 */
+  fileName?: string
   kind: DownloadPayloadKind
 }
 
@@ -53,19 +57,33 @@ export type PlatformDownloadSpec = {
   windowsMainExecutableRelative?: string
   macosInstalledBundlePath?: string
   windowsZipInstallSteps?: WindowsZipInstallSteps
+  /** 使用 `downloadKey` 时的解析 API 根路径，默认 `https://download.gbyte.com/downloads` */
+  downloadResolveBaseUrl?: string
 }
 
-/** 当前平台是否存在 `universal` 且含有效 `url` / `fileName`（可下载）；否则界面应显示暂未上线。 */
-export function toolHasUniversalDownloadForPlatform(
+function artifactHasDownloadSource(artifact: DownloadArtifact | undefined): boolean {
+  if (!artifact) return false
+  const url = artifact.url?.trim() ?? ''
+  const key = artifact.downloadKey?.trim() ?? ''
+  return Boolean(url || key)
+}
+
+/** 当前平台是否配置了可下载源（`url` 或 `downloadKey`，任一架构槽位即可）。 */
+export function toolHasDownloadForPlatform(
   spec: PlatformDownloadSpec,
   platform: HostDesktopPlatform
 ): boolean {
   const arts = platform === 'windows' ? spec.windows : spec.macos
-  const u = arts?.universal
-  const url = u?.url?.trim() ?? ''
-  const fileName = u?.fileName?.trim() ?? ''
-  return Boolean(url && fileName)
+  if (!arts) return false
+  return (
+    artifactHasDownloadSource(arts.universal) ||
+    artifactHasDownloadSource(arts.x64) ||
+    artifactHasDownloadSource(arts.arm64)
+  )
 }
+
+/** @deprecated 使用 `toolHasDownloadForPlatform` */
+export const toolHasUniversalDownloadForPlatform = toolHasDownloadForPlatform
 
 export type ToolManifest = {
   id: string
