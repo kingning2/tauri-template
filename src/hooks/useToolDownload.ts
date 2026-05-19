@@ -4,7 +4,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { downloadToolStream, type ToolDownloadProgress } from '@/cmd/tools'
 import {
-  toolHasUniversalDownloadForPlatform,
+  toolHasDownloadForPlatform,
   type HostDesktopPlatform,
   type ToolManifest,
 } from '@/config/tools-manifest'
@@ -48,7 +48,7 @@ export function useToolDownload() {
       hostPlatform: HostDesktopPlatform,
       options?: { onCompleted?: () => void }
     ) => {
-      if (!toolHasUniversalDownloadForPlatform(tool.downloadSpec, hostPlatform)) {
+      if (!toolHasDownloadForPlatform(tool.downloadSpec, hostPlatform)) {
         return
       }
       if (inFlight.current) return
