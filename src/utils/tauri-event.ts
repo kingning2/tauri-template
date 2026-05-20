@@ -14,20 +14,13 @@ export async function tauriEmit(event: string, payload?: unknown): Promise<void>
 }
 
 /** 前端 → 指定 Webview（对应 Rust 的 emit_to） */
-export async function tauriEmitTo(
-  target: string,
-  event: string,
-  payload?: unknown
-): Promise<void> {
+export async function tauriEmitTo(target: string, event: string, payload?: unknown): Promise<void> {
   if (!isTauriRuntime()) return;
   await emitTo(target, event, payload);
 }
 
 /** 订阅 Rust / 其他 Webview 发来的事件（全局，跨窗 IPC） */
-export function tauriOn<T>(
-  event: string,
-  handler: TauriEventHandler<T>
-): () => void {
+export function tauriOn<T>(event: string, handler: TauriEventHandler<T>): () => void {
   if (!isTauriRuntime()) return () => {};
 
   let unlisten: UnlistenFn | undefined;
@@ -42,10 +35,7 @@ export function tauriOn<T>(
 }
 
 /** 仅订阅发往当前 Webview 的事件（对应 Rust 的 emit_to 目标窗） */
-export function tauriOnWebview<T>(
-  event: string,
-  handler: TauriEventHandler<T>
-): () => void {
+export function tauriOnWebview<T>(event: string, handler: TauriEventHandler<T>): () => void {
   if (!isTauriRuntime()) return () => {};
 
   let unlisten: UnlistenFn | undefined;

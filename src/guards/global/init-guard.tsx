@@ -7,7 +7,7 @@ import { getAppSession } from "@/cmd/session";
 import type { AppStore } from "@/store";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { changeInitializedAction } from "@/store/modules/app";
-import { applySessionToStore } from "@/utils/session-bridge";
+import { applySessionToStore } from "@/events/session";
 
 export default function InitGuard({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -40,4 +40,4 @@ export default function InitGuard({ children }: { children: React.ReactNode }) {
   if (!initialized) return null;
 
   return <>{children}</>;
-};
+}

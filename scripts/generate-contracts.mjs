@@ -27,9 +27,7 @@ run("cargo", [
 
 const typeshare = spawnSync("typeshare", ["--help"], { cwd: root, encoding: "utf8" });
 if (typeshare.status !== 0) {
-  console.error(
-    "typeshare CLI not found. Install with: cargo install typeshare-cli --locked"
-  );
+  console.error("typeshare CLI not found. Install with: cargo install typeshare-cli --locked");
   process.exit(1);
 }
 

@@ -26,3 +26,5 @@ out
 *.sw?
 
 tsconfig.tsbuildinfo
+graphify-out
+graphify.*

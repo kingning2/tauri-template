@@ -20,7 +20,7 @@ export function ModalOverlay({ className }: ModalOverlayProps) {
       role="presentation"
       aria-hidden
       className={cn(
-        "pointer-events-auto absolute inset-0 z-[200] bg-slate-900/45 backdrop-blur-[1px]",
+        "pointer-events-auto absolute inset-0 z-200 bg-slate-900/45 backdrop-blur-[1px]",
         className
       )}
     />

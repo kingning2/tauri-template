@@ -79,7 +79,7 @@ const TitleBar = memo((props: { height?: number }) => {
       if (next === currentLanguage) return;
       try {
         await setLang(next);
-        /* 语言写入 Rust 后会广播 session/changed，各 Webview Redux 由 session-bridge 更新 */
+        /* 语言写入 Rust 后会广播 session/changed，各 Webview Redux 由 events/session 订阅更新 */
       } catch {
         dispatch(changeCurrentLanguageAction(next));
       }

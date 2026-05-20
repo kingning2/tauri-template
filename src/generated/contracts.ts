@@ -3,46 +3,46 @@
 */
 
 export interface AppSession {
-	currentLanguage: string;
+  currentLanguage: string;
 }
 
 export enum DownloadPayloadKind {
-	Zip = "zip",
-	Executable = "executable",
+  Zip = "zip",
+  Executable = "executable"
 }
 
 export interface DownloadArtifact {
-	/** 直接下载地址；与 `downloadKey` 二选一。 */
-	url?: string;
-	/** 下载解析 API 的 key，请求 `{downloadResolveBaseUrl}/{key}` 获取真实 `url`。 */
-	downloadKey?: string;
-	/** 本地保存文件名；未填时从 `url`（含接口返回的 url）路径推导。 */
-	fileName?: string;
-	kind: DownloadPayloadKind;
+  /** 直接下载地址；与 `downloadKey` 二选一。 */
+  url?: string;
+  /** 下载解析 API 的 key，请求 `{downloadResolveBaseUrl}/{key}` 获取真实 `url`。 */
+  downloadKey?: string;
+  /** 本地保存文件名；未填时从 `url`（含接口返回的 url）路径推导。 */
+  fileName?: string;
+  kind: DownloadPayloadKind;
 }
 
 export interface OpenToolExecutableArgs {
-	/** Windows：HKLM 下子路径，如 `SOFTWARE\Gbyte\Repair`（用于读取 `InstallPath`）。 */
-	windowsHklmSoftwarePath?: string;
-	/** Windows zip 安装流程中的主程序相对路径。 */
-	windowsZipMainExecutableRelative?: string;
-	/** Windows：相对 `InstallPath` 的主程序文件名。 */
-	windowsMainExecutableRelative?: string;
-	macosInstalledBundlePath?: string;
+  /** Windows：HKLM 下子路径，如 `SOFTWARE\Gbyte\Repair`（用于读取 `InstallPath`）。 */
+  windowsHklmSoftwarePath?: string;
+  /** Windows zip 安装流程中的主程序相对路径。 */
+  windowsZipMainExecutableRelative?: string;
+  /** Windows：相对 `InstallPath` 的主程序文件名。 */
+  windowsMainExecutableRelative?: string;
+  macosInstalledBundlePath?: string;
 }
 
 export interface PlatformArtifacts {
-	universal?: DownloadArtifact;
-	x64?: DownloadArtifact;
-	arm64?: DownloadArtifact;
+  universal?: DownloadArtifact;
+  x64?: DownloadArtifact;
+  arm64?: DownloadArtifact;
 }
 
 /** Windows：按「产品」区分的注册表位置（与安装器写入的 `Uninstall` 子键 + `HKLM\SOFTWARE\...` 数据根一致）。 */
 export interface WindowsProductRegistry {
-	/** 例如 `SOFTWARE\Gbyte\Unlock`（从 HKLM 起算的相对路径，与安装器 `REGISTRY_DATA_ROOT` 同形）。 */
-	hklmSoftwarePath: string;
-	/** `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{此值}` 下的子键名，例如 `gbyte_unlock`。 */
-	uninstallSubkey: string;
+  /** 例如 `SOFTWARE\Gbyte\Unlock`（从 HKLM 起算的相对路径，与安装器 `REGISTRY_DATA_ROOT` 同形）。 */
+  hklmSoftwarePath: string;
+  /** `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{此值}` 下的子键名，例如 `gbyte_unlock`。 */
+  uninstallSubkey: string;
 }
 
 /**
@@ -52,79 +52,78 @@ export interface WindowsProductRegistry {
  * 可显式配置本结构体，或由 `windowsMainExecutableRelative` + zip 文件名自动推导。
  */
 export interface WindowsZipInstallSteps {
-	/** 相对安装目录的主程序路径，例如 `Gbyte Unlock.exe`（用于校验解压结果是否完整）。 */
-	mainExecutableRelative: string;
-	/** 相对安装目录的卸载程序路径，例如 `uninstaller.exe`。 */
-	uninstallerRelative: string;
-	/** 控制面板「程序和功能」显示名称。 */
-	displayName: string;
-	publisher: string;
-	displayVersion: string;
-	/**
-	 * 同时执行的防火墙 PowerShell 任务上限（与安装器 `add_firewall_rules(..., 8)` 一致）。
-	 * 兼容旧字段名 `firewallScanMaxExes`。
-	 */
-	firewallMaxConcurrent: number;
-	writeLangRegistry: boolean;
-	writeGclidFromEnv: boolean;
-	/** 写入 HKLM 产品键 `SlintRendererName`（与安装器 `ui_event.ts` 一致）；未配置则跳过。 */
-	slintRendererName?: string;
+  /** 相对安装目录的主程序路径，例如 `Gbyte Unlock.exe`（用于校验解压结果是否完整）。 */
+  mainExecutableRelative: string;
+  /** 相对安装目录的卸载程序路径，例如 `uninstaller.exe`。 */
+  uninstallerRelative: string;
+  /** 控制面板「程序和功能」显示名称。 */
+  displayName: string;
+  publisher: string;
+  displayVersion: string;
+  /**
+   * 同时执行的防火墙 PowerShell 任务上限（与安装器 `add_firewall_rules(..., 8)` 一致）。
+   * 兼容旧字段名 `firewallScanMaxExes`。
+   */
+  firewallMaxConcurrent: number;
+  writeLangRegistry: boolean;
+  writeGclidFromEnv: boolean;
+  /** 写入 HKLM 产品键 `SlintRendererName`（与安装器 `ui_event.ts` 一致）；未配置则跳过。 */
+  slintRendererName?: string;
 }
 
 export interface PlatformDownloadSpec {
-	windows?: PlatformArtifacts;
-	macos?: PlatformArtifacts;
-	/** Windows：未配置则无法在注册表维度判定「已安装」（返回 `false`）。 */
-	windowsProductRegistry?: WindowsProductRegistry;
-	/**
-	 * macOS：若填写（例如 `/Applications/Gbyte Unlock.app`），「已安装」以该路径存在为准；
-	 * 不写则回退为工具下载目录下的落地/解压判断。
-	 */
-	macosInstalledBundlePath?: string;
-	/**
-	 * Windows：当 `InstallPath` 为**安装目录**（常见于 MSI/安装器写入）且**没有**配置
-	 * [`Self::windows_zip_install_steps`] 时，在此填写主程序相对该目录的路径，例如 `Gbyte Unlock.exe`。
-	 * 与 zip 流程中的 `windowsZipInstallSteps.mainExecutableRelative` 二选一即可；若两者皆有，以 zip 步骤为准。
-	 */
-	windowsMainExecutableRelative?: string;
-	/** Windows：zip 解压后收尾的显式配置；未配置时从 `windows_main_executable_relative` 等字段推导。 */
-	windowsZipInstallSteps?: WindowsZipInstallSteps;
-	/** 使用 `downloadKey` 时的解析 API 地址（`GET ?name={downloadKey}`），默认见 `.env`。 */
-	downloadResolveBaseUrl?: string;
+  windows?: PlatformArtifacts;
+  macos?: PlatformArtifacts;
+  /** Windows：未配置则无法在注册表维度判定「已安装」（返回 `false`）。 */
+  windowsProductRegistry?: WindowsProductRegistry;
+  /**
+   * macOS：若填写（例如 `/Applications/Gbyte Unlock.app`），「已安装」以该路径存在为准；
+   * 不写则回退为工具下载目录下的落地/解压判断。
+   */
+  macosInstalledBundlePath?: string;
+  /**
+   * Windows：当 `InstallPath` 为**安装目录**（常见于 MSI/安装器写入）且**没有**配置
+   * [`Self::windows_zip_install_steps`] 时，在此填写主程序相对该目录的路径，例如 `Gbyte Unlock.exe`。
+   * 与 zip 流程中的 `windowsZipInstallSteps.mainExecutableRelative` 二选一即可；若两者皆有，以 zip 步骤为准。
+   */
+  windowsMainExecutableRelative?: string;
+  /** Windows：zip 解压后收尾的显式配置；未配置时从 `windows_main_executable_relative` 等字段推导。 */
+  windowsZipInstallSteps?: WindowsZipInstallSteps;
+  /** 使用 `downloadKey` 时的解析 API 地址（`GET ?name={downloadKey}`），默认见 `.env`。 */
+  downloadResolveBaseUrl?: string;
 }
 
 /** 工具下载进度（Rust → 前端 Channel）。 */
 export interface ToolDownloadProgress {
-	/** 已写入磁盘的累计字节数（含断点续传前已有部分）。 */
-	downloaded: number;
-	/** 完整文件总字节数；若响应未提供 `Content-Length` / `Content-Range` 则为 `null`。 */
-	total?: number;
+  /** 已写入磁盘的累计字节数（含断点续传前已有部分）。 */
+  downloaded: number;
+  /** 完整文件总字节数；若响应未提供 `Content-Length` / `Content-Range` 则为 `null`。 */
+  total?: number;
 }
 
 /** 各工具是否已安装 + 可启动主程序绝对路径。 */
 export interface ToolInstallState {
-	toolId: string;
-	installed: boolean;
-	executablePath?: string;
-	installCheckError?: string;
+  toolId: string;
+  installed: boolean;
+  executablePath?: string;
+  installCheckError?: string;
 }
 
 export enum ToolVariant {
-	HeroLeft = "hero-left",
-	Medium = "medium",
-	Small = "small",
+  HeroLeft = "hero-left",
+  Medium = "medium",
+  Small = "small"
 }
 
 export interface ToolManifestEntry {
-	id: string;
-	downloadSpec: PlatformDownloadSpec;
-	hot?: boolean;
-	variant: ToolVariant;
+  id: string;
+  downloadSpec: PlatformDownloadSpec;
+  hot?: boolean;
+  variant: ToolVariant;
 }
 
 /** 前端 `runtime_host_platform` / 下载平台槽位。 */
 export enum HostDesktopPlatform {
-	Windows = "windows",
-	Macos = "macos",
+  Windows = "windows",
+  Macos = "macos"
 }
-

@@ -38,10 +38,7 @@ const downloadSlice = createSlice({
         entry.totalBytes = payload.total;
       }
     },
-    downloadCompleted(
-      state,
-      { payload }: PayloadAction<{ toolId: string; savedPath: string }>
-    ) {
+    downloadCompleted(state, { payload }: PayloadAction<{ toolId: string; savedPath: string }>) {
       const entry = ensureEntry(state, payload.toolId);
       entry.savedPath = payload.savedPath;
       entry.phase = DownloadPhase.Completed;

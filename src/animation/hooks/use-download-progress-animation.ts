@@ -58,10 +58,7 @@ export function useDownloadProgressAnimation({
   const introPlayedRef = useRef(false);
   const completeAnimPlayedRef = useRef(false);
 
-  const waveHandles = useMemo(
-    () => createTweenHandles(["front", "back", "bob"] as const),
-    []
-  );
+  const waveHandles = useMemo(() => createTweenHandles(["front", "back", "bob"] as const), []);
   const syncHandles = useMemo(
     () => createTweenHandles(["waterIndeterminate", "ring"] as const),
     []

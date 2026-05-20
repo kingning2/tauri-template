@@ -13,7 +13,9 @@ type ErrorProps = {
 export default function Error({ error, reset }: ErrorProps) {
   const handleBack = () => {
     void closeModalWindow(getCurrentWindow().label).catch(() => {
-      getCurrentWindow().close().catch(() => undefined);
+      getCurrentWindow()
+        .close()
+        .catch(() => undefined);
     });
   };
 

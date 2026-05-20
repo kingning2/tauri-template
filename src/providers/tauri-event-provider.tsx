@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useMemo } from "react";
 
+import { TauriEventSubscriptions } from "@/events/subscriptions";
 import type { TauriEventHandler, TauriEventScope } from "@/utils/tauri-event";
 import {
   tauriEmit,
@@ -41,7 +42,13 @@ export default function TauriEventProvider({ children }: { children: React.React
     []
   );
 
-  return <TauriEventContext.Provider value={api}>{children}</TauriEventContext.Provider>;
+  return (
+    <TauriEventContext.Provider value={api}>
+      {/* 在 TauriEventProvider 内挂载的跨 Webview 事件订阅 */}
+      <TauriEventSubscriptions />
+      {children}
+    </TauriEventContext.Provider>
+  );
 }
 
 export function useTauriEventApi(): TauriEventApi {
