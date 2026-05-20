@@ -2,24 +2,12 @@
 
 use std::sync::atomic::{AtomicU32, Ordering};
 
-use serde::Serialize;
-use tauri::{
-    AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent,
-};
+use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
+use crate::events::{self, MAIN_WINDOW_LABEL};
 use crate::utils::session;
 
-pub const MAIN_WINDOW_LABEL: &str = "main";
-pub const MODAL_OPENED_EVENT: &str = "modal/opened";
-pub const MODAL_CLOSED_EVENT: &str = "modal/closed";
-
 static MODAL_SEQ: AtomicU32 = AtomicU32::new(0);
-
-#[derive(Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct ModalEventPayload {
-    label: String,
-}
 
 fn normalize_path(path: &str) -> String {
     if path.starts_with('/') {
@@ -68,13 +56,7 @@ fn register_modal_destroy_listener(app: &AppHandle, label: &str) {
     let label_owned = label.to_string();
     window.on_window_event(move |event| {
         if let WindowEvent::Destroyed = event {
-            let _ = app_handle.emit_to(
-                MAIN_WINDOW_LABEL,
-                MODAL_CLOSED_EVENT,
-                ModalEventPayload {
-                    label: label_owned.clone(),
-                },
-            );
+            let _ = events::modal_closed(&app_handle, label_owned.clone());
         }
     });
 }
@@ -119,14 +101,7 @@ pub fn open_modal_window(
     register_modal_destroy_listener(app, &label);
     session::push_session_to_webview(app, &label)?;
 
-    app.emit_to(
-        MAIN_WINDOW_LABEL,
-        MODAL_OPENED_EVENT,
-        ModalEventPayload {
-            label: label.clone(),
-        },
-    )
-    .map_err(|e| e.to_string())?;
+    events::modal_opened(app, &label)?;
 
     Ok(label)
 }
@@ -137,12 +112,6 @@ pub fn close_modal_window(app: &AppHandle, label: &str) -> Result<(), String> {
         .ok_or_else(|| format!("modal window not found: {label}"))?;
     window.close().map_err(|e| e.to_string())?;
     // 部分平台 Destroyed 回调不稳定，关闭时主动向主窗发 closed 收起蒙层
-    let _ = app.emit_to(
-        MAIN_WINDOW_LABEL,
-        MODAL_CLOSED_EVENT,
-        ModalEventPayload {
-            label: label.to_string(),
-        },
-    );
+    let _ = events::modal_closed(app, label);
     Ok(())
 }

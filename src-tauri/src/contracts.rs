@@ -10,5 +10,5 @@ pub use crate::utils::platform::download::{
     PlatformDownloadSpec, ToolVariant, WindowsProductRegistry, WindowsZipInstallSteps,
 };
 pub use crate::utils::platform::open_tool::OpenToolExecutableArgs;
-pub use crate::utils::session::AppSession;
+pub use crate::events::payloads::AppSession;
 pub use crate::utils::tools::ToolInstallState;

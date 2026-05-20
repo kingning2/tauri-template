@@ -1,36 +1,37 @@
-import { invoke } from "@tauri-apps/api/core";
-
+import { FE_LOG_EVENT, FE_LOG_REQ_EVENT, type FeLogPayload } from "@/config/window-events";
 import { isTauriRuntime } from "./invoke";
+import { tauriEmit } from "@/utils/tauri-event";
 
 async function writeFeLog(
-  cmd: "log_fe" | "log_fe_req",
-  event: "info" | "error" | "warn",
+  eventName: typeof FE_LOG_EVENT | typeof FE_LOG_REQ_EVENT,
+  level: FeLogPayload["level"],
   msg: string,
   consoleOutput: boolean
 ) {
   if (consoleOutput) {
-    console.log(`[${event.toUpperCase()}] ${msg}`);
+    console.log(`[${level.toUpperCase()}] ${msg}`);
   }
 
   if (!isTauriRuntime()) {
     return;
   }
 
-  return invoke(cmd, { event, msg });
+  const payload: FeLogPayload = { level, msg };
+  await tauriEmit(eventName, payload);
 }
 
 export async function log(
-  event: "info" | "error" | "warn",
+  event: FeLogPayload["level"],
   msg: string,
   consoleOutput: boolean = false
 ) {
-  return writeFeLog("log_fe", event, msg, consoleOutput);
+  return writeFeLog(FE_LOG_EVENT, event, msg, consoleOutput);
 }
 
 export async function log_req(
-  event: "info" | "error" | "warn",
+  event: FeLogPayload["level"],
   msg: string,
   consoleOutput: boolean = false
 ) {
-  return writeFeLog("log_fe_req", event, msg, consoleOutput);
+  return writeFeLog(FE_LOG_REQ_EVENT, event, msg, consoleOutput);
 }

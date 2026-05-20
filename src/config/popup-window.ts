@@ -1,8 +1,10 @@
 import { LogicalSize, Window } from "@tauri-apps/api/window";
 
-export type WindowLabel = "main";
+import { MAIN_WINDOW_LABEL } from "@/config/window-events";
 
-export const MAIN_WINDOW_LABEL = "main" as const;
+export type WindowLabel = typeof MAIN_WINDOW_LABEL;
+
+export { MAIN_WINDOW_LABEL };
 
 /** 与 unlock-next-app 一致：固定 label，供标题栏拖动与窗口 API 使用 */
 export const mainWindow = new Window(MAIN_WINDOW_LABEL);

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import SessionBridgeProvider from "@/providers/session-bridge-provider";
 import StoreProvider from "@/providers/store";
+import TauriEventProvider from "@/providers/tauri-event-provider";
 
 import GlobalProvider from "./global-provider";
 
@@ -21,9 +22,11 @@ export default function RootLayout({
     <html lang="zh-Hant">
       <body>
         <StoreProvider>
-          <SessionBridgeProvider>
-            <GlobalProvider>{children}</GlobalProvider>
-          </SessionBridgeProvider>
+          <TauriEventProvider>
+            <SessionBridgeProvider>
+              <GlobalProvider>{children}</GlobalProvider>
+            </SessionBridgeProvider>
+          </TauriEventProvider>
         </StoreProvider>
       </body>
     </html>

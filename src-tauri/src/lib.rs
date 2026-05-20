@@ -1,6 +1,7 @@
 mod cmd;
 pub mod config;
 pub mod contracts;
+mod events;
 mod utils;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -12,6 +13,10 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(utils::session::SessionStore::load_from_disk())
+        .setup(|app| {
+            events::setup(app.handle());
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             cmd::lang::get_lang,
             cmd::lang::set_lang,

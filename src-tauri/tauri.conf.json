@@ -15,11 +15,7 @@
         "label": "main",
         "title": "MobiXpert",
         "width": 1200,
-        "height": 800,
-        "decorations": false,
-        "transparent": true,
-        "shadow": false,
-        "resizable": false
+        "height": 800
       }
     ],
     "security": {

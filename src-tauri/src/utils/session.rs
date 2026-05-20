@@ -4,19 +4,9 @@ use std::fs;
 use std::sync::Mutex;
 
 use directories::ProjectDirs;
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Emitter, Manager};
-use typeshare::typeshare;
+use tauri::{AppHandle, Manager};
 
-pub const SESSION_CHANGED_EVENT: &str = "session/changed";
-
-#[typeshare]
-#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
-#[serde(rename_all = "camelCase")]
-pub struct AppSession {
-    pub current_language: String,
-}
+pub use crate::events::payloads::AppSession;
 
 pub struct SessionStore(pub Mutex<AppSession>);
 
@@ -84,15 +74,10 @@ pub fn set_current_language(app: &AppHandle, language: String) -> Result<(), Str
 }
 
 pub fn broadcast_session(app: &AppHandle, session: &AppSession) -> Result<(), String> {
-    for (label, _) in app.webview_windows() {
-        app.emit_to(label, SESSION_CHANGED_EVENT, session)
-            .map_err(|e| e.to_string())?;
-    }
-    Ok(())
+    crate::events::session_changed_all(app, session)
 }
 
 pub fn push_session_to_webview(app: &AppHandle, webview_label: &str) -> Result<(), String> {
     let session = get_session(app)?;
-    app.emit_to(webview_label, SESSION_CHANGED_EVENT, &session)
-        .map_err(|e| e.to_string())
+    crate::events::session_changed_to(app, webview_label, &session)
 }
