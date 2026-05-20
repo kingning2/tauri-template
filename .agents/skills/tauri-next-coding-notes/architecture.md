@@ -11,10 +11,20 @@
 
 ## 调用链
 
+### Command（invoke）
+
 1. 前端页面调用 `src/cmd/*.ts`。
 2. `src/cmd/*.ts` 走 `invokeWrapper`。
-3. Rust command 在 `src-tauri/src/cmd/*.rs`。
+3. Rust command 在 `src-tauri/src/cmd/*.rs`（薄封装，逻辑在 `utils/`）。
 4. `src-tauri/src/lib.rs` 注册 `generate_handler!`。
+
+### Event（emit / listen）
+
+1. 事件名：前端 `src/config/window-events.ts` ↔ Rust `events/names.rs`。
+2. Rust → 前端：`events/emit.rs`（如会话、`modal/opened`）。
+3. 前端 → Rust：`tauriEmit` → `events/handlers/*`（如 `fe/log`）。
+4. 前端订阅：`TauriEventProvider` + `use-tauri-event` hooks。
+5. `lib.rs` 的 `setup` 调用 `events::setup` 注册 listen。
 
 ## 前后端契约
 

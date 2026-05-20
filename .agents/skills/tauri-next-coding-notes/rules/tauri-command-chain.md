@@ -2,6 +2,8 @@
 
 ## Rule
 
+需要返回值或强类型错误的 IPC 用 **Command**；跨窗广播、单向通知、前端写 Rust 日志等用 **Event**（见 [tauri-events.md](./tauri-events.md)）。
+
 新增或修改 command 时，必须同步修改以下位置：
 
 1. Rust command 文件（`src-tauri/src/cmd/*.rs`）

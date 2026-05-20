@@ -13,3 +13,5 @@
 ## Correct
 
 统一 `useAppSelector((s) => s.app.currentLanguage)`，通过 action 修改。
+
+跨 Webview 的会话快照由 Rust `session/changed` 广播；子窗/主窗通过 `SessionBridgeProvider` 监听事件后 dispatch，不要在各窗各自 `invoke` 拉会话。

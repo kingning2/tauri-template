@@ -84,3 +84,23 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
   return <button onClick={reset}>Try again</button>
 }
 ```
+
+## 5) 订阅 Rust 事件
+
+```tsx
+'use client'
+import { SESSION_CHANGED_EVENT } from '@/config/window-events'
+import { useTauriEventPayload } from '@/hooks/use-tauri-event'
+import type { AppSession } from '@/generated/contracts'
+
+export function SessionListener({ onSession }: { onSession: (s: AppSession) => void }) {
+  useTauriEventPayload<AppSession>(SESSION_CHANGED_EVENT, onSession)
+  return null
+}
+```
+
+```ts
+// 前端 → Rust 日志（非 invoke）
+import { log } from '@/cmd/log'
+void log('info', 'modal opened')
+```
