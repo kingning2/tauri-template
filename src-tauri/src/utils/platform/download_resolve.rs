@@ -37,12 +37,10 @@ pub async fn fetch_download_resolve(
         key
     );
 
-    let parsed: DownloadResolveResponse = http::get_json(
-        base,
-        &[(DOWNLOAD_RESOLVE_QUERY_NAME, key)],
-    )
-    .await
-    .map_err(|e| format!("download resolve: {e}"))?;
+    let parsed: DownloadResolveResponse =
+        http::get_json(base, &[(DOWNLOAD_RESOLVE_QUERY_NAME, key)])
+            .await
+            .map_err(|e| format!("download resolve: {e}"))?;
 
     let url = parsed.url.trim();
     if url.is_empty() {

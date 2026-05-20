@@ -75,7 +75,9 @@ fn parse_display_version_from_file_name(file_name: &str) -> String {
     for part in file_name.split(['_', '-']) {
         if part.chars().all(|c| c.is_ascii_digit() || c == '.')
             && part.contains('.')
-            && part.split('.').all(|seg| !seg.is_empty() && seg.chars().all(|c| c.is_ascii_digit()))
+            && part
+                .split('.')
+                .all(|seg| !seg.is_empty() && seg.chars().all(|c| c.is_ascii_digit()))
         {
             return part.to_string();
         }

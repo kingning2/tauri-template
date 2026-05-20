@@ -4,14 +4,12 @@
 
 #[allow(unused_imports)]
 pub use crate::config::tools_manifest::ToolManifestEntry;
+pub use crate::context::tools_download::{DownloadPhase, ToolDownloadEntry, ToolsDownloadSnapshot};
+pub use crate::events::payloads::AppSession;
 pub use crate::utils::download::ToolDownloadProgress;
 pub use crate::utils::platform::download::{
     DownloadArtifact, DownloadPayloadKind, HostDesktopPlatform, PlatformArtifacts,
     PlatformDownloadSpec, ToolVariant, WindowsProductRegistry, WindowsZipInstallSteps,
 };
 pub use crate::utils::platform::open_tool::OpenToolExecutableArgs;
-pub use crate::events::payloads::AppSession;
 pub use crate::utils::tools::ToolInstallState;
-pub use crate::context::tools_download::{
-    DownloadPhase, ToolDownloadEntry, ToolsDownloadSnapshot,
-};

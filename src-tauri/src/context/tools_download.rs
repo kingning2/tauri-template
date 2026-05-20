@@ -131,7 +131,11 @@ pub fn mark_completed(
     })
 }
 
-pub fn mark_failed(app: &AppHandle, tool_id: &str, error: String) -> Result<ToolsDownloadSnapshot, String> {
+pub fn mark_failed(
+    app: &AppHandle,
+    tool_id: &str,
+    error: String,
+) -> Result<ToolsDownloadSnapshot, String> {
     with_store(app, |map| {
         let entry = map
             .entry(tool_id.to_string())

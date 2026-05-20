@@ -3,17 +3,17 @@ export const MODAL_ENTER_FROM = {
   scale: 0.96,
   opacity: 0,
   duration: 0.34,
-  ease: 'power2.out'
-} as const
+  ease: "power2.out"
+} as const;
 
 export const MODAL_EXIT_TO = {
   scale: 0.96,
   opacity: 0,
   duration: 0.26,
-  ease: 'power2.in'
-} as const
+  ease: "power2.in"
+} as const;
 
 export function prefersReducedMotion(): boolean {
-  if (typeof window === 'undefined') return false
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }

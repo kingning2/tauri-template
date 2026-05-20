@@ -1,16 +1,18 @@
-use tauri::AppHandle;
 use tauri::ipc::Channel;
+use tauri::AppHandle;
 use tauri_plugin_opener::OpenerExt;
 
 use crate::config::tools_manifest::{tools_manifest, ToolManifestEntry};
+use crate::context::tools_download::{self, ToolsDownloadSnapshot};
 use crate::utils::download::{self, ToolDownloadProgress};
+use crate::utils::log::{trace_result_async, trace_result_fn};
 use crate::utils::platform::download::{
     post_process_download_payload_if_needed, HostDesktopPlatform, PlatformDownloadSpec,
 };
-use crate::utils::log::{trace_result_async, trace_result_fn};
-use crate::utils::platform::open_tool::{OpenToolExecutableArgs, resolve_executable_path as resolve_open_executable_path};
+use crate::utils::platform::open_tool::{
+    resolve_executable_path as resolve_open_executable_path, OpenToolExecutableArgs,
+};
 use crate::utils::tools::{self, ToolInstallState};
-use crate::context::tools_download::{self, ToolsDownloadSnapshot};
 
 #[tauri::command]
 pub async fn get_tools_download_dir() -> Result<String, String> {
@@ -81,7 +83,10 @@ pub fn get_tools_download_state(app: AppHandle) -> Result<ToolsDownloadSnapshot,
 }
 
 #[tauri::command]
-pub fn reset_tool_download_state(app: AppHandle, tool_id: String) -> Result<ToolsDownloadSnapshot, String> {
+pub fn reset_tool_download_state(
+    app: AppHandle,
+    tool_id: String,
+) -> Result<ToolsDownloadSnapshot, String> {
     trace_result_fn("cmd.tools", "reset_tool_download_state", || {
         let snapshot = tools_download::reset_tool(&app, &tool_id)?;
         tools_download::broadcast_snapshot(&app, &snapshot)?;
@@ -91,13 +96,17 @@ pub fn reset_tool_download_state(app: AppHandle, tool_id: String) -> Result<Tool
 
 #[tauri::command]
 pub fn get_tools_manifest() -> Result<Vec<ToolManifestEntry>, String> {
-    trace_result_fn("cmd.tools", "get_tools_manifest", || Ok(tools_manifest().to_vec()))
+    trace_result_fn("cmd.tools", "get_tools_manifest", || {
+        Ok(tools_manifest().to_vec())
+    })
 }
 
 /// 各工具是否已安装 + 可启动主程序绝对路径（与 [`get_tool_executable_path`] 同源解析逻辑）。
 #[tauri::command]
 pub fn get_tools_install_state() -> Result<Vec<ToolInstallState>, String> {
-    trace_result_fn("cmd.tools", "get_tools_install_state", || tools::gather_install_state())
+    trace_result_fn("cmd.tools", "get_tools_install_state", || {
+        tools::gather_install_state()
+    })
 }
 
 /// 重新扫描安装态并广播到所有 Webview。

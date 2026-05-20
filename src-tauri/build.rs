@@ -75,7 +75,8 @@ fn validate_tools_manifest_against_schema() {
     let schema_str = fs::read_to_string(&schema_path).expect("read tools_manifest.schema.json");
     let manifest_str = fs::read_to_string(&manifest_path).expect("read tools_manifest.json");
 
-    let schema_val: serde_json::Value = serde_json::from_str(&schema_str).expect("parse schema json");
+    let schema_val: serde_json::Value =
+        serde_json::from_str(&schema_str).expect("parse schema json");
     let manifest_val: serde_json::Value =
         serde_json::from_str(&manifest_str).expect("parse tools_manifest.json");
 

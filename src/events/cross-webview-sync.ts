@@ -5,7 +5,10 @@ import { useStore } from "react-redux";
 
 import { isTauriRuntime } from "@/cmd";
 import type { AppSession } from "@/cmd/session";
-import { getToolsDownloadState, refreshToolsInstallState as refreshToolsInstallStateCmd } from "@/cmd/tools";
+import {
+  getToolsDownloadState,
+  refreshToolsInstallState as refreshToolsInstallStateCmd
+} from "@/cmd/tools";
 import {
   SESSION_CHANGED_EVENT,
   TOOLS_DOWNLOAD_CHANGED_EVENT,
@@ -78,12 +81,9 @@ export function useToolsInstallStateSync(
   setInstallByToolId: (map: Record<string, ToolInstallState>) => void
 ) {
   useEffect(() => {
-    return tauriOn<ToolsInstallStateChangedPayload>(
-      TOOLS_INSTALL_STATE_CHANGED_EVENT,
-      (event) => {
-        setInstallByToolId(installStateByToolId(event.payload));
-      }
-    );
+    return tauriOn<ToolsInstallStateChangedPayload>(TOOLS_INSTALL_STATE_CHANGED_EVENT, (event) => {
+      setInstallByToolId(installStateByToolId(event.payload));
+    });
   }, [setInstallByToolId]);
 }
 

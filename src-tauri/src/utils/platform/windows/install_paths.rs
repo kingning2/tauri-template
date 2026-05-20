@@ -75,8 +75,6 @@ mod tests {
     fn falls_back_to_relative_dir_without_registry() {
         let spec = PlatformDownloadSpec::default();
         let dir = program_files_gbyte_product_dir(&spec, "system-repair").unwrap();
-        assert!(
-            dir.ends_with("Gbyte\\system-repair") || dir.ends_with("Gbyte/system-repair")
-        );
+        assert!(dir.ends_with("Gbyte\\system-repair") || dir.ends_with("Gbyte/system-repair"));
     }
 }

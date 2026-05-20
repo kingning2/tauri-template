@@ -32,9 +32,7 @@ pub struct DownloadArtifact {
 
 impl DownloadArtifact {
     pub fn has_download_source(&self) -> bool {
-        self.url
-            .as_ref()
-            .is_some_and(|u| !u.trim().is_empty())
+        self.url.as_ref().is_some_and(|u| !u.trim().is_empty())
             || self
                 .download_key
                 .as_ref()
@@ -440,11 +438,9 @@ async fn materialize_download_artifact(
         .filter(|k| !k.is_empty())
         .ok_or_else(|| "downloadKey is required when url is absent".to_string())?;
 
-    let resolved = super::download_resolve::fetch_download_resolve(
-        download_resolve_base_url(spec),
-        key,
-    )
-    .await?;
+    let resolved =
+        super::download_resolve::fetch_download_resolve(download_resolve_base_url(spec), key)
+            .await?;
 
     let url = resolved.url.trim().to_string();
     let file_name = match artifact
@@ -465,8 +461,7 @@ async fn resolve_download_artifact_inner(
     platform: SystemPlatform,
     arch: SystemArch,
 ) -> Result<ResolvedDownloadArtifact, String> {
-    let (platform, arch, artifact) =
-        resolve_download_artifact_config_inner(spec, platform, arch)?;
+    let (platform, arch, artifact) = resolve_download_artifact_config_inner(spec, platform, arch)?;
     let (url, file_name) = materialize_download_artifact(spec, &artifact).await?;
 
     Ok(ResolvedDownloadArtifact {

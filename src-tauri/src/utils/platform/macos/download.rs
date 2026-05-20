@@ -20,7 +20,9 @@ pub fn current_arch() -> Result<SystemArch, String> {
     match ARCH {
         "x86_64" => Ok(SystemArch::X64),
         "aarch64" => Ok(SystemArch::Arm64),
-        other => Err(format!("unsupported architecture on macos resolver: {other}")),
+        other => Err(format!(
+            "unsupported architecture on macos resolver: {other}"
+        )),
     }
 }
 
@@ -119,8 +121,7 @@ pub async fn run_downloaded_installer(local_path: &str) -> Result<(), String> {
     }
 
     let lower = local_path.to_ascii_lowercase();
-    let mut cmd = if lower.ends_with(".dmg") || lower.ends_with(".pkg") || lower.ends_with(".app")
-    {
+    let mut cmd = if lower.ends_with(".dmg") || lower.ends_with(".pkg") || lower.ends_with(".app") {
         let mut c = tokio::process::Command::new("/usr/bin/open");
         c.arg(local_path);
         c

@@ -142,14 +142,9 @@ pub async fn download_tool_file_by_platform(
 ) -> Result<PlatformDownloadResult, String> {
     let artifact = resolve_download_artifact(spec).await?;
     let relative_path = build_relative_download_path(relative_dir, &artifact.file_name)?;
-    let save_path = download_tool_file_retries_range(
-        app,
-        tool_id,
-        &artifact.url,
-        &relative_path,
-        on_progress,
-    )
-    .await?;
+    let save_path =
+        download_tool_file_retries_range(app, tool_id, &artifact.url, &relative_path, on_progress)
+            .await?;
 
     Ok(PlatformDownloadResult {
         save_path,
@@ -358,7 +353,9 @@ pub async fn download_tool_file_retries_range(
             on_progress
                 .send(ToolDownloadProgress { downloaded, total })
                 .map_err(|e| e.to_string())?;
-            crate::context::tools_download::sync_progress_and_broadcast(app, tool_id, downloaded, total);
+            crate::context::tools_download::sync_progress_and_broadcast(
+                app, tool_id, downloaded, total,
+            );
         }
 
         let mut stream = response.bytes_stream();

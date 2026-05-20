@@ -4,8 +4,8 @@ use tauri::{AppHandle, Emitter, Manager};
 
 use super::names::{self, MAIN_WINDOW_LABEL};
 use super::payloads::{AppSession, ModalLifecyclePayload};
-use crate::utils::tools::ToolInstallState;
 use crate::context::tools_download::ToolsDownloadSnapshot;
+use crate::utils::tools::ToolInstallState;
 
 fn map_emit_err(e: tauri::Error) -> String {
     e.to_string()

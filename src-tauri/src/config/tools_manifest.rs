@@ -13,8 +13,10 @@ use typeshare::typeshare;
 
 use crate::utils::platform::download::PlatformDownloadSpec;
 
-const TOOLS_MANIFEST_JSON: &str =
-    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/tools_manifest.json"));
+const TOOLS_MANIFEST_JSON: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/resources/tools_manifest.json"
+));
 
 #[typeshare]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

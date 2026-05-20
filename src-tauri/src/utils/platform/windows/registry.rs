@@ -82,7 +82,10 @@ pub fn get_lang_string(hklm_software_path: &str) -> Result<String, String> {
 pub fn registry_lang(hklm_software_path: &str, lang: &str) -> Result<(), String> {
     let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
     let (key, _disp) = hklm
-        .create_subkey_with_flags(hklm_software_path.trim_start_matches('\\'), KEY_WRITE | KEY_WOW64_64KEY)
+        .create_subkey_with_flags(
+            hklm_software_path.trim_start_matches('\\'),
+            KEY_WRITE | KEY_WOW64_64KEY,
+        )
         .map_err(|e| e.to_string())?;
     key.set_value(REGISTRY_DATA_LANG_KEY, &lang)
         .map_err(|e| format!("set {REGISTRY_DATA_LANG_KEY} err: {e:?}"))
@@ -104,7 +107,10 @@ pub fn get_install_path(hklm_software_path: &str) -> Result<PathBuf, String> {
 pub fn registry_install_path(hklm_software_path: &str, install_path: String) -> Result<(), String> {
     let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
     let (key, _disp) = hklm
-        .create_subkey_with_flags(hklm_software_path.trim_start_matches('\\'), KEY_WRITE | KEY_WOW64_64KEY)
+        .create_subkey_with_flags(
+            hklm_software_path.trim_start_matches('\\'),
+            KEY_WRITE | KEY_WOW64_64KEY,
+        )
         .map_err(|e| e.to_string())?;
     key.set_value(REGISTRY_DATA_INSTALL_PATH_KEY, &install_path)
         .map_err(|e| format!("set {REGISTRY_DATA_INSTALL_PATH_KEY} err: {e:?}"))
@@ -140,7 +146,10 @@ pub fn registry_slint_renderer_name(
 pub fn registry_gclid_value(hklm_software_path: &str, gclid: &str) -> Result<(), String> {
     let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
     let (key, _disp) = hklm
-        .create_subkey_with_flags(hklm_software_path.trim_start_matches('\\'), KEY_WRITE | KEY_WOW64_64KEY)
+        .create_subkey_with_flags(
+            hklm_software_path.trim_start_matches('\\'),
+            KEY_WRITE | KEY_WOW64_64KEY,
+        )
         .map_err(|e| e.to_string())?;
     key.set_value(REGISTRY_DATA_GCLID_KEY, &gclid)
         .map_err(|e| format!("set gclid err: {e:?}"))

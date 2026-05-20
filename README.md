@@ -135,12 +135,12 @@ docs: 补充 README 提交与编写规范
 
 适用：会话同步、modal 生命周期、前端写 Rust 日志、无需返回值的广播等。
 
-| 方向        | Rust                                        | 前端                                                                 |
-| ----------- | ------------------------------------------- | -------------------------------------------------------------------- |
+| 方向        | Rust                                        | 前端                                                                |
+| ----------- | ------------------------------------------- | ------------------------------------------------------------------- |
 | Rust → 前端 | `src-tauri/src/events/emit.rs`              | `tauriOn` / `useTauriEventApi().on` / `cross-webview-sync` 全局订阅 |
-| 前端 → Rust | `src-tauri/src/events/handlers/`            | `tauriEmit`（`src/utils/tauri-event.ts`）                            |
-| 事件名      | `events/names.rs`                           | `src/config/window-events.ts`（**两处须一致**）                      |
-| 载荷类型    | `events/payloads.rs`（部分 `#[typeshare]`） | `window-events.ts` 或 `@/generated/contracts`                        |
+| 前端 → Rust | `src-tauri/src/events/handlers/`            | `tauriEmit`（`src/utils/tauri-event.ts`）                           |
+| 事件名      | `events/names.rs`                           | `src/config/window-events.ts`（**两处须一致**）                     |
+| 载荷类型    | `events/payloads.rs`（部分 `#[typeshare]`） | `window-events.ts` 或 `@/generated/contracts`                       |
 
 根布局已挂载 `TauriEventProvider`（内含 `CrossWebviewSyncSubscriptions`：会话 + 下载 Redux）。页面安装态用 `useToolsInstallStateSync`（`events/cross-webview-sync.ts`）。自定义监听可用 `useTauriEventApi()`。
 
