@@ -28,11 +28,10 @@ export {
   resetDownloadProgressVisual
 } from "./download";
 
-export { useDownloadBadgeAnimation, useDownloadProgressAnimation } from "./hooks";
+export { useDownloadBadgeAnimation } from "./hooks/use-download-badge-animation";
+export { useDownloadProgressAnimation } from "./hooks/use-download-progress-animation";
 
-export type {
-  UseDownloadBadgeAnimationOptions,
-  UseDownloadProgressAnimationOptions
-} from "./hooks";
+export type { UseDownloadBadgeAnimationOptions } from "./hooks/use-download-badge-animation";
+export type { UseDownloadProgressAnimationOptions } from "./hooks/use-download-progress-animation";
 
 export type { DownloadBadgeElements, DownloadProgressDomRefs } from "./download";

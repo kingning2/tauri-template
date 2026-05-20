@@ -8,7 +8,7 @@ import {
   MODAL_OPENED_EVENT,
   type ModalLifecyclePayload
 } from "@/config/window-events";
-import { MAIN_WINDOW_LABEL } from "@/config/popup-window";
+import { MAIN_WINDOW_LABEL } from "@/config/windows";
 import { useAppDispatch } from "@/store/hooks";
 import { modalClosedAction, modalOpenedAction } from "@/store/modules/modal";
 

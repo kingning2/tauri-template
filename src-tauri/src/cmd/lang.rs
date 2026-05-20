@@ -3,7 +3,7 @@ use std::fs;
 use tauri::{path::BaseDirectory, Manager};
 
 use crate::utils::log::trace_result_fn;
-use crate::utils::session;
+use crate::context::session;
 
 fn normalize_lang_code(language: &str) -> &'static str {
     match language.trim() {

@@ -10,6 +10,7 @@ use crate::utils::platform::download::{
 use crate::utils::log::{trace_result_async, trace_result_fn};
 use crate::utils::platform::open_tool::{OpenToolExecutableArgs, resolve_executable_path as resolve_open_executable_path};
 use crate::utils::tools::{self, ToolInstallState};
+use crate::context::tools_download::{self, ToolsDownloadSnapshot};
 
 #[tauri::command]
 pub async fn get_tools_download_dir() -> Result<String, String> {
@@ -24,25 +25,68 @@ pub async fn get_tools_download_dir() -> Result<String, String> {
 #[tauri::command]
 pub async fn download_tool(
     app: AppHandle,
+    tool_id: String,
     download_spec: PlatformDownloadSpec,
     relative_dir: String,
     on_progress: Channel<ToolDownloadProgress>,
 ) -> Result<String, String> {
     trace_result_async("cmd.tools", "download_tool", async {
-        let result =
-            download::download_tool_file_by_platform(&app, &download_spec, &relative_dir, on_progress)
+        let snapshot = tools_download::mark_started(&app, &tool_id)?;
+        tools_download::broadcast_snapshot(&app, &snapshot)?;
+
+        let result = download::download_tool_file_by_platform(
+            &app,
+            &download_spec,
+            &tool_id,
+            &relative_dir,
+            on_progress,
+        )
+        .await;
+
+        match result {
+            Ok(result) => {
+                post_process_download_payload_if_needed(
+                    result.artifact.kind,
+                    &result.save_path,
+                    &download_spec,
+                    &relative_dir,
+                )
                 .await?;
 
-        post_process_download_payload_if_needed(
-            result.artifact.kind,
-            &result.save_path,
-            &download_spec,
-            &relative_dir,
-        )
-        .await?;
-        Ok(result.save_path)
+                let snapshot =
+                    tools_download::mark_completed(&app, &tool_id, result.save_path.clone())?;
+                tools_download::broadcast_snapshot(&app, &snapshot)?;
+
+                let install_states = tools::gather_install_state()?;
+                crate::events::tools_install_state_changed_all(&app, &install_states)?;
+
+                Ok(result.save_path)
+            }
+            Err(e) => {
+                let snapshot = tools_download::mark_failed(&app, &tool_id, e.clone())?;
+                tools_download::broadcast_snapshot(&app, &snapshot)?;
+                Err(e)
+            }
+        }
     })
     .await
+}
+
+/// 各 Webview 启动或新 modal 打开时拉取 Rust 侧下载态快照。
+#[tauri::command]
+pub fn get_tools_download_state(app: AppHandle) -> Result<ToolsDownloadSnapshot, String> {
+    trace_result_fn("cmd.tools", "get_tools_download_state", || {
+        tools_download::get_snapshot(&app)
+    })
+}
+
+#[tauri::command]
+pub fn reset_tool_download_state(app: AppHandle, tool_id: String) -> Result<ToolsDownloadSnapshot, String> {
+    trace_result_fn("cmd.tools", "reset_tool_download_state", || {
+        let snapshot = tools_download::reset_tool(&app, &tool_id)?;
+        tools_download::broadcast_snapshot(&app, &snapshot)?;
+        Ok(snapshot)
+    })
 }
 
 #[tauri::command]
@@ -54,6 +98,16 @@ pub fn get_tools_manifest() -> Result<Vec<ToolManifestEntry>, String> {
 #[tauri::command]
 pub fn get_tools_install_state() -> Result<Vec<ToolInstallState>, String> {
     trace_result_fn("cmd.tools", "get_tools_install_state", || tools::gather_install_state())
+}
+
+/// 重新扫描安装态并广播到所有 Webview。
+#[tauri::command]
+pub fn refresh_tools_install_state(app: AppHandle) -> Result<Vec<ToolInstallState>, String> {
+    trace_result_fn("cmd.tools", "refresh_tools_install_state", || {
+        let states = tools::gather_install_state()?;
+        crate::events::tools_install_state_changed_all(&app, &states)?;
+        Ok(states)
+    })
 }
 
 /// 当前进程所在桌面平台（供前端判断 `windows` / `macos` 下是否有 `universal` 下载项）。

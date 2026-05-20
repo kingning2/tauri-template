@@ -5,8 +5,6 @@ import TauriEventProvider from '@/providers/tauri-event-provider'
 
 import GlobalProvider from './global-provider'
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error
 import '@/assets/globals.css'
 
 export const metadata: Metadata = {

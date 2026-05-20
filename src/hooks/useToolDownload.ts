@@ -2,21 +2,13 @@
 
 import { useCallback, useMemo } from "react";
 
-import { downloadToolStream } from "@/cmd/tools";
+import { downloadToolStream, resetToolDownloadState } from "@/cmd/tools";
 import {
   toolHasDownloadForPlatform,
   type HostDesktopPlatform,
   type ToolManifest
 } from "@/config/tools-manifest";
-import { DownloadPhase } from "@/enums/download-phase";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import {
-  downloadCompleted,
-  downloadFailed,
-  downloadProgressUpdated,
-  downloadReset,
-  downloadStarted
-} from "@/store/modules/download";
+import { useAppSelector } from "@/store/hooks";
 import { createIdleDownloadEntry } from "@/store/modules/download/types";
 import {
   selectProgressBarValue,
@@ -25,15 +17,14 @@ import {
 } from "@/store/modules/download/selectors";
 
 export function useToolDownload(toolId: string) {
-  const dispatch = useAppDispatch();
   const entry = useAppSelector(
     (state) => state.download.byToolId[toolId] ?? createIdleDownloadEntry()
   );
   const inFlight = useAppSelector((state) => state.download.byToolId[toolId]?.inFlight ?? false);
 
   const reset = useCallback(() => {
-    dispatch(downloadReset({ toolId }));
-  }, [dispatch, toolId]);
+    void resetToolDownloadState(toolId);
+  }, [toolId]);
 
   const start = useCallback(
     async (
@@ -47,34 +38,21 @@ export function useToolDownload(toolId: string) {
       }
       if (inFlight) return;
 
-      dispatch(downloadStarted({ toolId }));
-
       try {
-        const path = await downloadToolStream({
+        await downloadToolStream({
+          toolId,
           downloadSpec: tool.downloadSpec,
           relativeDir: tool.id,
-          onProgress: (p) => {
-            dispatch(
-              downloadProgressUpdated({
-                toolId,
-                downloaded: p.downloaded,
-                total: p.total ?? undefined
-              })
-            );
+          onProgress: () => {
+            /* 进度由 Rust 写入共享态并 `tools/download/changed` 广播，各窗 Redux 同步 */
           }
         });
-        dispatch(downloadCompleted({ toolId, savedPath: path }));
         options?.onCompleted?.();
-      } catch (e) {
-        dispatch(
-          downloadFailed({
-            toolId,
-            error: e instanceof Error ? e.message : String(e)
-          })
-        );
+      } catch {
+        /* 失败态由 Rust 广播 */
       }
     },
-    [dispatch, inFlight, toolId]
+    [inFlight, toolId]
   );
 
   const progressPercent = useMemo(() => selectProgressPercent(entry), [entry]);

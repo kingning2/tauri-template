@@ -4,7 +4,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 
 import { ModalMotionProvider } from "@/components/modal/modal-motion-provider";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
-import { isModalWindowLabel } from "@/config/modal-window";
+import { isModalWindowLabel } from "@/config/windows";
 
 export default function ModalWindowLayout({ children }: { children: React.ReactNode }) {
   useIsomorphicLayoutEffect(() => {

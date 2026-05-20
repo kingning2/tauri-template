@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
 use crate::events::{self, MAIN_WINDOW_LABEL};
-use crate::utils::session;
+use crate::context::{session, tools_download};
 
 static MODAL_SEQ: AtomicU32 = AtomicU32::new(0);
 
@@ -100,6 +100,7 @@ pub fn open_modal_window(
 
     register_modal_destroy_listener(app, &label);
     session::push_session_to_webview(app, &label)?;
+    tools_download::push_snapshot_to_webview(app, &label)?;
 
     events::modal_opened(app, &label)?;
 

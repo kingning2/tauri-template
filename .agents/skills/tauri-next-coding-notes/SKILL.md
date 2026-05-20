@@ -13,6 +13,9 @@ user-invocable: true
 - 前端：Next App Router + React + Redux Toolkit + shadcn/ui。
 - **Command 桥接**：`src/cmd/index.ts` 的 `invokeWrapper`（请求/响应）。
 - **Event 桥接**：`src-tauri/src/events/` ↔ `src/config/window-events.ts` + `src/utils/tauri-event.ts` + `TauriEventProvider`。
+- **跨 Webview 同步**：`src/events/cross-webview-sync.ts`（会话、下载 Redux、安装态 hook）。
+- **窗口配置**：`src/config/windows.ts`（主窗 `mainWindow`、modal 打开/关闭 command 封装）。
+- Rust **`context/`**：`.manage` 会话与下载态；**`utils/`**：无 Store 业务；**`cmd/`**：薄 command。
 - Rust 入口：`src-tauri/src/lib.rs`（`generate_handler!` + `events::setup`）。
 - i18n：`react-i18next` + `src-tauri/resources/languages/*.json`。
 - 主窗：`TitleBar` + `ContentContainer`，重点防止滚动条。
@@ -29,6 +32,7 @@ user-invocable: true
 6. **状态与副作用边界** → [state-and-effects.md](./rules/state-and-effects.md)
 7. **日志与错误处理** → [logging-and-errors.md](./rules/logging-and-errors.md)
 8. **提交前检查** → [preflight-checks.md](./rules/preflight-checks.md)
+9. **Rust 分层** → 仓库 `.cursor/rules/tauri-rust-layering.mdc`（`cmd` / `context` / `utils` / `platform`）
 
 ## 快速模式（常用）
 
@@ -50,8 +54,10 @@ const { t } = useTranslation('launcher')
 ```
 
 ```tsx
-// 订阅 Rust 推送（须在 TauriEventProvider 内）
-useTauriEventPayload<AppSession>(SESSION_CHANGED_EVENT, (session) => { /* sync store */ })
+// 打开 modal（Rust command，非 WebviewWindow API）
+import { useModalWindow } from '@/components/modal'
+const { openModal } = useModalWindow()
+await openModal({ name: 'activate', width: 720, height: 640 })
 ```
 
 ```rust

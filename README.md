@@ -49,17 +49,18 @@ src/                    # Next 前端
   app/                  # 路由与页面
   cmd/                  # Tauri invoke 封装
   components/           # 业务与 UI 组件
-  config/               # 窗口、事件名等配置
+  config/               # windows.ts、window-events.ts、tools-manifest 等
+  events/               # cross-webview-sync.ts（跨窗 Redux / 安装态）
   generated/            # typeshare 生成（勿手改）
-  hooks/                # 含 use-tauri-event
-  providers/            # Redux、会话桥、Tauri 事件
+  providers/            # Redux、TauriEventProvider
   store/                # Redux slices
   utils/tauri-event.ts  # emit / listen 工具
 
 src-tauri/src/
   cmd/                  # #[tauri::command] 薄入口
+  context/              # 跨 Webview 共享态（SessionStore、下载快照）
   events/               # 事件名、载荷、emit、listen
-  utils/                # 业务逻辑；platform/ 分平台
+  utils/                # 无 Store 业务逻辑；platform/ 分平台
   contracts.rs          # 对外导出契约类型
   lib.rs                # 应用入口与 handler 注册
 
@@ -134,20 +135,20 @@ docs: 补充 README 提交与编写规范
 
 适用：会话同步、modal 生命周期、前端写 Rust 日志、无需返回值的广播等。
 
-| 方向        | Rust                                        | 前端                                            |
-| ----------- | ------------------------------------------- | ----------------------------------------------- |
-| Rust → 前端 | `src-tauri/src/events/emit.rs`              | `useTauriEventListener` / `tauriOn`             |
-| 前端 → Rust | `src-tauri/src/events/handlers/`            | `tauriEmit`（`src/utils/tauri-event.ts`）       |
-| 事件名      | `events/names.rs`                           | `src/config/window-events.ts`（**两处须一致**） |
-| 载荷类型    | `events/payloads.rs`（部分 `#[typeshare]`） | `window-events.ts` 或 `@/generated/contracts`   |
+| 方向        | Rust                                        | 前端                                                                 |
+| ----------- | ------------------------------------------- | -------------------------------------------------------------------- |
+| Rust → 前端 | `src-tauri/src/events/emit.rs`              | `tauriOn` / `useTauriEventApi().on` / `cross-webview-sync` 全局订阅 |
+| 前端 → Rust | `src-tauri/src/events/handlers/`            | `tauriEmit`（`src/utils/tauri-event.ts`）                            |
+| 事件名      | `events/names.rs`                           | `src/config/window-events.ts`（**两处须一致**）                      |
+| 载荷类型    | `events/payloads.rs`（部分 `#[typeshare]`） | `window-events.ts` 或 `@/generated/contracts`                        |
 
-根布局已挂载 `TauriEventProvider`；组件内用 `useTauriEventApi` / `use-tauri-event` hooks。
+根布局已挂载 `TauriEventProvider`（内含 `CrossWebviewSyncSubscriptions`：会话 + 下载 Redux）。页面安装态用 `useToolsInstallStateSync`（`events/cross-webview-sync.ts`）。自定义监听可用 `useTauriEventApi()`。
 
 完整约定见 [tauri-events.md](./.agents/skills/tauri-next-coding-notes/rules/tauri-events.md)。
 
 ### 3. Rust 分层
 
-`cmd` 只做命令入口；业务在 `utils/`；平台差异在 `utils/platform/{windows,macos}/`。  
+`cmd` 只做命令入口；跨 Webview 共享态在 `context/`；业务在 `utils/`；平台差异在 `utils/platform/{windows,macos}/`。  
 Cursor 规则： [`.cursor/rules/tauri-rust-layering.mdc`](./.cursor/rules/tauri-rust-layering.mdc)
 
 ### 4. 其他强约束（技能内 rule）

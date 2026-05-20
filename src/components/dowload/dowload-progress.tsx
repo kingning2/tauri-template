@@ -4,7 +4,7 @@ import { ArrowDown } from "lucide-react";
 import { useId } from "react";
 
 import { buildDownloadWaveCapPath, useDownloadProgressAnimation } from "@/animation";
-import { DownloadPhase } from "@/enums/download-phase";
+import { DownloadPhase } from "@/generated/contracts";
 import { cn } from "@/lib/utils";
 
 export interface DowloadProgressProps {

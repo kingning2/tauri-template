@@ -8,7 +8,11 @@
   "definitions": {
     "ToolManifestEntry": {
       "type": "object",
-      "required": ["downloadSpec", "id", "variant"],
+      "required": [
+        "downloadSpec",
+        "id",
+        "variant"
+      ],
       "properties": {
         "id": {
           "type": "string"
@@ -61,11 +65,17 @@
         },
         "macosInstalledBundlePath": {
           "description": "macOS：若填写（例如 `/Applications/Gbyte Unlock.app`），「已安装」以该路径存在为准； 不写则回退为工具下载目录下的落地/解压判断。",
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "windowsMainExecutableRelative": {
           "description": "Windows：当 `InstallPath` 为**安装目录**（常见于 MSI/安装器写入）且**没有**配置 [`Self::windows_zip_install_steps`] 时，在此填写主程序相对该目录的路径，例如 `Gbyte Unlock.exe`。 与 zip 流程中的 `windowsZipInstallSteps.mainExecutableRelative` 二选一即可；若两者皆有，以 zip 步骤为准。",
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "windowsZipInstallSteps": {
           "description": "Windows：zip 解压后收尾的显式配置；未配置时从 `windows_main_executable_relative` 等字段推导。",
@@ -80,7 +90,10 @@
         },
         "downloadResolveBaseUrl": {
           "description": "使用 `downloadKey` 时的解析 API 地址（`GET ?name={downloadKey}`），默认见 `.env`。",
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },
@@ -121,19 +134,30 @@
     },
     "DownloadArtifact": {
       "type": "object",
-      "required": ["kind"],
+      "required": [
+        "kind"
+      ],
       "properties": {
         "url": {
           "description": "直接下载地址；与 `downloadKey` 二选一。",
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "downloadKey": {
           "description": "下载解析 API 的 key，请求 `{downloadResolveBaseUrl}/{key}` 获取真实 `url`。",
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "fileName": {
           "description": "本地保存文件名；未填时从 `url`（含接口返回的 url）路径推导。",
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "kind": {
           "$ref": "#/definitions/DownloadPayloadKind"
@@ -142,12 +166,18 @@
     },
     "DownloadPayloadKind": {
       "type": "string",
-      "enum": ["zip", "executable"]
+      "enum": [
+        "zip",
+        "executable"
+      ]
     },
     "WindowsProductRegistry": {
       "description": "Windows：按「产品」区分的注册表位置（与安装器写入的 `Uninstall` 子键 + `HKLM\\SOFTWARE\\...` 数据根一致）。",
       "type": "object",
-      "required": ["hklmSoftwarePath", "uninstallSubkey"],
+      "required": [
+        "hklmSoftwarePath",
+        "uninstallSubkey"
+      ],
       "properties": {
         "hklmSoftwarePath": {
           "description": "例如 `SOFTWARE\\Gbyte\\Unlock`（从 HKLM 起算的相对路径，与安装器 `REGISTRY_DATA_ROOT` 同形）。",
@@ -205,13 +235,20 @@
         },
         "slintRendererName": {
           "description": "写入 HKLM 产品键 `SlintRendererName`（与安装器 `ui_event.ts` 一致）；未配置则跳过。",
-          "type": ["string", "null"]
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },
     "ToolVariant": {
       "type": "string",
-      "enum": ["hero-left", "medium", "small"]
+      "enum": [
+        "hero-left",
+        "medium",
+        "small"
+      ]
     }
   }
 }

@@ -8,6 +8,11 @@ import LauncherMediumToolCard from "@/components/launcher/launcher-medium-tool-c
 import LauncherSmallToolCard from "@/components/launcher/launcher-small-tool-card";
 import { getRuntimeHostPlatform, getToolsInstallState, getToolsManifest } from "@/cmd/tools";
 import type { HostDesktopPlatform, ToolInstallState, ToolManifest } from "@/config/tools-manifest";
+import {
+  installStateByToolId,
+  refreshToolsInstallStateAcrossWindows,
+  useToolsInstallStateSync
+} from "@/events/cross-webview-sync";
 import { mainWindowBg } from "@/config/main-window-bg";
 import { ToolVariant } from "@/enums/tool-variant";
 import { useAppDispatch } from "@/store/hooks";
@@ -20,10 +25,12 @@ export default function MainWindowHome() {
   const [installByToolId, setInstallByToolId] = useState<Record<string, ToolInstallState>>({});
 
   const refreshInstallState = useCallback(() => {
-    void getToolsInstallState().then((list) => {
-      setInstallByToolId(Object.fromEntries(list.map((s) => [s.toolId, s])));
+    void refreshToolsInstallStateAcrossWindows().then((list) => {
+      setInstallByToolId(installStateByToolId(list));
     });
   }, []);
+
+  useToolsInstallStateSync(setInstallByToolId);
 
   useEffect(() => {
     dispatch(changeMainWindowGlobalGgAction(mainWindowBg.heroGradient));

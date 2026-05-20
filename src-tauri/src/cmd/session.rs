@@ -1,6 +1,6 @@
 use tauri::AppHandle;
 
-use crate::utils::session::{self, AppSession};
+use crate::context::session::{self, AppSession};
 
 #[tauri::command]
 pub fn get_app_session(app: AppHandle) -> Result<AppSession, String> {

@@ -7,7 +7,7 @@ import { getAppSession } from "@/cmd/session";
 import type { AppStore } from "@/store";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { changeInitializedAction } from "@/store/modules/app";
-import { applySessionToStore } from "@/events/session";
+import { applySessionToStore } from "@/events/cross-webview-sync";
 
 export default function InitGuard({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();

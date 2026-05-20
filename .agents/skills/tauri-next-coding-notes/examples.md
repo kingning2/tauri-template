@@ -85,18 +85,40 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
 }
 ```
 
-## 5) 订阅 Rust 事件
+## 5) 跨 Webview 状态同步
 
 ```tsx
-'use client'
-import { SESSION_CHANGED_EVENT } from '@/config/window-events'
-import { useTauriEventPayload } from '@/hooks/use-tauri-event'
-import type { AppSession } from '@/generated/contracts'
+// 根布局已挂载 TauriEventProvider → CrossWebviewSyncSubscriptions
+// 会话 / 下载 Redux 无需页面手写订阅
 
-export function SessionListener({ onSession }: { onSession: (s: AppSession) => void }) {
-  useTauriEventPayload<AppSession>(SESSION_CHANGED_EVENT, onSession)
-  return null
-}
+// 首屏拉会话（与 session/changed 互补）
+import { applySessionToStore } from '@/events/cross-webview-sync'
+import { getAppSession } from '@/cmd/session'
+
+void getAppSession().then((session) => applySessionToStore(store, session))
+```
+
+```tsx
+// 页面安装态（本地 state + Rust 广播）
+import {
+  refreshToolsInstallStateAcrossWindows,
+  useToolsInstallStateSync
+} from '@/events/cross-webview-sync'
+
+const [installByToolId, setInstallByToolId] = useState<Record<string, ToolInstallState>>({})
+useToolsInstallStateSync(setInstallByToolId)
+void refreshToolsInstallStateAcrossWindows().then((list) =>
+  setInstallByToolId(installStateByToolId(list))
+)
+```
+
+```tsx
+// 自定义事件监听（须在 TauriEventProvider 子树内）
+import { useTauriEventApi } from '@/providers/tauri-event-provider'
+import { MODAL_OPENED_EVENT } from '@/config/windows'
+
+const { on } = useTauriEventApi()
+useEffect(() => on(MODAL_OPENED_EVENT, handler), [on])
 ```
 
 ```ts

@@ -12,7 +12,7 @@ import {
   resetBadgeMotionDom,
   type DownloadBadgeElements
 } from "@/animation/download";
-import { DownloadPhase } from "@/enums/download-phase";
+import { DownloadPhase } from "@/generated/contracts";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 
 export interface UseDownloadBadgeAnimationOptions {

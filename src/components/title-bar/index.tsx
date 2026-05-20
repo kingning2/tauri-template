@@ -32,7 +32,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { mainWindow } from '@/config/popup-window'
+import { mainWindow } from '@/config/windows'
 import { cn } from '@/lib/utils'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { changeCurrentLanguageAction } from '@/store/modules/app'
@@ -79,7 +79,7 @@ const TitleBar = memo((props: { height?: number }) => {
       if (next === currentLanguage) return
       try {
         await setLang(next)
-        /* 语言写入 Rust 后会广播 session/changed，各 Webview Redux 由 events/session 订阅更新 */
+        /* 语言写入 Rust 后会广播 session/changed，各 Webview Redux 由 cross-webview-sync 订阅更新 */
       } catch {
         dispatch(changeCurrentLanguageAction(next))
       }

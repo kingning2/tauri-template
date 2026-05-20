@@ -7,7 +7,11 @@ import type {
   ToolInstallState,
   ToolManifest
 } from "@/config/tools-manifest";
-import type { HostDesktopPlatform, ToolDownloadProgress } from "@/generated/contracts";
+import type {
+  HostDesktopPlatform,
+  ToolDownloadProgress,
+  ToolsDownloadSnapshot
+} from "@/generated/contracts";
 
 export type { ToolDownloadProgress };
 
@@ -37,6 +41,7 @@ export async function openToolExecutable(args: OpenToolExecutableArgs) {
 }
 
 export async function downloadToolStream(args: {
+  toolId: string;
   downloadSpec: PlatformDownloadSpec;
   relativeDir: string;
   onProgress: (p: ToolDownloadProgress) => void;
@@ -47,8 +52,21 @@ export async function downloadToolStream(args: {
   };
 
   return await invokeWrapper<string>("download_tool", {
+    toolId: args.toolId,
     downloadSpec: args.downloadSpec,
     relativeDir: args.relativeDir,
     onProgress: channel
   });
+}
+
+export async function getToolsDownloadState() {
+  return await invokeWrapper<ToolsDownloadSnapshot>("get_tools_download_state");
+}
+
+export async function resetToolDownloadState(toolId: string) {
+  return await invokeWrapper<ToolsDownloadSnapshot>("reset_tool_download_state", { toolId });
+}
+
+export async function refreshToolsInstallState() {
+  return await invokeWrapper<ToolInstallState[]>("refresh_tools_install_state");
 }

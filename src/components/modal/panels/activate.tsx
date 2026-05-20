@@ -9,6 +9,11 @@ import { useModalMotion } from '@/components/modal/modal-motion-provider'
 import { Button } from '@/components/ui/button'
 import { getRuntimeHostPlatform, getToolsInstallState, getToolsManifest, openToolExecutable } from '@/cmd/tools'
 import {
+  installStateByToolId,
+  refreshToolsInstallStateAcrossWindows,
+  useToolsInstallStateSync
+} from '@/events/cross-webview-sync'
+import {
   openToolArgsFromDownloadSpec,
   toolHasDownloadForPlatform,
   toolIdToI18nKey,
@@ -16,7 +21,7 @@ import {
   type ToolInstallState,
   type ToolManifest
 } from '@/config/tools-manifest'
-import { DownloadPhase } from '@/enums/download-phase'
+import { DownloadPhase } from '@/generated/contracts'
 import { useToolDownload } from '@/hooks/useToolDownload'
 import { cn } from '@/lib/utils'
 
@@ -198,10 +203,12 @@ export function ActivatePanel() {
   const [licenseCode, setLicenseCode] = useState('')
 
   const refreshInstallState = useCallback(() => {
-    void getToolsInstallState().then((list) => {
-      setInstallByToolId(Object.fromEntries(list.map((s) => [s.toolId, s])))
+    void refreshToolsInstallStateAcrossWindows().then((list) => {
+      setInstallByToolId(installStateByToolId(list))
     })
   }, [])
+
+  useToolsInstallStateSync(setInstallByToolId)
 
   const fetchProducts = useCallback(async (options?: { showLoading?: boolean }) => {
     if (options?.showLoading) setLoading(true)

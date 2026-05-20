@@ -12,3 +12,6 @@ pub use crate::utils::platform::download::{
 pub use crate::utils::platform::open_tool::OpenToolExecutableArgs;
 pub use crate::events::payloads::AppSession;
 pub use crate::utils::tools::ToolInstallState;
+pub use crate::context::tools_download::{
+    DownloadPhase, ToolDownloadEntry, ToolsDownloadSnapshot,
+};

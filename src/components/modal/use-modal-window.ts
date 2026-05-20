@@ -6,7 +6,7 @@ import {
   closeModalWindowCommand,
   openModalWindowCommand,
   type OpenModalWindowOptions
-} from "@/config/modal-window";
+} from "@/config/windows";
 
 export function useModalWindow() {
   const openModal = useCallback(async (options: OpenModalWindowOptions) => {

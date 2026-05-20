@@ -11,7 +11,7 @@ import {
   type HostDesktopPlatform,
   type ToolManifest
 } from "@/config/tools-manifest";
-import { DownloadPhase } from "@/enums/download-phase";
+import { DownloadPhase } from "@/generated/contracts";
 import { useToolDownload } from "@/hooks/useToolDownload";
 import { cn } from "@/lib/utils";
 import DowloadProgress from "./dowload-progress";
@@ -21,7 +21,7 @@ export interface DowloadCardRenderArgs {
   busy: boolean;
   done: boolean;
   failed: boolean;
-  error: string | null;
+  error: string | undefined;
   interactive: boolean;
   startDownload: () => void;
 }

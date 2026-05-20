@@ -4,12 +4,15 @@
 export type {
   DownloadArtifact,
   DownloadPayloadKind,
+  DownloadPhase,
   HostDesktopPlatform,
   OpenToolExecutableArgs,
   PlatformArtifacts,
   PlatformDownloadSpec,
+  ToolDownloadEntry,
   ToolInstallState,
   ToolManifestEntry,
+  ToolsDownloadSnapshot,
   ToolVariant,
   WindowsProductRegistry,
   WindowsZipInstallSteps
@@ -45,9 +48,6 @@ export function toolHasDownloadForPlatform(
     artifactHasDownloadSource(arts.arm64)
   );
 }
-
-/** @deprecated 使用 `toolHasDownloadForPlatform` */
-export const toolHasUniversalDownloadForPlatform = toolHasDownloadForPlatform;
 
 /** i18n key suffix under namespace `tools`, e.g. system_repair -> tools:system_repair.title */
 export function toolIdToI18nKey(id: string): string {

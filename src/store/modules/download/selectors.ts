@@ -1,4 +1,4 @@
-import { DownloadPhase } from "@/enums/download-phase";
+import { DownloadPhase } from "@/generated/contracts";
 
 import type { ToolDownloadEntry } from "./types";
 

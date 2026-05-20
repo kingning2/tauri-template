@@ -136,13 +136,20 @@ fn build_relative_download_path(relative_dir: &str, file_name: &str) -> Result<S
 pub async fn download_tool_file_by_platform(
     app: &AppHandle,
     spec: &PlatformDownloadSpec,
+    tool_id: &str,
     relative_dir: &str,
     on_progress: Channel<ToolDownloadProgress>,
 ) -> Result<PlatformDownloadResult, String> {
     let artifact = resolve_download_artifact(spec).await?;
     let relative_path = build_relative_download_path(relative_dir, &artifact.file_name)?;
-    let save_path =
-        download_tool_file_retries_range(app, &artifact.url, &relative_path, on_progress).await?;
+    let save_path = download_tool_file_retries_range(
+        app,
+        tool_id,
+        &artifact.url,
+        &relative_path,
+        on_progress,
+    )
+    .await?;
 
     Ok(PlatformDownloadResult {
         save_path,
@@ -204,7 +211,8 @@ pub fn tools_download_base_dir() -> Result<PathBuf, String> {
 /// # 返回
 /// 保存完成后的落地路径字符串（期望为 UTF-8）
 pub async fn download_tool_file_retries_range(
-    _app: &AppHandle,
+    app: &AppHandle,
+    tool_id: &str,
     url: &str,
     relative_path: &str,
     on_progress: Channel<ToolDownloadProgress>,
@@ -345,12 +353,12 @@ pub async fn download_tool_file_retries_range(
 
         // If we resumed successfully, make UI reflect already-written bytes.
         if resume_supported && existing_size > 0 {
+            let downloaded = u32::try_from(existing_size).unwrap_or(u32::MAX) as i32;
+            let total = total_hint.and_then(|t| u32::try_from(t).ok().map(|n| n as i32));
             on_progress
-                .send(ToolDownloadProgress {
-                    downloaded: u32::try_from(existing_size).unwrap_or(u32::MAX) as i32,
-                    total: total_hint.and_then(|t| u32::try_from(t).ok().map(|n| n as i32)),
-                })
+                .send(ToolDownloadProgress { downloaded, total })
                 .map_err(|e| e.to_string())?;
+            crate::context::tools_download::sync_progress_and_broadcast(app, tool_id, downloaded, total);
         }
 
         let mut stream = response.bytes_stream();
@@ -373,12 +381,20 @@ pub async fn download_tool_file_retries_range(
             downloaded += chunk_len;
             bytes_since_progress_log += chunk_len;
 
+            let downloaded_i32 = u32::try_from(downloaded).unwrap_or(u32::MAX) as i32;
+            let total_i32 = total_hint.and_then(|t| u32::try_from(t).ok().map(|n| n as i32));
             on_progress
                 .send(ToolDownloadProgress {
-                    downloaded: u32::try_from(downloaded).unwrap_or(u32::MAX) as i32,
-                    total: total_hint.and_then(|t| u32::try_from(t).ok().map(|n| n as i32)),
+                    downloaded: downloaded_i32,
+                    total: total_i32,
                 })
                 .map_err(|e| e.to_string())?;
+            crate::context::tools_download::sync_progress_and_broadcast(
+                app,
+                tool_id,
+                downloaded_i32,
+                total_i32,
+            );
 
             let elapsed = last_progress_log.elapsed();
             if bytes_since_progress_log >= PROGRESS_LOG_MIN_BYTES

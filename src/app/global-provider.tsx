@@ -1,6 +1,6 @@
 "use client";
 
-import { initWindowConfig } from "@/config/popup-window";
+import { initWindowConfig } from "@/config/windows";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 
 import InitGuard from "@/guards/global/init-guard";
