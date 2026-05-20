@@ -26,7 +26,8 @@
       "macosInstalledBundlePath": "/Applications/Repair.app"
     },
     "hot": true,
-    "variant": "hero-left"
+    "variant": "hero-left",
+    "purchaseUrl": "https://www.gbyte.com/pricing/ios-system-repair"
   },
   {
     "id": "phone-unlock",
@@ -55,7 +56,8 @@
       "macosInstalledBundlePath": "/Applications/Unlock.app"
     },
     "hot": false,
-    "variant": "medium"
+    "variant": "medium",
+    "purchaseUrl": "https://www.gbyte.com/pricing/iphone-unlock"
   },
   {
     "id": "virtual-location",
@@ -142,7 +144,8 @@
       "macosInstalledBundlePath": "/Applications/Data Recovery.app"
     },
     "hot": false,
-    "variant": "small"
+    "variant": "small",
+    "purchaseUrl": "https://www.gbyte.com/pricing/ios-data-recovery"
   },
   {
     "id": "social-transfer",

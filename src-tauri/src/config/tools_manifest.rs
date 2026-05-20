@@ -25,6 +25,9 @@ pub struct ToolManifestEntry {
     #[serde(default)]
     pub hot: bool,
     pub variant: crate::utils::platform::download::ToolVariant,
+    /// 官网购买页；未配置时前端不展示可点击的「购买」入口。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub purchase_url: Option<String>,
 }
 
 fn load_tools_manifest() -> Vec<ToolManifestEntry> {

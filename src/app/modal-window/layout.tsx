@@ -2,7 +2,7 @@
 
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
-import { ModalMotionProvider } from "@/components/modal/modal-motion-provider";
+import { ModalMotionProvider } from "@/components/modal";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 import { isModalWindowLabel } from "@/config/windows";
 

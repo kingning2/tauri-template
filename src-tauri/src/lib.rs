@@ -38,6 +38,8 @@ pub fn run() {
             cmd::log::log_fe_req,
             cmd::window::open_modal_window,
             cmd::window::close_modal_window,
+            cmd::window::modal_window_ready,
+            cmd::window::preload_modal_window,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

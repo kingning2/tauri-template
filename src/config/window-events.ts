@@ -6,6 +6,8 @@ export const MAIN_WINDOW_LABEL = "main";
 /** 主窗 modal 蒙层（Rust emit_to main） */
 export const MODAL_OPENED_EVENT = "modal/opened";
 export const MODAL_CLOSED_EVENT = "modal/closed";
+/** Rust → modal 子窗：切换面板（单窗复用，不新建 Webview） */
+export const MODAL_OPEN_PANEL_EVENT = "modal/open-panel";
 
 /** Rust 会话变更广播（跨 Webview IPC，各窗监听后写入本地 Redux） */
 export const SESSION_CHANGED_EVENT = "session/changed";
@@ -26,6 +28,11 @@ export type ToolsInstallStateChangedPayload = ToolInstallState[];
 
 export type ModalLifecyclePayload = {
   label: string;
+};
+
+export type ModalOpenPanelPayload = {
+  name: string;
+  title?: string;
 };
 
 export type FeLogLevel = "info" | "error" | "warn";

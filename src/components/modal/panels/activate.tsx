@@ -1,13 +1,19 @@
 'use client'
 
+import { openUrl } from '@tauri-apps/plugin-opener'
 import { Info, RefreshCw, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Modal } from '../modal'
 import { toolLauncherIconGradient, ToolGlyph } from '@/components/launcher/launcher-tool-card'
-import { useModalMotion } from '@/components/modal/modal-motion-provider'
 import { Button } from '@/components/ui/button'
-import { getRuntimeHostPlatform, getToolsInstallState, getToolsManifest, openToolExecutable } from '@/cmd/tools'
+import {
+  getRuntimeHostPlatform,
+  getToolsInstallState,
+  getToolsManifest,
+  openToolExecutable
+} from '@/cmd/tools'
 import {
   installStateByToolId,
   refreshToolsInstallStateAcrossWindows,
@@ -23,69 +29,28 @@ import {
 } from '@/config/tools-manifest'
 import { DownloadPhase } from '@/generated/contracts'
 import { useToolDownload } from '@/hooks/useToolDownload'
+import { isToolActivated } from '@/lib/tool-activation'
 import { cn } from '@/lib/utils'
 
 type HeaderMode = 'overview' | 'license'
-type RowAction = 'open' | 'download' | 'buy'
+type RowAction = 'open' | 'buy' | 'download'
 
-function ActivateHeaderChrome({
-  children,
-  loading,
-  onRefresh,
-  onClose,
-  closeLabel
-}: {
-  children: React.ReactNode
-  loading: boolean
-  onRefresh: () => void
-  onClose: () => void
-  closeLabel: string
-}) {
-  const { t } = useTranslation('modal_window')
-
-  return (
-    <header
-      data-tauri-drag-region
-      className="relative shrink-0 overflow-hidden border-b border-violet-100/80 bg-linear-to-br from-violet-50 via-indigo-50/90 to-sky-50 px-5 pt-4 pb-5"
-    >
-      <div className="pointer-events-none absolute inset-0 opacity-40" aria-hidden>
-        <div className="absolute -top-6 right-8 size-24 rotate-12 rounded-lg bg-violet-200/50" />
-        <div className="absolute top-10 right-24 size-16 -rotate-6 rounded-md bg-sky-200/40" />
-        <div className="absolute right-40 bottom-2 size-20 rotate-45 rounded-lg bg-indigo-100/60" />
-      </div>
-      <div className="relative space-y-4 pr-20">
-        {children}
-        <div className="absolute top-0 right-0 flex items-center gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-8 text-slate-500 hover:bg-white/60 hover:text-slate-700"
-            onClick={onRefresh}
-            aria-label={t('activate_refresh')}
-          >
-            <RefreshCw className={cn('size-4', loading && 'animate-spin')} />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-8 text-slate-500 hover:bg-white/60 hover:text-slate-700"
-            onClick={onClose}
-            aria-label={closeLabel}
-          >
-            <X className="size-4" />
-          </Button>
-        </div>
-      </div>
-    </header>
-  )
+/** 未安装 → 下载；已安装且已激活 → 打开；已安装未激活 → 购买。 */
+function resolveRowAction(installed: boolean, activated: boolean): RowAction {
+  if (!installed) return 'download'
+  if (activated) return 'open'
+  return 'buy'
 }
 
-function resolveRowAction(installed: boolean, canDownload: boolean): RowAction {
-  if (installed) return 'open'
-  if (canDownload) return 'download'
-  return 'buy'
+function rowActionLabel(
+  action: RowAction,
+  busy: boolean,
+  tCommon: (key: string) => string,
+  tTitle: (key: string) => string
+): string {
+  if (action === 'open') return tCommon('open')
+  if (action === 'download') return busy ? tCommon('downloading') : tCommon('download')
+  return tTitle('buy_now')
 }
 
 function ActivateSpinner() {
@@ -107,10 +72,13 @@ function ActivateLoading({ label }: { label: string }) {
   )
 }
 
+const activateHeaderClassName =
+  'border-violet-100/80 bg-linear-to-br from-violet-50 via-indigo-50/90 to-sky-50'
+
 type ActivateProductRowProps = {
   tool: ToolManifest
   hostPlatform: HostDesktopPlatform | null
-  installed: boolean
+  toolInstallState?: ToolInstallState
   title: string
   description: string
   iconGrad: string
@@ -120,7 +88,7 @@ type ActivateProductRowProps = {
 function ActivateProductRow({
   tool,
   hostPlatform,
-  installed,
+  toolInstallState,
   title,
   description,
   iconGrad,
@@ -130,21 +98,21 @@ function ActivateProductRow({
   const { t: tCommon } = useTranslation('common')
   const { phase, start } = useToolDownload(tool.id)
 
+  const installed = !!toolInstallState?.installed
+  const activated = isToolActivated(tool.id)
   const canDownload =
     hostPlatform != null && toolHasDownloadForPlatform(tool.downloadSpec, hostPlatform)
-  const action = resolveRowAction(installed, canDownload)
+  const purchaseUrl = tool.purchaseUrl?.trim() ?? ''
+  const action = resolveRowAction(installed, activated)
   const busy = phase === DownloadPhase.Downloading
+  const actionDisabled =
+    (action === 'download' && (!canDownload || busy)) ||
+    (action === 'buy' && !purchaseUrl)
 
-  const actionLabel =
-    action === 'open'
-      ? tCommon('open')
-      : action === 'download'
-        ? busy
-          ? tCommon('downloading')
-          : tCommon('download')
-        : tTitle('buy_now')
+  const actionLabel = rowActionLabel(action, busy, tCommon, tTitle)
 
   const handleAction = () => {
+    if (actionDisabled) return
     if (action === 'open') {
       void openToolExecutable(openToolArgsFromDownloadSpec(tool.downloadSpec))
       return
@@ -152,7 +120,9 @@ function ActivateProductRow({
     if (action === 'download') {
       if (!hostPlatform || busy) return
       void start(tool, hostPlatform, { onCompleted: onInstallStateRefresh })
+      return
     }
+    void openUrl(purchaseUrl)
   }
 
   return (
@@ -172,7 +142,7 @@ function ActivateProductRow({
       <Button
         type="button"
         size="sm"
-        disabled={action === 'download' && busy}
+        disabled={actionDisabled}
         onClick={handleAction}
         className={cn(
           'h-8 shrink-0 rounded-full px-4 text-xs font-semibold text-white shadow-sm',
@@ -194,7 +164,6 @@ export function ActivatePanel() {
   const { t } = useTranslation('modal_window')
   const { t: tTools } = useTranslation('tools')
   const { t: tTitle } = useTranslation('title_bar')
-  const { requestClose } = useModalMotion()
   const [loading, setLoading] = useState(true)
   const [tools, setTools] = useState<ToolManifest[] | null>(null)
   const [hostPlatform, setHostPlatform] = useState<HostDesktopPlatform | null>(null)
@@ -258,78 +227,93 @@ export function ActivatePanel() {
     // TODO: 接入授權碼啟用 command
   }
 
-  return (
-    <div className="modal-window flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
-      <ActivateHeaderChrome
-        loading={loading}
-        onRefresh={onRefresh}
-        onClose={() => requestClose()}
-        closeLabel={tTitle('close')}
-      >
-        {headerMode === 'overview' ? (
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1" data-tauri-drag-region>
-              <h1 className="text-lg leading-tight font-bold tracking-tight text-slate-800">
-                {t('activate_welcome_title', { app: tTitle('app_name') })}
-              </h1>
-              <p className="mt-2 max-w-xl text-xs leading-relaxed text-slate-500">
-                {t('activate_welcome_subtitle')}
-              </p>
-            </div>
-            <Button
-              type="button"
-              size="sm"
-              className="h-8 shrink-0 rounded-full bg-linear-to-r from-orange-400 to-pink-500 px-4 text-xs font-semibold text-white shadow-md hover:from-orange-500 hover:to-pink-600"
-              onClick={() => setHeaderMode('license')}
-            >
-              {t('activate_enter_license')}
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center gap-2" data-tauri-drag-region>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-7 shrink-0 px-2 text-xs text-slate-500 hover:text-slate-700"
-                onClick={() => setHeaderMode('overview')}
-              >
-                {t('activate_back')}
-              </Button>
-              <h1 className="text-lg leading-tight font-bold tracking-tight text-slate-800">
-                {t('activate_form_title', { app: tTitle('app_name') })}
-              </h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <input
-                type="text"
-                value={licenseCode}
-                onChange={(e) => setLicenseCode(e.target.value)}
-                placeholder={t('activate_license_placeholder')}
-                className="border-border/80 focus:border-sky-400 focus:ring-sky-400/30 h-11 min-w-0 flex-1 rounded-full border bg-white px-4 text-sm text-slate-800 shadow-sm outline-none focus:ring-2"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSubmitLicense()
-                }}
-              />
-              <Button
-                type="button"
-                size="sm"
-                disabled={!licenseCode.trim()}
-                onClick={handleSubmitLicense}
-                className="h-11 shrink-0 rounded-full bg-linear-to-r from-orange-400 to-pink-500 px-6 text-sm font-semibold text-white shadow-md hover:from-orange-500 hover:to-pink-600 disabled:opacity-50"
-              >
-                {t('activate_submit')}
-              </Button>
-            </div>
-            <p className="flex items-start gap-1.5 text-xs leading-relaxed text-slate-500">
-              <Info className="mt-0.5 size-3.5 shrink-0 text-sky-500" aria-hidden />
-              {t('activate_license_hint')}
-            </p>
-          </>
-        )}
-      </ActivateHeaderChrome>
+  const modalTitle =
+    headerMode === 'overview' ? (
+      <div>
+        <h1 className="text-lg leading-tight font-bold tracking-tight text-slate-800">
+          {t('activate_welcome_title', { app: tTitle('app_name') })}
+        </h1>
+        <p className="mt-2 max-w-xl text-xs leading-relaxed text-slate-500">
+          {t('activate_welcome_subtitle')}
+        </p>
+      </div>
+    ) : (
+      <div className="w-full space-y-4 pr-2">
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="pointer-events-auto h-7 shrink-0 px-2 text-xs text-slate-500 hover:text-slate-700"
+            onClick={() => setHeaderMode('overview')}
+          >
+            {t('activate_back')}
+          </Button>
+          <h1 className="text-lg leading-tight font-bold tracking-tight text-slate-800">
+            {t('activate_form_title', { app: tTitle('app_name') })}
+          </h1>
+        </div>
+        <div className="pointer-events-auto flex items-center gap-3">
+          <input
+            type="text"
+            value={licenseCode}
+            onChange={(e) => setLicenseCode(e.target.value)}
+            placeholder={t('activate_license_placeholder')}
+            className="border-border/80 h-11 min-w-0 flex-1 rounded-full border bg-white px-4 text-sm text-slate-800 shadow-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSubmitLicense()
+            }}
+          />
+          <Button
+            type="button"
+            size="sm"
+            disabled={!licenseCode.trim()}
+            onClick={handleSubmitLicense}
+            className="h-11 shrink-0 rounded-full bg-linear-to-r from-orange-400 to-pink-500 px-6 text-sm font-semibold text-white shadow-md hover:from-orange-500 hover:to-pink-600 disabled:opacity-50"
+          >
+            {t('activate_submit')}
+          </Button>
+        </div>
+        <p className="flex items-start gap-1.5 text-xs leading-relaxed text-slate-500">
+          <Info className="mt-0.5 size-3.5 shrink-0 text-sky-500" aria-hidden />
+          {t('activate_license_hint')}
+        </p>
+      </div>
+    )
 
+  const headerToolbar = (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className="size-8 text-slate-500 hover:bg-white/60 hover:text-slate-700"
+      onClick={onRefresh}
+      aria-label={t('activate_refresh')}
+    >
+      <RefreshCw className={cn('size-4', loading && 'animate-spin')} />
+    </Button>
+  )
+
+  const headerExtra =
+    headerMode === 'overview' ? (
+      <Button
+        type="button"
+        size="sm"
+        className="h-8 rounded-full bg-linear-to-r from-orange-400 to-pink-500 px-4 text-xs font-semibold text-white shadow-md hover:from-orange-500 hover:to-pink-600"
+        onClick={() => setHeaderMode('license')}
+      >
+        {t('activate_enter_license')}
+      </Button>
+    ) : null
+
+  return (
+    <Modal
+      title={modalTitle}
+      toolbar={headerToolbar}
+      extra={headerExtra}
+      headerClassName={activateHeaderClassName}
+      bodyClassName="flex min-h-0 flex-1 flex-col overflow-hidden p-0"
+    >
       <div className="scrollbar-themed min-h-0 flex-1 overflow-auto bg-white">
         {loading ? (
           <ActivateLoading label={t('activate_loading')} />
@@ -346,7 +330,7 @@ export function ActivatePanel() {
                   key={tool.id}
                   tool={tool}
                   hostPlatform={hostPlatform}
-                  installed={!!installByToolId[tool.id]?.installed}
+                  toolInstallState={installByToolId[tool.id]}
                   title={tTools(`${i18nKey}.title`)}
                   description={tTools(`${i18nKey}.description`)}
                   iconGrad={toolLauncherIconGradient(tool.id)}
@@ -357,6 +341,6 @@ export function ActivatePanel() {
           </ul>
         )}
       </div>
-    </div>
+    </Modal>
   )
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import AppErrorView from "@/components/error/app-error-view";
-import { useModalMotion } from "@/components/modal/modal-motion-provider";
+import { useModalMotion } from "@/components/modal";
 
 type ErrorProps = {
   error: Error & { digest?: string };

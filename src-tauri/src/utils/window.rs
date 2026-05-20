@@ -1,13 +1,22 @@
-//! Modal 子窗口创建与生命周期（parent=main，会话推送，主窗蒙层事件）。
+//! Modal 子窗口：单窗 `modal`、可预热隐藏、打开时 show、关闭 hide 复用。
+//!
+//! 主窗与 modal 各为独立 Webview（系统层多进程/线程渲染），预热在空闲时完成，
+//! 避免首次 `open` 阻塞主窗。
 
-use std::sync::atomic::{AtomicU32, Ordering};
+use tauri::{
+    AppHandle, Emitter, LogicalSize, Manager, PhysicalPosition, WebviewUrl, WebviewWindowBuilder,
+    WindowEvent,
+};
 
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
-
-use crate::events::{self, MAIN_WINDOW_LABEL};
 use crate::context::{session, tools_download};
+use crate::events::{self, payloads::ModalOpenPanelPayload, MAIN_WINDOW_LABEL};
 
-static MODAL_SEQ: AtomicU32 = AtomicU32::new(0);
+/// 唯一 modal 子窗口 label（与 `src/config/windows.ts` 的 `DEFAULT_MODAL_LABEL` 一致）
+pub const MODAL_WINDOW_LABEL: &str = "modal";
+
+const MODAL_PRELOAD_PATH: &str = "/modal-window";
+const MODAL_DEFAULT_WIDTH: f64 = 720.0;
+const MODAL_DEFAULT_HEIGHT: f64 = 640.0;
 
 fn normalize_path(path: &str) -> String {
     if path.starts_with('/') {
@@ -41,11 +50,18 @@ fn resolve_modal_url(app: &AppHandle, path: &str) -> Result<WebviewUrl, String> 
     }
 }
 
-fn next_modal_label(label: Option<String>) -> String {
-    label.unwrap_or_else(|| {
-        let n = MODAL_SEQ.fetch_add(1, Ordering::Relaxed) + 1;
-        format!("modal-{n}")
-    })
+fn panel_name_from_path(path: &str) -> String {
+    let normalized = normalize_path(path);
+    let fake = format!("http://local{normalized}");
+    let Ok(parsed) = url::Url::parse(&fake) else {
+        return String::new();
+    };
+    for (key, value) in parsed.query_pairs() {
+        if key == "name" {
+            return value.into_owned();
+        }
+    }
+    String::new()
 }
 
 fn register_modal_destroy_listener(app: &AppHandle, label: &str) {
@@ -61,58 +77,183 @@ fn register_modal_destroy_listener(app: &AppHandle, label: &str) {
     });
 }
 
-pub fn open_modal_window(
+fn emit_open_panel(
     app: &AppHandle,
-    path: String,
+    label: &str,
+    panel_name: String,
     title: Option<String>,
-    width: Option<f64>,
-    height: Option<f64>,
-    label: Option<String>,
-) -> Result<String, String> {
-    let label = next_modal_label(label);
+) -> Result<(), String> {
+    app.emit_to(
+        label,
+        events::names::MODAL_OPEN_PANEL,
+        ModalOpenPanelPayload {
+            name: panel_name,
+            title,
+        },
+    )
+    .map_err(|e| e.to_string())
+}
 
-    if let Some(existing) = app.get_webview_window(&label) {
-        existing.set_focus().map_err(|e| e.to_string())?;
-        return Ok(label);
+/// 将 modal 居中到主窗（父窗口）区域内，而非整块屏幕。
+fn center_modal_on_parent(
+    app: &AppHandle,
+    modal: &tauri::WebviewWindow,
+    width: f64,
+    height: f64,
+) -> Result<(), String> {
+    let parent = app
+        .get_webview_window(MAIN_WINDOW_LABEL)
+        .ok_or_else(|| format!("{MAIN_WINDOW_LABEL} window not found"))?;
+
+    let scale = parent.scale_factor().map_err(|e| e.to_string())?;
+    let modal_size = LogicalSize::new(width, height).to_physical(scale);
+    let parent_pos = parent.outer_position().map_err(|e| e.to_string())?;
+    let parent_size = parent.outer_size().map_err(|e| e.to_string())?;
+
+    let offset_x = (parent_size.width.saturating_sub(modal_size.width) / 2) as i32;
+    let offset_y = (parent_size.height.saturating_sub(modal_size.height) / 2) as i32;
+    let x = parent_pos.x + offset_x;
+    let y = parent_pos.y + offset_y;
+
+    modal
+        .set_position(PhysicalPosition::new(x, y))
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+fn apply_modal_geometry(
+    app: &AppHandle,
+    window: &tauri::WebviewWindow,
+    title: &str,
+    width: f64,
+    height: f64,
+) -> Result<(), String> {
+    window.set_title(title).map_err(|e| e.to_string())?;
+    window
+        .set_size(LogicalSize::new(width, height))
+        .map_err(|e| e.to_string())?;
+    center_modal_on_parent(app, window, width, height)?;
+    Ok(())
+}
+
+fn create_modal_webview(
+    app: &AppHandle,
+    path: &str,
+    title: &str,
+    width: f64,
+    height: f64,
+) -> Result<(), String> {
+    let label = MODAL_WINDOW_LABEL;
+
+    if app.get_webview_window(label).is_some() {
+        return Ok(());
     }
 
     let parent = app
         .get_webview_window(MAIN_WINDOW_LABEL)
         .ok_or_else(|| format!("{MAIN_WINDOW_LABEL} window not found"))?;
 
-    let url = resolve_modal_url(app, &path)?;
-    let width = width.unwrap_or(520.0);
-    let height = height.unwrap_or(400.0);
-    let title = title.unwrap_or_else(|| "Modal".to_string());
+    let url = resolve_modal_url(app, path)?;
 
-    WebviewWindowBuilder::new(app, &label, url)
+    WebviewWindowBuilder::new(app, label, url)
         .title(title)
         .inner_size(width, height)
-        .center()
         .decorations(false)
         .transparent(true)
         .resizable(false)
         .shadow(false)
+        .visible(false)
         .parent(&parent)
         .map_err(|e| e.to_string())?
         .build()
         .map_err(|e| e.to_string())?;
 
-    register_modal_destroy_listener(app, &label);
+    if let Some(modal) = app.get_webview_window(label) {
+        center_modal_on_parent(app, &modal, width, height)?;
+    }
+
+    register_modal_destroy_listener(app, label);
+    session::push_session_to_webview(app, label)?;
+    tools_download::push_snapshot_to_webview(app, label)?;
+
+    Ok(())
+}
+
+/// 主窗空闲时预热：后台创建隐藏 modal Webview，不触发蒙层。
+pub fn preload_modal_window(app: &AppHandle) -> Result<(), String> {
+    create_modal_webview(
+        app,
+        MODAL_PRELOAD_PATH,
+        "Modal",
+        MODAL_DEFAULT_WIDTH,
+        MODAL_DEFAULT_HEIGHT,
+    )
+}
+
+pub fn open_modal_window(
+    app: &AppHandle,
+    path: String,
+    title: Option<String>,
+    width: Option<f64>,
+    height: Option<f64>,
+    _label: Option<String>,
+) -> Result<String, String> {
+    let label = MODAL_WINDOW_LABEL.to_string();
+    let panel_name = panel_name_from_path(&path);
+    let width = width.unwrap_or(MODAL_DEFAULT_WIDTH);
+    let height = height.unwrap_or(MODAL_DEFAULT_HEIGHT);
+    let title = title.unwrap_or_else(|| "Modal".to_string());
+
+    if app.get_webview_window(&label).is_none() {
+        create_modal_webview(app, &path, &title, width, height)?;
+    }
+
+    let existing = app
+        .get_webview_window(&label)
+        .ok_or_else(|| format!("modal window not found: {label}"))?;
+
+    let was_visible = existing.is_visible().map_err(|e| e.to_string())?;
+
+    apply_modal_geometry(app, &existing, &title, width, height)?;
     session::push_session_to_webview(app, &label)?;
     tools_download::push_snapshot_to_webview(app, &label)?;
 
-    events::modal_opened(app, &label)?;
+    // 蒙层先于子窗 show：用户点击后立即盖住主窗，子窗在 CSS 就绪后再显示。
+    if !was_visible {
+        events::modal_opened(app, &label)?;
+    }
+
+    emit_open_panel(app, &label, panel_name, Some(title.clone()))?;
+
+    if was_visible {
+        existing.set_focus().map_err(|e| e.to_string())?;
+        let _ = events::modal_opened(app, &label);
+    }
 
     Ok(label)
+}
+
+/// 子窗内容就绪后由前端调用：仅 show + focus（蒙层已在 open 阶段触发）。
+pub fn modal_window_ready(app: &AppHandle, label: &str) -> Result<(), String> {
+    let window = app
+        .get_webview_window(label)
+        .ok_or_else(|| format!("modal window not found: {label}"))?;
+
+    if !window.is_visible().map_err(|e| e.to_string())? {
+        window.show().map_err(|e| e.to_string())?;
+    }
+    window.set_focus().map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 pub fn close_modal_window(app: &AppHandle, label: &str) -> Result<(), String> {
     let window = app
         .get_webview_window(label)
         .ok_or_else(|| format!("modal window not found: {label}"))?;
-    window.close().map_err(|e| e.to_string())?;
-    // 部分平台 Destroyed 回调不稳定，关闭时主动向主窗发 closed 收起蒙层
+
+    if window.is_visible().map_err(|e| e.to_string())? {
+        window.hide().map_err(|e| e.to_string())?;
+    }
     let _ = events::modal_closed(app, label);
     Ok(())
 }

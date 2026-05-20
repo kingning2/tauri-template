@@ -136,6 +136,8 @@ export interface ToolManifestEntry {
 	downloadSpec: PlatformDownloadSpec;
 	hot?: boolean;
 	variant: ToolVariant;
+	/** 官网购买页；未配置时前端不展示可点击的「购买」入口。 */
+	purchaseUrl?: string;
 }
 
 export interface ToolsDownloadSnapshot {

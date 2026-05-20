@@ -10,6 +10,7 @@ pub const TOOLS_DOWNLOAD_CHANGED: &str = "tools/download/changed";
 pub const TOOLS_INSTALL_STATE_CHANGED: &str = "tools/install-state/changed";
 pub const MODAL_OPENED: &str = "modal/opened";
 pub const MODAL_CLOSED: &str = "modal/closed";
+pub const MODAL_OPEN_PANEL: &str = "modal/open-panel";
 
 // --- 前端 → Rust ---
 

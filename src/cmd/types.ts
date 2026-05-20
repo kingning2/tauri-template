@@ -16,4 +16,6 @@ export type Cmd =
   | "log_fe_req"
   | "open_modal_window"
   | "close_modal_window"
+  | "modal_window_ready"
+  | "preload_modal_window"
   | "get_app_session";

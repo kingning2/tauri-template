@@ -1,14 +1,21 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "modal-windows",
-  "description": "Capability for dynamically created modal windows",
-  "windows": ["modal-*"],
+  "description": "Capability for the shared modal child window",
+  "windows": ["modal"],
   "permissions": [
     "core:default",
     "core:window:allow-start-dragging",
     "core:window:allow-close",
-    "core:window:allow-destroy",
+    "core:window:allow-hide",
+    "core:window:allow-show",
+    "core:window:allow-set-focus",
+    "core:window:allow-center",
+    "core:window:allow-set-size",
+    "core:window:allow-set-title",
     "core:event:default",
-    "core:event:allow-emit-to"
+    "core:event:allow-emit-to",
+    "core:event:allow-listen",
+    "opener:default"
   ]
 }

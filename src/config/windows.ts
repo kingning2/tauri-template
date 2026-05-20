@@ -1,6 +1,6 @@
 import { LogicalSize, Window } from "@tauri-apps/api/window";
 
-import { closeModalWindow, openModalWindow } from "@/cmd/window";
+import { closeModalWindow, openModalWindow, preloadModalWindow } from "@/cmd/window";
 import { MAIN_WINDOW_LABEL } from "@/config/window-events";
 
 import type { ModalPanelName } from "@/components/modal/panels";
@@ -35,13 +35,16 @@ export function initWindowConfig() {
 
 export const MODAL_LABEL_PREFIX = "modal";
 
+/** 唯一 modal 子窗口 label（与 Rust `MODAL_WINDOW_LABEL` 一致） */
+export const DEFAULT_MODAL_LABEL = "modal";
+
 export type OpenModalWindowOptions = {
   /** 面板组件名，对应 `src/components/modal/panels` 注册表（如 `activate`） */
   name: ModalPanelName;
   title?: string;
   width?: number;
   height?: number;
-  /** 固定 label；省略则由 Rust 自动生成 `modal-N` */
+  /** 固定为 `modal`；传入其它值也会被归一为单窗 label */
   label?: string;
 };
 
@@ -50,7 +53,11 @@ function modalWindowPath(name: string): string {
 }
 
 export function isModalWindowLabel(label: string): boolean {
-  return label === MODAL_LABEL_PREFIX || label.startsWith(`${MODAL_LABEL_PREFIX}-`);
+  return (
+    label === DEFAULT_MODAL_LABEL ||
+    label === MODAL_LABEL_PREFIX ||
+    label.startsWith(`${MODAL_LABEL_PREFIX}-`)
+  );
 }
 
 /** 通过 Rust command 打开 modal 子窗口（非前端 WebviewWindow API） */
@@ -60,10 +67,15 @@ export async function openModalWindowCommand(options: OpenModalWindowOptions): P
     title: options.title,
     width: options.width,
     height: options.height,
-    label: options.label
+    label: options.label ?? DEFAULT_MODAL_LABEL
   });
 }
 
 export async function closeModalWindowCommand(label: string): Promise<void> {
   await closeModalWindow(label);
+}
+
+/** 主窗渲染稳定后在空闲时调用，避免首次打开 modal 卡顿 */
+export async function preloadModalWindowCommand(): Promise<void> {
+  await preloadModalWindow();
 }

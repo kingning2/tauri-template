@@ -26,6 +26,13 @@
         },
         "variant": {
           "$ref": "#/definitions/ToolVariant"
+        },
+        "purchaseUrl": {
+          "description": "官网购买页；未配置时前端不展示可点击的「购买」入口。",
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },

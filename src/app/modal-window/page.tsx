@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 
-import { ModalPanelHost } from '@/components/modal/modal-panel-host'
+import { ModalPanelHost } from '@/components/modal'
 
 export default function ModalWindowPage() {
   return (

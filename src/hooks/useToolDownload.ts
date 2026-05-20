@@ -9,18 +9,16 @@ import {
   type ToolManifest
 } from "@/config/tools-manifest";
 import { useAppSelector } from "@/store/hooks";
-import { createIdleDownloadEntry } from "@/store/modules/download/types";
 import {
   selectProgressBarValue,
   selectProgressLabel,
-  selectProgressPercent
+  selectProgressPercent,
+  selectToolDownloadEntry
 } from "@/store/modules/download/selectors";
 
 export function useToolDownload(toolId: string) {
-  const entry = useAppSelector(
-    (state) => state.download.byToolId[toolId] ?? createIdleDownloadEntry()
-  );
-  const inFlight = useAppSelector((state) => state.download.byToolId[toolId]?.inFlight ?? false);
+  const entry = useAppSelector((state) => selectToolDownloadEntry(state, toolId));
+  const inFlight = entry.inFlight;
 
   const reset = useCallback(() => {
     void resetToolDownloadState(toolId);

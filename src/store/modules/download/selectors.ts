@@ -1,6 +1,16 @@
-import { DownloadPhase } from "@/generated/contracts";
+import { createSelector } from "@reduxjs/toolkit";
 
-import type { ToolDownloadEntry } from "./types";
+import { DownloadPhase } from "@/generated/contracts";
+import type { RootState } from "@/store";
+
+import { IDLE_DOWNLOAD_ENTRY, type ToolDownloadEntry } from "./types";
+
+const selectDownloadByToolId = (state: RootState) => state.download.byToolId;
+
+export const selectToolDownloadEntry = createSelector(
+  [selectDownloadByToolId, (_state: RootState, toolId: string) => toolId],
+  (byToolId, toolId): ToolDownloadEntry => byToolId[toolId] ?? IDLE_DOWNLOAD_ENTRY
+);
 
 export function formatDownloadPercentLabel(p: number): string {
   if (p <= 0) return "0";

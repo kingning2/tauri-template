@@ -17,6 +17,13 @@ pub struct ModalLifecyclePayload {
     pub label: String,
 }
 
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ModalOpenPanelPayload {
+    pub name: String,
+    pub title: Option<String>,
+}
+
 #[derive(Debug, Clone, Copy, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum FeLogLevel {
