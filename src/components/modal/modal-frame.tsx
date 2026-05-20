@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { useCallback } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
-import { closeModalWindow } from "@/cmd/window";
+import { useModalMotion } from "@/components/modal/modal-motion-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -18,14 +18,16 @@ export type ModalFrameProps = {
  * Modal 子窗口外壳：可拖动标题区 + 关闭按钮。
  */
 export function ModalFrame({ title, children, className }: ModalFrameProps) {
-  const close = useCallback(async () => {
+  const { requestClose } = useModalMotion();
+
+  const close = useCallback(() => {
     try {
-      const label = getCurrentWindow().label;
-      await closeModalWindow(label);
+      getCurrentWindow();
+      requestClose();
     } catch {
       /* 非 Tauri 环境 */
     }
-  }, []);
+  }, [requestClose]);
 
   return (
     <div

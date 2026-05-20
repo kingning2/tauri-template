@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import type gsap from "gsap";
 
@@ -22,6 +22,7 @@ import {
   type DownloadProgressDomRefs
 } from "@/animation/download";
 import { DownloadPhase } from "@/enums/download-phase";
+import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 
 export interface UseDownloadProgressAnimationOptions {
   phase: DownloadPhase;
@@ -122,7 +123,7 @@ export function useDownloadProgressAnimation({
     resetDownloadProgressVisual(getDomRefs(), getLevelRefs(), waveHandles, syncHandles);
   }, [getDomRefs, getLevelRefs, stopLoops, syncHandles, waveHandles]);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (phase !== DownloadPhase.Downloading || !showProgressSvg) return;
     if (introPlayedRef.current) return;
 
@@ -145,7 +146,7 @@ export function useDownloadProgressAnimation({
     };
   }, [getDomRefs, getLevelRefs, phase, showProgressSvg, stopLoops]);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!introDone || !showWater || phase !== DownloadPhase.Downloading) return;
 
     const refs = getDomRefs();
@@ -158,7 +159,7 @@ export function useDownloadProgressAnimation({
     };
   }, [getDomRefs, introDone, phase, showWater, waveHandles]);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!showWater || phase !== DownloadPhase.Downloading) return;
     if (!introPlayedRef.current) return;
 
@@ -177,13 +178,13 @@ export function useDownloadProgressAnimation({
     };
   }, [getDomRefs, getLevelRefs, phase, progress, showWater, syncHandles]);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (phase !== DownloadPhase.Completed) return;
     if (showAfterComplete) return;
     flushSync(() => setShowAfterComplete(true));
   }, [phase, showAfterComplete]);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!showAfterComplete || phase !== DownloadPhase.Completed) return;
     if (completeAnimPlayedRef.current) return;
 

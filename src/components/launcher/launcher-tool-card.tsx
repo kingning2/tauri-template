@@ -40,7 +40,7 @@ const TOOL_ICON_BOX: Partial<Record<string, string>> = {
   ringtone: "from-violet-500 to-purple-600"
 };
 
-function toolLauncherIconGradient(toolId: string): string {
+export function toolLauncherIconGradient(toolId: string): string {
   return TOOL_ICON_BOX[toolId] ?? "from-sky-400 to-blue-600";
 }
 

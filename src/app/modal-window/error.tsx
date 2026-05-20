@@ -1,9 +1,7 @@
 "use client";
 
-import { getCurrentWindow } from "@tauri-apps/api/window";
-
 import AppErrorView from "@/components/error/app-error-view";
-import { closeModalWindow } from "@/cmd/window";
+import { useModalMotion } from "@/components/modal/modal-motion-provider";
 
 type ErrorProps = {
   error: Error & { digest?: string };
@@ -11,12 +9,10 @@ type ErrorProps = {
 };
 
 export default function Error({ error, reset }: ErrorProps) {
+  const { requestClose } = useModalMotion();
+
   const handleBack = () => {
-    void closeModalWindow(getCurrentWindow().label).catch(() => {
-      getCurrentWindow()
-        .close()
-        .catch(() => undefined);
-    });
+    requestClose();
   };
 
   return (

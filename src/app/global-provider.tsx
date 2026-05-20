@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
-
 import { initWindowConfig } from "@/config/popup-window";
+import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 
 import InitGuard from "@/guards/global/init-guard";
 import LanguageGuard from "@/guards/global/language-guard";
 
 export default function GlobalProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     initWindowConfig();
 
     const app = document.getElementById("App");

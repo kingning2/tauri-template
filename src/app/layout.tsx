@@ -1,21 +1,23 @@
-import type { Metadata } from "next";
+import type { Metadata } from 'next'
 
-import StoreProvider from "@/providers/store";
-import TauriEventProvider from "@/providers/tauri-event-provider";
+import StoreProvider from '@/providers/store'
+import TauriEventProvider from '@/providers/tauri-event-provider'
 
-import GlobalProvider from "./global-provider";
+import GlobalProvider from './global-provider'
 
-import "@/assets/globals.css";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error
+import '@/assets/globals.css'
 
 export const metadata: Metadata = {
-  title: "MobiXpert",
-  description: "iOS utility toolkit"
-};
+  title: 'MobiXpert',
+  description: 'iOS utility toolkit'
+}
 
 export default function RootLayout({
   children
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="zh-Hant">
@@ -27,5 +29,5 @@ export default function RootLayout({
         </StoreProvider>
       </body>
     </html>
-  );
+  )
 }

@@ -67,6 +67,7 @@
     "downloaded": "Downloaded",
     "failed": "Failed",
     "download": "Download",
+    "open": "Open",
     "redownload": "Re-download",
     "not_yet_online": "Not available yet",
     "installed_on_device": "Installed on this device"
@@ -74,7 +75,19 @@
   "modal_window": {
     "title": "Window",
     "activate_title": "Activate",
-    "panel_label": "Panel: {{panel}}",
+    "activate_body": "Enter your license key to activate this product.",
+    "activate_welcome_title": "Welcome to {{app}}",
+    "activate_welcome_subtitle": "Your activated features are listed below. View usage status and expiration dates, or switch licenses.",
+    "activate_enter_license": "Enter license code",
+    "activate_form_title": "Activate {{app}}",
+    "activate_license_placeholder": "Already have a code? Enter it here. Format: \"XXXXX-XXXXX-XXXXX-XXXXX-XXXXX\"",
+    "activate_license_hint": "You can find your product activation code in the email you received after purchase.",
+    "activate_submit": "Activate",
+    "activate_back": "Back",
+    "activate_loading": "Loading…",
+    "activate_refresh": "Refresh",
+    "activate_empty": "No products available",
+    "unknown_panel": "Unknown panel: {{name}}",
     "shared_session": "Shared session with main window. Language: {{lang}}",
     "hint": "Closing this window removes the overlay on the main window."
   }

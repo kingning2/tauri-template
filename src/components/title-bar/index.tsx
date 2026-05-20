@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import {
   ArrowUpCircle,
@@ -15,13 +15,13 @@ import {
   Square,
   X,
   type LucideIcon
-} from "lucide-react";
-import { memo, useCallback } from "react";
-import { useTranslation } from "react-i18next";
+} from 'lucide-react'
+import { memo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import { setLang } from "@/cmd/lang";
-import { useModalWindow } from "@/components/modal";
-import { Button } from "@/components/ui/button";
+import { setLang } from '@/cmd/lang'
+import { useModalWindow } from '@/components/modal'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,67 +31,67 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { mainWindow } from "@/config/popup-window";
-import { cn } from "@/lib/utils";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { changeCurrentLanguageAction } from "@/store/modules/app";
-import type { Languages } from "@/store/modules/app/types";
+} from '@/components/ui/dropdown-menu'
+import { mainWindow } from '@/config/popup-window'
+import { cn } from '@/lib/utils'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { changeCurrentLanguageAction } from '@/store/modules/app'
+import type { Languages } from '@/store/modules/app/types'
 
 type MoreMenuItem = {
-  id: string;
+  id: string
   i18nKey:
-    | "menu_feedback"
-    | "menu_contact_support"
-    | "menu_online_help"
-    | "menu_check_updates"
-    | "menu_about";
-  Icon: LucideIcon;
-};
+    | 'menu_feedback'
+    | 'menu_contact_support'
+    | 'menu_online_help'
+    | 'menu_check_updates'
+    | 'menu_about'
+  Icon: LucideIcon
+}
 
 const MORE_MENU_ITEMS: MoreMenuItem[] = [
-  { id: "feedback", i18nKey: "menu_feedback", Icon: Mail },
-  { id: "contact_support", i18nKey: "menu_contact_support", Icon: Headphones },
-  { id: "online_help", i18nKey: "menu_online_help", Icon: CircleHelp },
-  { id: "check_updates", i18nKey: "menu_check_updates", Icon: ArrowUpCircle },
-  { id: "about", i18nKey: "menu_about", Icon: Info }
-];
+  { id: 'feedback', i18nKey: 'menu_feedback', Icon: Mail },
+  { id: 'contact_support', i18nKey: 'menu_contact_support', Icon: Headphones },
+  { id: 'online_help', i18nKey: 'menu_online_help', Icon: CircleHelp },
+  { id: 'check_updates', i18nKey: 'menu_check_updates', Icon: ArrowUpCircle },
+  { id: 'about', i18nKey: 'menu_about', Icon: Info }
+]
 
 const TitleBar = memo((props: { height?: number }) => {
-  const { t } = useTranslation("title_bar");
-  const h = props.height ?? 40;
-  const dispatch = useAppDispatch();
-  const currentLanguage = useAppSelector((state) => state.app.currentLanguage);
-  const supportLanguages = useAppSelector((state) => state.app.supportLanguages);
-  const { openModal } = useModalWindow();
+  const { t } = useTranslation('title_bar')
+  const h = props.height ?? 40
+  const dispatch = useAppDispatch()
+  const currentLanguage = useAppSelector((state) => state.app.currentLanguage)
+  const supportLanguages = useAppSelector((state) => state.app.supportLanguages)
+  const { openModal } = useModalWindow()
 
   const openActivateWindow = useCallback(() => {
     void openModal({
-      path: "/modal-window?panel=activate",
-      title: t("activate"),
-      width: 480,
-      height: 360
-    });
-  }, [openModal, t]);
+      name: 'activate',
+      title: t('activate'),
+      width: 720,
+      height: 640
+    })
+  }, [openModal, t])
 
   const switchLanguage = useCallback(
     async (next: Languages) => {
-      if (next === currentLanguage) return;
+      if (next === currentLanguage) return
       try {
-        await setLang(next);
+        await setLang(next)
         /* 语言写入 Rust 后会广播 session/changed，各 Webview Redux 由 events/session 订阅更新 */
       } catch {
-        dispatch(changeCurrentLanguageAction(next));
+        dispatch(changeCurrentLanguageAction(next))
       }
     },
     [currentLanguage, dispatch]
-  );
+  )
 
   /** 与 unlock 一致：仅当事件目标带 `data-drag-region` 时才拖动（按钮内部无此属性） */
   function handleBarMouseDown(e: React.MouseEvent) {
-    const isDragRegion = Boolean((e.target as HTMLElement).dataset.dragRegion);
+    const isDragRegion = Boolean((e.target as HTMLElement).dataset.dragRegion)
     if (isDragRegion && e.buttons === 1) {
-      void mainWindow.startDragging();
+      void mainWindow.startDragging()
     }
   }
 
@@ -100,7 +100,7 @@ const TitleBar = memo((props: { height?: number }) => {
       role="banner"
       data-drag-region
       className={cn(
-        "bg-card/90 flex w-full items-center justify-between px-3 backdrop-blur select-none"
+        'bg-card/90 flex w-full items-center justify-between px-3 backdrop-blur select-none'
         // 'border-b'
       )}
       style={{ height: h }}
@@ -115,7 +115,7 @@ const TitleBar = memo((props: { height?: number }) => {
           M
         </div>
         <span className="text-foreground truncate text-[15px] font-semibold tracking-tight">
-          {t("app_name")}
+          {t('app_name')}
         </span>
       </div>
 
@@ -126,7 +126,7 @@ const TitleBar = memo((props: { height?: number }) => {
           className="rounded-full border-0 bg-[#ff7a2e] px-8 text-xs font-semibold text-white shadow-sm hover:bg-[#ff6a18]"
         >
           <ShoppingCart />
-          {t("buy_now")}
+          {t('buy_now')}
         </Button>
         <Button
           type="button"
@@ -137,7 +137,7 @@ const TitleBar = memo((props: { height?: number }) => {
           onPointerDown={(e) => e.stopPropagation()}
         >
           <KeyRound className="size-3.5" aria-hidden />
-          {t("activate")}
+          {t('activate')}
         </Button>
 
         <div className="ml-1 flex items-center gap-0.5">
@@ -148,7 +148,7 @@ const TitleBar = memo((props: { height?: number }) => {
                 variant="ghost"
                 size="icon"
                 className="text-muted-foreground"
-                aria-label={t("menu")}
+                aria-label={t('menu')}
                 onPointerDown={(e) => e.stopPropagation()}
               >
                 <Menu className="size-4" />
@@ -163,7 +163,7 @@ const TitleBar = memo((props: { height?: number }) => {
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="gap-2">
                   <Globe className="size-4 shrink-0 opacity-80" aria-hidden />
-                  <span>{t("menu_language")}</span>
+                  <span>{t('menu_language')}</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent className="min-w-40" sideOffset={4}>
                   {supportLanguages.map((opt) => (
@@ -171,7 +171,7 @@ const TitleBar = memo((props: { height?: number }) => {
                       key={opt.value}
                       className="gap-2 pl-2"
                       onSelect={() => {
-                        void switchLanguage(opt.value);
+                        void switchLanguage(opt.value)
                       }}
                     >
                       <span className="flex size-4 shrink-0 items-center justify-center">
@@ -201,7 +201,7 @@ const TitleBar = memo((props: { height?: number }) => {
             variant="ghost"
             size="icon"
             className="text-muted-foreground"
-            aria-label={t("minimize")}
+            aria-label={t('minimize')}
             onClick={() => void mainWindow.minimize()}
           >
             <Minus className="size-4" />
@@ -212,7 +212,7 @@ const TitleBar = memo((props: { height?: number }) => {
               variant="ghost"
               size="icon"
               className="text-muted-foreground"
-              aria-label={t("maximize")}
+              aria-label={t('maximize')}
               onClick={() => void mainWindow.toggleMaximize()}
             >
               <Square className="size-3.5" />
@@ -223,7 +223,7 @@ const TitleBar = memo((props: { height?: number }) => {
             variant="ghost"
             size="icon"
             className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-            aria-label={t("close")}
+            aria-label={t('close')}
             onClick={() => void mainWindow.close()}
           >
             <X className="size-4" />
@@ -231,9 +231,9 @@ const TitleBar = memo((props: { height?: number }) => {
         </div>
       </div>
     </div>
-  );
-});
+  )
+})
 
-TitleBar.displayName = "TitleBar";
+TitleBar.displayName = 'TitleBar'
 
-export default TitleBar;
+export default TitleBar

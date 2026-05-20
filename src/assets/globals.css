@@ -171,6 +171,25 @@
   background: #fff;
 }
 
+@keyframes modal-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-overlay-enter {
+  animation: modal-overlay-in 0.28s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay-enter {
+    animation: none;
+  }
+}
+
 /* 主内容区滚动条：语义色 + WebKit / Firefox */
 @layer utilities {
   .shadow-card {

@@ -67,6 +67,7 @@
     "downloaded": "已下載",
     "failed": "失敗",
     "download": "下載",
+    "open": "打開",
     "redownload": "重新下載",
     "not_yet_online": "暫未上線",
     "installed_on_device": "本機已安裝"
@@ -74,7 +75,19 @@
   "modal_window": {
     "title": "視窗",
     "activate_title": "啟用",
-    "panel_label": "面板：{{panel}}",
+    "activate_body": "請輸入授權碼以啟用本產品。",
+    "activate_welcome_title": "歡迎使用 {{app}}",
+    "activate_welcome_subtitle": "您已啟用的功能如下所示。您可以檢視使用狀態和有效日期，並且還可以切換授權。",
+    "activate_enter_license": "輸入授權碼",
+    "activate_form_title": "啟用 {{app}}",
+    "activate_license_placeholder": "已有啟動碼，可在此輸入。啟動碼格式如 \"XXXXX-XXXXX-XXXXX-XXXXX-XXXXX\"",
+    "activate_license_hint": "您可以在購買後收到的電子郵件中找到產品的啟用碼。",
+    "activate_submit": "啟用",
+    "activate_back": "返回",
+    "activate_loading": "載入中…",
+    "activate_refresh": "重新整理",
+    "activate_empty": "暫無可用產品",
+    "unknown_panel": "未知面板：{{name}}",
     "shared_session": "與主窗共用會話，當前語言：{{lang}}",
     "hint": "關閉此視窗後，主窗蒙層會自動消失。"
   }
