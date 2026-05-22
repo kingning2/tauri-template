@@ -2,6 +2,23 @@
 
 桌面端工具启动器：Tauri 2 承载壳层与系统能力，Next.js App Router 负责 UI，Rust 与前端通过 **Command（invoke）** 与 **Event（emit / listen）** 两条 IPC 通道协作。
 
+![主窗口预览](./public/main.png)
+
+## 架构概览
+
+本项目以 **Tauri 2 桌面壳 + Next.js 前端** 为主轴，目录按职责分层：`src/` 放页面与业务组件，`src-tauri/` 放 Rust 命令、事件与窗口逻辑，前后端契约由 typeshare 生成到 `src/generated/`。
+
+| 能力         | 实现要点                                                                                                              |
+| ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| **主窗**     | 无边框透明窗体 + CSS `--window-radius` 裁切，呈现圆角桌面窗口                                                         |
+| **Modal**    | 非页面内 Dialog，而是由 Rust `WebviewWindowBuilder` 创建的**独立系统子窗口**（`modal` label），可预热、复用 hide/show |
+| **跨窗同步** | 主窗与 modal 各为独立 Webview，通过 Event + Redux 同步会话、下载与蒙层状态                                            |
+| **IPC**      | Command 走 `invoke`（有返回值）；Event 走 `emit` / `listen`（广播、modal 生命周期等）                                 |
+
+Modal 打开链路：`src/config/windows.ts` → `src/cmd/window.ts` → `src-tauri/src/cmd/window.rs` → `utils/window.rs`；主窗监听 `modal/opened`、`modal/closed` 显示蒙层。圆角与透明底色见 `src/assets/globals.css`（`#App` / `.main-window` 使用 `clip-path` 与 `--window-radius`）。
+
+更细的目录与调用链见下文「项目结构」与 [architecture.md](./.agents/skills/tauri-next-coding-notes/architecture.md)。
+
 ## 技术栈
 
 | 层级   | 技术                                                   |

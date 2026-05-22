@@ -1,0 +1,68 @@
+# 部署成功后向 kingning2/xiaoman-projects 注册资产卡片。
+#
+# 在本仓库 Settings → Secrets → Actions 配置（勿写入代码）：
+#   PORTFOLIO_PAT
+#   PORTFOLIO_REGISTER_KEY
+#
+# 若部署 workflow 名称不是 "Deploy to GitHub Pages"，请同步修改下方 on.workflow_run.workflows。
+
+name: Register to portfolio
+
+on:
+  workflow_run:
+    workflows: ["Deploy to GitHub Pages"]
+    types: [completed]
+    branches: [master]
+
+jobs:
+  register:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send asset to xiaoman-projects
+        uses: actions/github-script@v7
+        env:
+          PORTFOLIO_REGISTER_KEY: ${{ secrets.PORTFOLIO_REGISTER_KEY }}
+        with:
+          github-token: ${{ secrets.PORTFOLIO_PAT }}
+          script: |
+            const wr = context.payload.workflow_run;
+            const repo = wr.head_repository;
+
+            const ASSET_TYPE = "project";
+            const ASSET_NAME = "MobiXpert";
+            const ASSET_DESCRIPTION =
+              "Tauri 2 + Next.js 桌面工具启动器：圆角无边框主窗、Rust 创建的系统 Modal 子窗口，Command/Event 双通道 IPC。";
+            const ASSET_TAGS = [
+              "Tauri",
+              "Next.js",
+              "TypeScript",
+              "Rust",
+              "Desktop",
+            ];
+
+            const updatedRaw = wr.updated_at || new Date().toISOString();
+            const updatedAt = String(updatedRaw).slice(0, 10);
+
+            const payload = {
+              registerKey: (process.env.PORTFOLIO_REGISTER_KEY || "").trim(),
+              id: repo.name,
+              type: ASSET_TYPE,
+              name: ASSET_NAME,
+              description: ASSET_DESCRIPTION,
+              githubUrl: `https://github.com/${repo.full_name}`,
+              tags: ASSET_TAGS,
+              updatedAt,
+            };
+
+            if (!payload.registerKey) {
+              core.setFailed("PORTFOLIO_REGISTER_KEY secret is missing");
+              return;
+            }
+
+            await github.rest.repos.createDispatchEvent({
+              owner: "kingning2",
+              repo: "xiaoman-projects",
+              event_type: "upsert-asset",
+              client_payload: payload,
+            });
