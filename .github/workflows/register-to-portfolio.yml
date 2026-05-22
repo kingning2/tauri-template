@@ -1,20 +1,16 @@
-# 部署成功后向 kingning2/xiaoman-projects 注册资产卡片。
+# 向 kingning2/xiaoman-projects 注册/更新资产卡片。
 #
-# 在本仓库 Settings → Secrets → Actions 配置（勿写入代码）：
+# 触发：push 到 main、手动 workflow_dispatch、或「Deploy to GitHub Pages」成功后。
+#
+# Secrets（Settings → Actions，勿写入代码）：
 #   PORTFOLIO_PAT
 #   PORTFOLIO_REGISTER_KEY
-#
-# 若部署 workflow 名称不是 "Deploy to GitHub Pages"，请同步修改下方 on.workflow_run.workflows。
-#
-# 为何 Actions 里看不到运行？
-# 1. 本 workflow 默认不在 push 时触发，只在「Deploy to GitHub Pages」成功结束后触发。
-# 2. 仓库需另有同名部署 workflow；仅 push 代码不会跑 Register。
-# 3. 分支须为 main（与 GitHub 默认分支一致）。
-# 4. 可先用 workflow_dispatch 手动试跑（需已配置 Secrets）。
 
 name: Register to portfolio
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
   workflow_run:
     workflows: ["Deploy to GitHub Pages"]
@@ -23,7 +19,10 @@ on:
 
 jobs:
   register:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Send asset to xiaoman-projects
