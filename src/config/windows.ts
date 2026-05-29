@@ -1,16 +1,13 @@
 import { LogicalSize, Window } from "@tauri-apps/api/window";
 
 import { closeModalWindow, openModalWindow, preloadModalWindow } from "@/cmd/window";
-import { MAIN_WINDOW_LABEL } from "@/config/window-events";
+import type { ModalPanel } from "@/enums";
+import { AppRoute, TauriEvent, WindowLabel } from "@/enums";
 
-import type { ModalPanelName } from "@/components/modal/panels";
-
-export type WindowLabel = typeof MAIN_WINDOW_LABEL;
-
-export { MAIN_WINDOW_LABEL, MODAL_CLOSED_EVENT, MODAL_OPENED_EVENT } from "@/config/window-events";
+export { TauriEvent, WindowLabel };
 
 /** 与 unlock-next-app 一致：固定 label，供标题栏拖动与窗口 API 使用 */
-export const mainWindow = new Window(MAIN_WINDOW_LABEL);
+export const mainWindow = new Window(WindowLabel.Main);
 
 /**
  * 在 WebView 内注册主窗体行为（与 unlock `global-provider` 里 `initWindowConfig()` 对齐）。
@@ -31,16 +28,9 @@ export function initWindowConfig() {
   });
 }
 
-// --- Modal 子窗口 ---
-
-export const MODAL_LABEL_PREFIX = "modal";
-
-/** 唯一 modal 子窗口 label（与 Rust `MODAL_WINDOW_LABEL` 一致） */
-export const DEFAULT_MODAL_LABEL = "modal";
-
 export type OpenModalWindowOptions = {
-  /** 面板组件名，对应 `src/components/modal/panels` 注册表（如 `activate`） */
-  name: ModalPanelName;
+  /** 面板组件名，对应 `src/components/modal/panels` 注册表 */
+  name: ModalPanel;
   title?: string;
   width?: number;
   height?: number;
@@ -48,16 +38,12 @@ export type OpenModalWindowOptions = {
   label?: string;
 };
 
-function modalWindowPath(name: string): string {
-  return `/modal-window?name=${encodeURIComponent(name)}`;
+function modalWindowPath(name: ModalPanel): string {
+  return `${AppRoute.ModalWindow}?name=${encodeURIComponent(name)}`;
 }
 
 export function isModalWindowLabel(label: string): boolean {
-  return (
-    label === DEFAULT_MODAL_LABEL ||
-    label === MODAL_LABEL_PREFIX ||
-    label.startsWith(`${MODAL_LABEL_PREFIX}-`)
-  );
+  return label === WindowLabel.Modal || label.startsWith(`${WindowLabel.Modal}-`);
 }
 
 /** 通过 Rust command 打开 modal 子窗口（非前端 WebviewWindow API） */
@@ -67,7 +53,7 @@ export async function openModalWindowCommand(options: OpenModalWindowOptions): P
     title: options.title,
     width: options.width,
     height: options.height,
-    label: options.label ?? DEFAULT_MODAL_LABEL
+    label: options.label ?? WindowLabel.Modal
   });
 }
 

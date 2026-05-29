@@ -1,11 +1,11 @@
 import { invoke, InvokeArgs, InvokeOptions } from "@tauri-apps/api/core";
 
-import type { Cmd } from "./types";
+import { FeLogLevel, TauriCmd } from "@/enums";
 
 export class InvokeError extends Error {
-  readonly cmd: Cmd;
+  readonly cmd: TauriCmd;
 
-  constructor(cmd: Cmd, cause: unknown) {
+  constructor(cmd: TauriCmd, cause: unknown) {
     const detail = cause instanceof Error ? cause.message : String(cause);
     super(`${cmd}: ${detail}`);
     this.name = "InvokeError";
@@ -20,7 +20,7 @@ export function isTauriRuntime(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 }
 
-async function logInvokeFailure(cmd: Cmd, error: unknown): Promise<void> {
+async function logInvokeFailure(cmd: TauriCmd, error: unknown): Promise<void> {
   const detail = error instanceof Error ? error.message : String(error);
   const msg = `[invoke:${cmd}] ${detail}`;
 
@@ -30,14 +30,14 @@ async function logInvokeFailure(cmd: Cmd, error: unknown): Promise<void> {
   }
 
   try {
-    await invoke("log_fe", { event: "error", msg });
+    await invoke(TauriCmd.LogFe, { event: FeLogLevel.Error, msg });
   } catch {
     console.error(msg, error);
   }
 }
 
 export const invokeWrapper = async <T>(
-  cmd: Cmd,
+  cmd: TauriCmd,
   args?: InvokeArgs,
   options?: InvokeOptions
 ): Promise<T> => {

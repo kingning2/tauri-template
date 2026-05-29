@@ -1,5 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+import { ReduxSlice } from "@/enums";
+
 import type { ModalInitialState } from "./types";
 import type { IAction } from "@/store/types";
 
@@ -8,7 +10,7 @@ const initialState: ModalInitialState = {
 };
 
 const modalSlice = createSlice({
-  name: "modal",
+  name: ReduxSlice.Modal,
   initialState,
   reducers: {
     modalOpenedAction(state, { payload }: IAction<string>) {

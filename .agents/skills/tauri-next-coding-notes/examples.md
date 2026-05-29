@@ -24,21 +24,26 @@ pub mod system;
 ```
 
 ```ts
-// src/cmd/types.ts
-export type Cmd = 'get_system_mode' | /* ... */ string
+// src/enums/tauri-cmd.ts
+export enum TauriCmd {
+  // ...
+  GetSystemMode = "get_system_mode"
+}
 ```
 
 ```ts
 // src/cmd/system.ts
-import { invokeWrapper } from '.'
-export const getSystemMode = () => invokeWrapper<string>('get_system_mode')
+import { TauriCmd } from "@/enums";
+import { invokeWrapper } from ".";
+
+export const getSystemMode = () => invokeWrapper<string>(TauriCmd.GetSystemMode);
 ```
 
 ## 2) i18n 文案新增
 
 ```tsx
-const { t } = useTranslation('title_bar')
-<Button>{t('menu_about')}</Button>
+const { t } = useTranslation("title_bar");
+<Button>{t("menu_about")}</Button>;
 ```
 
 ```json
@@ -64,8 +69,7 @@ const { t } = useTranslation('title_bar')
 ```tsx
 <ContentContainer className="flex flex-col overflow-hidden">
   <div className="flex h-full min-h-0 flex-1 flex-col gap-3 overflow-hidden p-3">
-    <div className="shrink-0 basis-[clamp(10.5rem,30vh,17.5rem)]" />
-    <div className="grid min-h-0 flex-1 overflow-hidden" />
+    <div className="min-h-0 flex-1 overflow-hidden">{/* 内容 */}</div>
   </div>
 </ContentContainer>
 ```
@@ -73,15 +77,16 @@ const { t } = useTranslation('title_bar')
 ## 4) 错误边界与日志
 
 ```tsx
-'use client'
-import { useEffect } from 'react'
-import { log } from '@/cmd/log'
+"use client";
+import { useEffect } from "react";
+import { log } from "@/cmd/log";
+import { FeLogLevel } from "@/enums";
 
 export default function Error({ error, reset }: { error: Error; reset: () => void }) {
   useEffect(() => {
-    void log('error', `main-window error: ${error.message}`)
-  }, [error])
-  return <button onClick={reset}>Try again</button>
+    void log(FeLogLevel.Error, `main-window error: ${error.message}`);
+  }, [error]);
+  return <button onClick={reset}>Try again</button>;
 }
 ```
 
@@ -89,40 +94,50 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
 
 ```tsx
 // 根布局已挂载 TauriEventProvider → CrossWebviewSyncSubscriptions
-// 会话 / 下载 Redux 无需页面手写订阅
+// 会话 Redux 无需页面手写订阅
 
-// 首屏拉会话（与 session/changed 互补）
-import { applySessionToStore } from '@/events/cross-webview-sync'
-import { getAppSession } from '@/cmd/session'
+import { applySessionToStore } from "@/events/cross-webview-sync";
+import { getAppSession } from "@/cmd/session";
 
-void getAppSession().then((session) => applySessionToStore(store, session))
-```
-
-```tsx
-// 页面安装态（本地 state + Rust 广播）
-import {
-  refreshToolsInstallStateAcrossWindows,
-  useToolsInstallStateSync
-} from '@/events/cross-webview-sync'
-
-const [installByToolId, setInstallByToolId] = useState<Record<string, ToolInstallState>>({})
-useToolsInstallStateSync(setInstallByToolId)
-void refreshToolsInstallStateAcrossWindows().then((list) =>
-  setInstallByToolId(installStateByToolId(list))
-)
+void getAppSession().then((session) => applySessionToStore(store, session));
 ```
 
 ```tsx
 // 自定义事件监听（须在 TauriEventProvider 子树内）
-import { useTauriEventApi } from '@/providers/tauri-event-provider'
-import { MODAL_OPENED_EVENT } from '@/config/windows'
+import { TauriEvent } from "@/enums";
+import { useTauriEventApi } from "@/providers/tauri-event-provider";
 
-const { on } = useTauriEventApi()
-useEffect(() => on(MODAL_OPENED_EVENT, handler), [on])
+const { on } = useTauriEventApi();
+useEffect(() => on(TauriEvent.ModalOpened, handler), [on]);
 ```
 
 ```ts
 // 前端 → Rust 日志（非 invoke）
-import { log } from '@/cmd/log'
-void log('info', 'modal opened')
+import { log } from "@/cmd/log";
+import { FeLogLevel } from "@/enums";
+
+void log(FeLogLevel.Info, "modal opened");
+```
+
+## 6) 新增 Modal 面板
+
+```ts
+// src/enums/modal-panel.ts
+export enum ModalPanel {
+  Demo = "demo",
+  Settings = "settings"
+}
+```
+
+```tsx
+// src/components/modal/panels/settings.tsx — 实现 SettingsPanel
+```
+
+```ts
+// src/components/modal/panels/index.ts
+[ModalPanel.Settings]: SettingsPanel
+```
+
+```tsx
+await openModal({ name: ModalPanel.Settings, width: 520, height: 400 });
 ```

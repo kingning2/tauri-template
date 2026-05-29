@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 import { appConfig } from "@/config/app-config";
+import { LocalCacheKey, ReduxSlice } from "@/enums";
 import { localCache } from "@/utils/cache";
 
 import type { AppInitialState } from "./types";
@@ -12,12 +13,12 @@ const initialState: AppInitialState = {
   mainWindowGlobalGg: appConfig.mainWindowGlobalGg,
   supportLanguages: appConfig.supportLanguages,
   currentLanguage:
-    (localCache.getCache(appConfig.languageCacheKey) as AppInitialState["currentLanguage"]) ??
+    (localCache.getCache(LocalCacheKey.Language) as AppInitialState["currentLanguage"]) ??
     appConfig.defaultLanguage
 };
 
 const appSlice = createSlice({
-  name: "app",
+  name: ReduxSlice.App,
   initialState,
   reducers: {
     changeInitializedAction(state, { payload }: IAction<AppInitialState["initialized"]>) {
@@ -31,7 +32,7 @@ const appSlice = createSlice({
     },
     changeCurrentLanguageAction(state, { payload }: IAction<AppInitialState["currentLanguage"]>) {
       state.currentLanguage = payload;
-      localCache.setCache(appConfig.languageCacheKey, payload);
+      localCache.setCache(LocalCacheKey.Language, payload);
     }
   }
 });

@@ -4,8 +4,6 @@ use tauri::{AppHandle, Emitter, Manager};
 
 use super::names::{self, MAIN_WINDOW_LABEL};
 use super::payloads::{AppSession, ModalLifecyclePayload};
-use crate::context::tools_download::ToolsDownloadSnapshot;
-use crate::utils::tools::ToolInstallState;
 
 fn map_emit_err(e: tauri::Error) -> String {
     e.to_string()
@@ -38,46 +36,6 @@ pub fn modal_opened(app: &AppHandle, label: impl Into<String>) -> Result<(), Str
         ModalLifecyclePayload { label },
     )
     .map_err(map_emit_err)
-}
-
-/// 向所有 Webview 广播工具下载态快照。
-pub fn tools_download_changed_all(
-    app: &AppHandle,
-    snapshot: &ToolsDownloadSnapshot,
-) -> Result<(), String> {
-    for (label, _) in app.webview_windows() {
-        tools_download_changed_to(app, &label, snapshot)?;
-    }
-    Ok(())
-}
-
-pub fn tools_download_changed_to(
-    app: &AppHandle,
-    webview_label: &str,
-    snapshot: &ToolsDownloadSnapshot,
-) -> Result<(), String> {
-    app.emit_to(webview_label, names::TOOLS_DOWNLOAD_CHANGED, snapshot)
-        .map_err(map_emit_err)
-}
-
-/// 向所有 Webview 广播工具安装态（下载完成后等与磁盘/registry 对齐）。
-pub fn tools_install_state_changed_all(
-    app: &AppHandle,
-    states: &[ToolInstallState],
-) -> Result<(), String> {
-    for (label, _) in app.webview_windows() {
-        tools_install_state_changed_to(app, &label, states)?;
-    }
-    Ok(())
-}
-
-pub fn tools_install_state_changed_to(
-    app: &AppHandle,
-    webview_label: &str,
-    states: &[ToolInstallState],
-) -> Result<(), String> {
-    app.emit_to(webview_label, names::TOOLS_INSTALL_STATE_CHANGED, states)
-        .map_err(map_emit_err)
 }
 
 /// 通知主窗：modal 已关闭。

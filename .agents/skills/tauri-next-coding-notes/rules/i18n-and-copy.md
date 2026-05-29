@@ -16,5 +16,5 @@
 
 ```tsx
 const { t } = useTranslation('title_bar')
-<h1>{t('buy_now')}</h1>
+<h1>{t('menu_about')}</h1>
 ```

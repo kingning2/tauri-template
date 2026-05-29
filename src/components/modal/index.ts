@@ -3,14 +3,10 @@
 import { useCallback, useEffect, useRef } from "react";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 
-import {
-  MODAL_CLOSED_EVENT,
-  MODAL_OPENED_EVENT,
-  type ModalLifecyclePayload
-} from "@/config/window-events";
+import { TauriEvent, WindowLabel } from "@/enums";
+import type { ModalLifecyclePayload } from "@/types/tauri-payloads";
 import {
   closeModalWindowCommand,
-  MAIN_WINDOW_LABEL,
   openModalWindowCommand,
   preloadModalWindowCommand,
   type OpenModalWindowOptions
@@ -29,8 +25,7 @@ export {
   type ModalProps
 } from "./modal";
 
-export type { ModalPanelName } from "./panels";
-export { MODAL_PANEL_REGISTRY } from "./panels";
+export { ModalPanel, MODAL_PANEL_REGISTRY } from "./panels";
 
 export function useModalWindow() {
   const openModal = useCallback(async (options: OpenModalWindowOptions) => {
@@ -49,7 +44,7 @@ function useModalPreload() {
 
   useEffect(() => {
     if (startedRef.current) return;
-    if (getCurrentWebviewWindow().label !== MAIN_WINDOW_LABEL) return;
+    if (getCurrentWebviewWindow().label !== WindowLabel.Main) return;
 
     startedRef.current = true;
 
@@ -74,18 +69,18 @@ export function ModalWindowProvider({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     const webview = getCurrentWebviewWindow();
-    if (webview.label !== MAIN_WINDOW_LABEL) return;
+    if (webview.label !== WindowLabel.Main) return;
 
     const unlisteners: Array<() => void> = [];
 
     void webview
-      .listen<ModalLifecyclePayload>(MODAL_OPENED_EVENT, (event) => {
+      .listen<ModalLifecyclePayload>(TauriEvent.ModalOpened, (event) => {
         dispatch(modalOpenedAction(event.payload.label));
       })
       .then((unlisten) => unlisteners.push(unlisten));
 
     void webview
-      .listen<ModalLifecyclePayload>(MODAL_CLOSED_EVENT, (event) => {
+      .listen<ModalLifecyclePayload>(TauriEvent.ModalClosed, (event) => {
         dispatch(modalClosedAction(event.payload.label));
       })
       .then((unlisten) => unlisteners.push(unlisten));

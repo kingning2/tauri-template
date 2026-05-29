@@ -8,7 +8,7 @@ use tauri::{
     WindowEvent,
 };
 
-use crate::context::{session, tools_download};
+use crate::context::session;
 use crate::events::{self, payloads::ModalOpenPanelPayload, MAIN_WINDOW_LABEL};
 
 /// 唯一 modal 子窗口 label（与 `src/config/windows.ts` 的 `DEFAULT_MODAL_LABEL` 一致）
@@ -174,7 +174,6 @@ fn create_modal_webview(
 
     register_modal_destroy_listener(app, label);
     session::push_session_to_webview(app, label)?;
-    tools_download::push_snapshot_to_webview(app, label)?;
 
     Ok(())
 }
@@ -216,7 +215,6 @@ pub fn open_modal_window(
 
     apply_modal_geometry(app, &existing, &title, width, height)?;
     session::push_session_to_webview(app, &label)?;
-    tools_download::push_snapshot_to_webview(app, &label)?;
 
     // 蒙层先于子窗 show：用户点击后立即盖住主窗，子窗在 CSS 就绪后再显示。
     if !was_visible {

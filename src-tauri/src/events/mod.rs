@@ -11,10 +11,7 @@ mod listen;
 pub mod names;
 pub mod payloads;
 
-pub use emit::{
-    modal_closed, modal_opened, session_changed_all, session_changed_to,
-    tools_download_changed_all, tools_download_changed_to, tools_install_state_changed_all,
-};
+pub use emit::{modal_closed, modal_opened, session_changed_all, session_changed_to};
 pub use listen::register;
 pub use names::MAIN_WINDOW_LABEL;
 

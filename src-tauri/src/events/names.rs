@@ -6,8 +6,6 @@ pub const MAIN_WINDOW_LABEL: &str = "main";
 // --- Rust → 前端 ---
 
 pub const SESSION_CHANGED: &str = "session/changed";
-pub const TOOLS_DOWNLOAD_CHANGED: &str = "tools/download/changed";
-pub const TOOLS_INSTALL_STATE_CHANGED: &str = "tools/install-state/changed";
 pub const MODAL_OPENED: &str = "modal/opened";
 pub const MODAL_CLOSED: &str = "modal/closed";
 pub const MODAL_OPEN_PANEL: &str = "modal/open-panel";

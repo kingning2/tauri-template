@@ -7,11 +7,9 @@ import {
   Globe,
   Headphones,
   Info,
-  KeyRound,
   Mail,
   Menu,
   Minus,
-  ShoppingCart,
   Square,
   X,
   type LucideIcon
@@ -20,7 +18,6 @@ import { memo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import { setLang } from "@/cmd/lang";
-import { useModalWindow } from "@/components/modal";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,7 +33,7 @@ import { mainWindow } from "@/config/windows";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { changeCurrentLanguageAction } from "@/store/modules/app";
-import type { Languages } from "@/store/modules/app/types";
+import type { Language } from "@/enums";
 
 type MoreMenuItem = {
   id: string;
@@ -63,19 +60,9 @@ const TitleBar = memo((props: { height?: number }) => {
   const dispatch = useAppDispatch();
   const currentLanguage = useAppSelector((state) => state.app.currentLanguage);
   const supportLanguages = useAppSelector((state) => state.app.supportLanguages);
-  const { openModal } = useModalWindow();
-
-  const openActivateWindow = useCallback(() => {
-    void openModal({
-      name: "activate",
-      title: t("activate"),
-      width: 720,
-      height: 640
-    });
-  }, [openModal, t]);
 
   const switchLanguage = useCallback(
-    async (next: Languages) => {
+    async (next: Language) => {
       if (next === currentLanguage) return;
       try {
         await setLang(next);
@@ -101,18 +88,16 @@ const TitleBar = memo((props: { height?: number }) => {
       data-drag-region
       className={cn(
         "bg-card/90 flex w-full items-center justify-between px-3 backdrop-blur select-none"
-        // 'border-b'
       )}
       style={{ height: h }}
       onMouseDown={handleBarMouseDown}
     >
-      {/* 左侧整块可拖：子元素不接收指针事件，事件落到本层带 data-drag-region 的父级 */}
       <div className="pointer-events-none flex min-w-0 flex-1 items-center gap-2">
         <div
           className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-[#2b7fff] to-[#155dfc] text-sm font-bold text-white"
           aria-hidden
         >
-          M
+          T
         </div>
         <span className="text-foreground truncate text-[15px] font-semibold tracking-tight">
           {t("app_name")}
@@ -120,26 +105,6 @@ const TitleBar = memo((props: { height?: number }) => {
       </div>
 
       <div className="pointer-events-auto flex shrink-0 items-center gap-2" data-drag-region>
-        <Button
-          type="button"
-          size="sm"
-          className="rounded-full border-0 bg-[#ff7a2e] px-8 text-xs font-semibold text-white shadow-sm hover:bg-[#ff6a18]"
-        >
-          <ShoppingCart />
-          {t("buy_now")}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="bg-background rounded-full border-pink-400 px-8 text-xs font-medium text-pink-600 hover:bg-pink-50 hover:text-pink-600"
-          onClick={openActivateWindow}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          <KeyRound className="size-3.5" aria-hidden />
-          {t("activate")}
-        </Button>
-
         <div className="ml-1 flex items-center gap-0.5">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

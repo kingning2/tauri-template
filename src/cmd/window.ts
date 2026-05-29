@@ -1,3 +1,5 @@
+import { TauriCmd } from "@/enums";
+
 import { invokeWrapper } from ".";
 
 export type OpenModalWindowArgs = {
@@ -9,13 +11,13 @@ export type OpenModalWindowArgs = {
 };
 
 export const openModalWindow = (args: OpenModalWindowArgs) =>
-  invokeWrapper<string>("open_modal_window", { ...args });
+  invokeWrapper<string>(TauriCmd.OpenModalWindow, { ...args });
 
 export const closeModalWindow = (label: string) =>
-  invokeWrapper<void>("close_modal_window", { label });
+  invokeWrapper<void>(TauriCmd.CloseModalWindow, { label });
 
 export const notifyModalWindowReady = (label: string) =>
-  invokeWrapper<void>("modal_window_ready", { label });
+  invokeWrapper<void>(TauriCmd.ModalWindowReady, { label });
 
 /** 主窗空闲时后台预热隐藏 modal Webview（不显示、不触发蒙层） */
-export const preloadModalWindow = () => invokeWrapper<void>("preload_modal_window");
+export const preloadModalWindow = () => invokeWrapper<void>(TauriCmd.PreloadModalWindow);

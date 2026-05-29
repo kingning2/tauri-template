@@ -1,6 +1,5 @@
+import { LocalCacheKey } from "@/enums";
 import { isString } from "./general";
-
-import type { LocalCacheKey } from "./cache-types";
 
 class LocalCache {
   setCache<T = unknown>(key: LocalCacheKey, value: T) {

@@ -1,14 +1,16 @@
 import type { ComponentType } from "react";
 
-import { ActivatePanel } from "./activate";
+import { ModalPanel, isModalPanel } from "@/enums";
 
-export const MODAL_PANEL_REGISTRY = {
-  activate: ActivatePanel
-} as const satisfies Record<string, ComponentType>;
+import { DemoPanel } from "./demo";
 
-export type ModalPanelName = keyof typeof MODAL_PANEL_REGISTRY;
+export const MODAL_PANEL_REGISTRY: Record<ModalPanel, ComponentType> = {
+  [ModalPanel.Demo]: DemoPanel
+};
+
+export { ModalPanel };
 
 export function resolveModalPanel(name: string): ComponentType | undefined {
-  if (!(name in MODAL_PANEL_REGISTRY)) return undefined;
-  return MODAL_PANEL_REGISTRY[name as ModalPanelName];
+  if (!isModalPanel(name)) return undefined;
+  return MODAL_PANEL_REGISTRY[name];
 }

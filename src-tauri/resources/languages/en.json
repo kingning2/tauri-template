@@ -1,19 +1,11 @@
 {
-  "launcher": {
-    "hero_title": "EaseUS MobiXpert - System Repair",
-    "hero_subtitle": "Easy & efficient iOS system repair software",
-    "slide1_title": "EaseUS MobiXpert - System Repair",
-    "slide1_subtitle": "Easy & efficient iOS system repair software",
-    "slide2_title": "Fix common iOS system issues",
-    "slide2_subtitle": "Black screen, Apple logo loop, recovery mode, and more—guided repair at home.",
-    "slide3_title": "Upgrade or downgrade iOS safely",
-    "slide3_subtitle": "Switch iOS versions while keeping your data in mind with clear steps.",
-    "carousel_goto": "Go to slide {{index}}"
+  "home": {
+    "title": "Tauri + Next.js Template",
+    "description": "Desktop shell with a main window, modal sub-window, i18n, and cross-webview session sync. Replace this page with your app.",
+    "open_demo_modal": "Open demo modal"
   },
   "title_bar": {
-    "app_name": "EaseUS MobiXpert",
-    "buy_now": "Buy now",
-    "activate": "Activate",
+    "app_name": "Tauri Template",
     "menu": "Menu",
     "minimize": "Minimize",
     "maximize": "Maximize",
@@ -25,68 +17,17 @@
     "menu_check_updates": "Check for updates",
     "menu_about": "About"
   },
-  "tools": {
-    "system_repair": {
-      "title": "System repair",
-      "description": "Fix iOS/iPad issues and iTunes errors; upgrade or downgrade the system."
-    },
-    "phone_unlock": {
-      "title": "Phone unlock",
-      "description": "Remove lock screen and Apple ID without a passcode."
-    },
-    "virtual_location": {
-      "title": "Virtual location",
-      "description": "Set a virtual location on iPhone, iPad, or iPod touch."
-    },
-    "data_transfer": {
-      "title": "Data transfer & backup",
-      "description": "Manage, transfer, and back up your iPhone/iPad/iPod touch data."
-    },
-    "data_recovery": {
-      "title": "Data recovery",
-      "description": "Recover data from devices, iTunes, and iCloud backups."
-    },
-    "social_transfer": {
-      "title": "Social app transfer",
-      "description": "Transfer, back up, and restore WhatsApp, LINE, Kik, and Viber chats."
-    },
-    "ringtone": {
-      "title": "Ringtone editor",
-      "description": "Create custom ringtones for your iPhone."
-    }
-  },
   "common": {
     "error_title": "Something went wrong",
     "error_retry": "Try again",
     "error_back_home": "Back to home",
     "error_close": "Close window",
-    "error_digest": "Error ID: {{digest}}",
-    "hot": "HOT",
-    "downloading": "Downloading…",
-    "downloading_percent_prefix": "Downloading:",
-    "downloaded": "Downloaded",
-    "failed": "Failed",
-    "download": "Download",
-    "open": "Open",
-    "redownload": "Re-download",
-    "not_yet_online": "Not available yet",
-    "installed_on_device": "Installed on this device"
+    "error_digest": "Error ID: {{digest}}"
   },
   "modal_window": {
     "title": "Window",
-    "activate_title": "Activate",
-    "activate_body": "Enter your license key to activate this product.",
-    "activate_welcome_title": "Welcome to {{app}}",
-    "activate_welcome_subtitle": "Your activated features are listed below. View usage status and expiration dates, or switch licenses.",
-    "activate_enter_license": "Enter license code",
-    "activate_form_title": "Activate {{app}}",
-    "activate_license_placeholder": "Already have a code? Enter it here. Format: \"XXXXX-XXXXX-XXXXX-XXXXX-XXXXX\"",
-    "activate_license_hint": "You can find your product activation code in the email you received after purchase.",
-    "activate_submit": "Activate",
-    "activate_back": "Back",
-    "activate_loading": "Loading…",
-    "activate_refresh": "Refresh",
-    "activate_empty": "No products available",
+    "demo_title": "Demo modal",
+    "demo_body": "This panel is registered in `src/components/modal/panels`. Add your own panels and open them via `openModal`.",
     "unknown_panel": "Unknown panel: {{name}}",
     "shared_session": "Shared session with main window. Language: {{lang}}",
     "hint": "Closing this window removes the overlay on the main window."

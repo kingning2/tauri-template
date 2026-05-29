@@ -23,12 +23,13 @@ import {
 } from "@/animation/modal/play-window-motion";
 import { closeModalWindow, notifyModalWindowReady } from "@/cmd/window";
 import { Button } from "@/components/ui/button";
-import { MODAL_OPEN_PANEL_EVENT, type ModalOpenPanelPayload } from "@/config/window-events";
+import { TauriEvent, isModalPanel } from "@/enums";
 import { cn } from "@/lib/utils";
+import type { ModalOpenPanelPayload } from "@/types/tauri-payloads";
 
 import { useAppSelector } from "@/store/hooks";
 
-import { MODAL_PANEL_REGISTRY, type ModalPanelName } from "./panels";
+import { MODAL_PANEL_REGISTRY } from "./panels";
 
 type ModalMotionContextValue = {
   requestClose: () => void;
@@ -237,7 +238,7 @@ export function ModalPanelHost() {
     let unlisten: (() => void) | undefined;
 
     void webview
-      .listen<ModalOpenPanelPayload>(MODAL_OPEN_PANEL_EVENT, (event) => {
+      .listen<ModalOpenPanelPayload>(TauriEvent.ModalOpenPanel, (event) => {
         applyPanel(event.payload.name);
       })
       .then((fn) => {
@@ -254,7 +255,7 @@ export function ModalPanelHost() {
     notifyPanelOpen(panelName, openNonce);
   }, [notifyPanelOpen, openNonce, panelName]);
 
-  if (!(panelName in MODAL_PANEL_REGISTRY)) {
+  if (!isModalPanel(panelName)) {
     return (
       <Modal title={t("title")}>
         <p className="text-muted-foreground text-sm">
@@ -264,7 +265,7 @@ export function ModalPanelHost() {
     );
   }
 
-  return createElement(MODAL_PANEL_REGISTRY[panelName as ModalPanelName]);
+  return createElement(MODAL_PANEL_REGISTRY[panelName]);
 }
 
 export type ModalOverlayProps = {

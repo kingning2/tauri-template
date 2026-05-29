@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { log } from "@/cmd/log";
+import { FeLogLevel } from "@/enums";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -25,7 +26,7 @@ export default function AppErrorView({
   const { t } = useTranslation("common");
 
   useEffect(() => {
-    void log("error", `${logPrefix}: ${error.message || String(error)}`);
+    void log(FeLogLevel.Error, `${logPrefix}: ${error.message || String(error)}`);
   }, [error, logPrefix]);
 
   const message = error.message || String(error);

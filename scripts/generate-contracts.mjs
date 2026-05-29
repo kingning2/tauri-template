@@ -16,15 +16,6 @@ function run(cmd, args, opts = {}) {
   }
 }
 
-run("cargo", [
-  "run",
-  "--quiet",
-  "--manifest-path",
-  "src-tauri/Cargo.toml",
-  "--bin",
-  "export-contract-schemas"
-]);
-
 const typeshare = spawnSync("typeshare", ["--help"], { cwd: root, encoding: "utf8" });
 if (typeshare.status !== 0) {
   console.error("typeshare CLI not found. Install with: cargo install typeshare-cli --locked");

@@ -1,6 +1,5 @@
 mod cmd;
-pub mod config;
-pub mod context;
+mod context;
 pub mod contracts;
 mod events;
 mod utils;
@@ -14,7 +13,6 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(context::session::SessionStore::load_from_disk())
-        .manage(context::tools_download::ToolsDownloadStore::new())
         .setup(|app| {
             events::setup(app.handle());
             Ok(())
@@ -24,16 +22,6 @@ pub fn run() {
             cmd::lang::set_lang,
             cmd::session::get_app_session,
             cmd::lang::get_language_resource_bundle,
-            cmd::tools::download_tool,
-            cmd::tools::get_tools_download_dir,
-            cmd::tools::get_tools_download_state,
-            cmd::tools::reset_tool_download_state,
-            cmd::tools::get_tools_manifest,
-            cmd::tools::get_tools_install_state,
-            cmd::tools::refresh_tools_install_state,
-            cmd::tools::runtime_host_platform,
-            cmd::tools::get_tool_executable_path,
-            cmd::tools::open_tool_executable,
             cmd::log::log_fe,
             cmd::log::log_fe_req,
             cmd::window::open_modal_window,
