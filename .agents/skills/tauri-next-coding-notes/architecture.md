@@ -1,5 +1,7 @@
 # Architecture Snapshot
 
+> 按职位查看「主要改哪些文件夹」：[`docs/development-rules/roles-and-directories.md`](../../../docs/development-rules/roles-and-directories.md)
+
 ## 目录职责
 
 - `src/app/*`：页面与路由层（App Router）。

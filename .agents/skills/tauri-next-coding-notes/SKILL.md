@@ -73,5 +73,6 @@ crate::events::session_changed_all(app, &session)?;
 
 ## 参考资料
 
+- **通用开发规范（IDE 无关）**：仓库根目录 [`docs/development-rules/README.md`](../../../docs/development-rules/README.md)
 - 架构与目录： [architecture.md](./architecture.md)
 - 场景化片段： [examples.md](./examples.md)
